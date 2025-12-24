@@ -4,20 +4,95 @@
 #Requires Autohotkey v2.0+
 #SingleInstance Force ; Prevents multiple versions of script running
 #UseHook ; Helps ensure modifier keys don't remain pressed after hotkey ends
+A_MaxHotkeysPerInterval := 200 ; Prevents the script from stopping due to rapid key presses
+ProcessSetPriority "High" ; Ensures the script stays responsive under load
+SetKeyDelay -1, 0 ; Increases reliability of SendEvent by reducing delays
+InstallKeybdHook ; Explicitly install the keyboard hook for reliability
 
+; ==========================================================
+; 		STREAM SAVE SETTINGS (Moved to top for initialization)
+; ==========================================================
+; This will fail if the file isn't in an NTFS folder, E.G., if it's in Box Drive, which is FAT-32, and create a settings text file using stream_fallback instead
+Global stream_fallback := "MirrorKeys-Settings-" A_Username ".ini"
 
 ; =========================================================
 ; 			NAVIGATION MODE
 ; =========================================================
 Global NavMode := False
+Global NavStyle := StreamRead("MirrorKeys", "NavStyle", "New") ; Default to New (ESDF)
+Global MirrorStyle := StreamRead("MirrorKeys", "MirrorStyle", "Standard") ; Default to Standard
+
+; Startup Notification
+Notify("Mirrored Keyboard Active", 1500)
+
+; Emergency Reload Hotkey
+^Esc::Reload
+
+Notify(Text, Duration:=1000) {
+    Static NGui := ""
+    Try NGui.Destroy()
+    NGui := Gui("-Caption +AlwaysOnTop +ToolWindow +Owner")
+    NGui.BackColor := "White"
+    NGui.MarginX := 10
+    NGui.MarginY := 10
+    NGui.SetFont("s10 cBlack bold", "Segoe UI")
+    NGui.Add("Text", "Center", Text)
+    MouseGetPos(&mx, &my)
+    NGui.Show("NoActivate NA AutoSize x" . (mx + 20) . " y" . (my + 20))
+    SetTimer(() => (IsObject(NGui) ? NGui.Destroy() : ""), -Duration)
+}
 
 ~Ctrl Up:: {
+	Critical ; Prevents this thread from being interrupted
 	if (A_PriorKey = "LControl" || A_PriorKey = "RControl") {
 		Global NavMode := !NavMode
+		if (NavMode) {
+			Notify("Navigation Mode: ON")
+			SoundBeep 1000, 150
+		} else {
+			Notify("Navigation Mode: OFF")
+			SoundBeep 500, 150
+		}
 	}
 }
 
-#HotIf NavMode
+ToggleNavStyle(*) {
+	Global NavStyle
+	PrevName := (NavStyle = "New" ? "Use &New Navigation (ESDF)" : "Use &Old Navigation (WASD)")
+	
+	if (NavStyle = "New") {
+		NavStyle := "Old"
+		Notify("Navigation Style: Old (WASD)")
+	} else {
+		NavStyle := "New"
+		Notify("Navigation Style: New (ESDF)")
+	}
+	StreamWrite("MirrorKeys", "NavStyle", NavStyle)
+	
+	NewName := (NavStyle = "New" ? "Use &New Navigation (ESDF)" : "Use &Old Navigation (WASD)")
+	Tray.Rename(PrevName, NewName)
+	Tray.Check(NewName)
+}
+
+ToggleMirrorStyle(*) {
+	Global MirrorStyle
+	PrevName := (MirrorStyle = "Standard" ? "Mirror Style: &Standard" : "Mirror Style: &Overlapping")
+	
+	if (MirrorStyle = "Standard") {
+		MirrorStyle := "Overlapping"
+		Notify("Mirror Style: Overlapping")
+	} else {
+		MirrorStyle := "Standard"
+		Notify("Mirror Style: Standard")
+	}
+	StreamWrite("MirrorKeys", "MirrorStyle", MirrorStyle)
+	
+	NewName := (MirrorStyle = "Standard" ? "Mirror Style: &Standard" : "Mirror Style: &Overlapping")
+	Tray.Rename(PrevName, NewName)
+}
+
+
+#HotIf NavMode && NavStyle == "Old"
 w::Up
 a::Left
 s::Down
@@ -25,8 +100,27 @@ d::Right
 q::Home
 e::End
 x::Delete
-p::PgUp
-i::PgDn
+p::SendEvent "{Blind}{PgUp}"
+i::SendEvent "{Blind}{PgDn}"
+#HotIf
+
+#HotIf NavMode && NavStyle == "New"
+; New Navigation (ESDF)
+e::Up
+s::Left
+d::Down
+f::Right
+w::Home
+r::End
+o:: {
+	SetKeyDelay -1, 50
+	SendEvent "{Blind}{PgUp}"
+}
+u:: {
+	SetKeyDelay -1, 50
+	SendEvent "{Blind}{PgDn}"
+}
+x::Delete
 #HotIf
 
 
@@ -34,29 +128,19 @@ i::PgDn
 ; 			MIRROR KEYS
 ; =========================================================
 MirrorSend(this_key) {
-	; Checks for modifier keys, then sends this_key with modifiers
-	If GetKeyState("Shift", "P") {
-		this_key := "+" . this_key
-	}
-	If GetKeyState("Ctrl", "P") {
-		this_key := "^" . this_key
-	}
-	If GetKeyState("Alt", "P") {
-		this_key := "!" . this_key
-	}
-	If GetKeyState("LWin", "P") {
-		this_key := "#" . this_key
-	}
-	If GetKeyState("RWin", "P") {
-		this_key := "#" . this_key
-	}
-	Send(this_key)
+	; Uses Blind mode to send the key with any currently held modifiers.
+	; Uses SendEvent for better stability during rapid key presses.
+	SendEvent("{Blind}" . this_key)
 }
 
 
-Space Up:: Send("{Space}")
+Space Up:: {
+	if (A_PriorKey = "Space") {
+		SendEvent("{Space}")
+	}
+}
 
-
+#HotIf MirrorStyle == "Standard"
 ; Left half ===============================================
 ; Function row --------------------------------------------
 Space & F1:: MirrorSend("{F12}")
@@ -84,7 +168,7 @@ Space & t:: MirrorSend("y")
 
 Capslock:: {
 	SetCapsLockState "Off"
-	Send("{Enter}")
+	SendEvent("{Enter}")
 }
 
 ; Middle row ----------------------------------------------
@@ -143,6 +227,96 @@ Space & ,:: MirrorSend("c")
 Space & m:: MirrorSend("v")
 Space & n:: MirrorSend("b")
 Space & b:: MirrorSend("n")
+#HotIf
+
+#HotIf MirrorStyle == "Overlapping"
+; Left half (Overlapping Style) ===========================
+; Function row (Same as standard for now) -----------------
+Space & F1:: MirrorSend("{F12}")
+Space & F2:: MirrorSend("{F11}")
+Space & F3:: MirrorSend("{F10}")
+Space & F4:: MirrorSend("{F9}")
+Space & F5:: MirrorSend("{F8}")
+Space & F6:: MirrorSend("{F7}")
+
+; Number row ----------------------------------------------
+Space & `:: MirrorSend("-")
+Space & 1:: MirrorSend("6")
+Space & 2:: MirrorSend("7")
+Space & 3:: MirrorSend("8")
+Space & 4:: MirrorSend("9")
+Space & 5:: MirrorSend("0")
+
+; Top row -------------------------------------------------
+Space & Tab:: MirrorSend("{Backspace}")
+Space & q:: MirrorSend("y")
+Space & w:: MirrorSend("u")
+Space & e:: MirrorSend("i")
+Space & r:: MirrorSend("o")
+Space & t:: MirrorSend("p")
+
+Capslock:: {
+	SetCapsLockState "Off"
+	SendEvent("{Enter}")
+}
+
+; Middle row ----------------------------------------------
+Space & Capslock:: MirrorSend("'")
+Space & a:: MirrorSend("h")
+Space & s:: MirrorSend("j")
+Space & d:: MirrorSend("k")
+Space & f:: MirrorSend("l")
+Space & g:: MirrorSend("'")
+
+; Bottom row ----------------------------------------------
+Space & z:: MirrorSend("n")
+Space & x:: MirrorSend("m")
+Space & c:: MirrorSend(",")
+Space & v:: MirrorSend(".")
+Space & b:: MirrorSend("/")
+
+; Right half (Overlapping Style) ==========================
+; Function row --------------------------------------------
+Space & F7:: MirrorSend("{F6}")
+Space & F8:: MirrorSend("{F5}")
+Space & F9:: MirrorSend("{F4}")
+Space & F10:: MirrorSend("{F3}")
+Space & F11:: MirrorSend("{F2}")
+Space & F12:: MirrorSend("{F1}")
+
+; Number row ----------------------------------------------
+Space & =:: MirrorSend("``")
+Space & -:: MirrorSend("``")
+Space & 0:: MirrorSend("5")
+Space & 9:: MirrorSend("4")
+Space & 8:: MirrorSend("3")
+Space & 7:: MirrorSend("2")
+Space & 6:: MirrorSend("1")
+
+; Top row -------------------------------------------------
+Space & \:: MirrorSend("{Tab}")
+Space & ]:: MirrorSend("{Tab}")
+Space & [:: MirrorSend("{Tab}")
+Space & p:: MirrorSend("t")
+Space & o:: MirrorSend("r")
+Space & i:: MirrorSend("e")
+Space & u:: MirrorSend("w")
+Space & y:: MirrorSend("q")
+
+; Middle row ----------------------------------------------
+Space & `;:: MirrorSend("g")
+Space & l:: MirrorSend("f")
+Space & k:: MirrorSend("d")
+Space & j:: MirrorSend("s")
+Space & h:: MirrorSend("a")
+
+; Bottom row ----------------------------------------------
+Space & /:: MirrorSend("b")
+Space & .:: MirrorSend("v")
+Space & ,:: MirrorSend("c")
+Space & m:: MirrorSend("x")
+Space & n:: MirrorSend("z")
+#HotIf
 
 
 ; =========================================================
@@ -209,7 +383,7 @@ Save_KeyboardWindow_Properties() {
 
 KeyboardWindow_Close(thisGui) {
 	Save_KeyboardWindow_Properties()
-	TrayTip("Mirror Keys is still running. Right-click the tray icon to fully quit, or to reopen the mirror map.", "Mirror Keys", "4 32 Mute") ;4 uses the script's icon; 32 prevents a notification sound
+	Notify("Mirror Keys is still running.", 2000)
 	KeyboardWindow.Destroy()
 }
 
@@ -223,6 +397,15 @@ Tray := A_TrayMenu
 Tray.Delete() ;Removes the default menu
 
 Tray.Add("Reopen mirror &map", Keyboard_Display)
+Tray.Add() ;Line break
+Tray.Add("Switch &Navigation Style", ToggleNavStyle)
+Tray.Add("Switch &Mirror Style", ToggleMirrorStyle)
+
+; Initialize Tray Menu State
+Tray.Rename("Switch &Navigation Style", NavStyle = "New" ? "Use &New Navigation (ESDF)" : "Use &Old Navigation (WASD)")
+Tray.Check(NavStyle = "New" ? "Use &New Navigation (ESDF)" : "Use &Old Navigation (WASD)")
+Tray.Rename("Switch &Mirror Style", MirrorStyle = "Standard" ? "Mirror Style: &Standard" : "Mirror Style: &Overlapping")
+
 Tray.Add() ;Line break
 Tray.Add("View project on &Github", Launch_Github)
 Tray.Add("How to &launch on PC startup...", Startup_Instructions)
@@ -243,7 +426,7 @@ Startup_Instructions(A_ThisMenuItem := "", A_ThisMenuItemPos := "", A_ThisMenu :
 
 
 Suspend_Script(A_ThisMenuItem := "", A_ThisMenuItemPos := "", A_ThisMenu := "") {
-	Tray.ToggleCheck("Pause Mirror Keys")
+	Try Tray.ToggleCheck("&Pause Mirror Keys")
 	Suspend -1 ;Toggles state
 	Pause -1 ;Toggles state
 }
@@ -313,7 +496,7 @@ toggle_map_startup(this_MenuItem, this_ItemPos, this_Menu) {
 ; 		STREAM SAVE SETTINGS
 ; ==========================================================
 ; This will fail if the file isn't in an NTFS folder, E.G., if it's in Box Drive, which is FAT-32, and create a settings text file using stream_fallback instead
-Global stream_fallback := "MirrorKeys-Settings-" A_Username ".ini"
+; Global stream_fallback := "MirrorKeys-Settings-" A_Username ".ini" ; Moved to top
 
 StreamRead(INI_section, INI_key, defaultTo := False) {
 	; Reads the key's value from the given section of the data stream
@@ -454,8 +637,8 @@ StreamWrite(INI_section, INI_key, INI_value) {
 ; 			LAUNCH GUI
 ; =========================================================
 
-autostart_map_state := StreamRead("MirrorKeys", "autostart_map_state", True) ; Reads current setting
+; autostart_map_state := StreamRead("MirrorKeys", "autostart_map_state", True) ; Reads current setting
 
-If autostart_map_state {
-	Keyboard_Display()
-}
+; If autostart_map_state {
+; 	Keyboard_Display()
+; }
