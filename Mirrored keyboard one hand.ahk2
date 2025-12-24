@@ -2,6 +2,17 @@
 ; 			DIRECTIVES
 ; =========================================================
 #Requires Autohotkey v2.0+
+if not A_IsAdmin {
+    try {
+        if A_IsCompiled
+            Run "*RunAs `"" A_ScriptFullPath "`""
+        else
+            Run "*RunAs `"" A_AhkPath "`" `"" A_ScriptFullPath "`""
+    } catch {
+        MsgBox "Failed to run as administrator. This script requires admin rights to interact with all applications."
+    }
+    ExitApp
+}
 #SingleInstance Force ; Prevents multiple versions of script running
 #UseHook ; Helps ensure modifier keys don't remain pressed after hotkey ends
 A_MaxHotkeysPerInterval := 200 ; Prevents the script from stopping due to rapid key presses
@@ -20,7 +31,9 @@ Global stream_fallback := "MirrorKeys-Settings-" A_Username ".ini"
 ; =========================================================
 Global NavMode := False
 Global NavStyle := StreamRead("MirrorKeys", "NavStyle", "New") ; Default to New (ESDF)
-Global MirrorStyle := StreamRead("MirrorKeys", "MirrorStyle", "Standard") ; Default to Standard
+Global MirrorStyle := StreamRead("MirrorKeys", "MirrorStyle", "Hybrid") ; Default to Hybrid
+Global NavToggleKey := StreamRead("MirrorKeys", "NavToggleKey", "LWin") ; Default to LWin
+Global MouseMode := False ; Default to Transient (Space required for mouse)
 
 ; Startup Notification
 Notify("Mirrored Keyboard Active", 1500)
@@ -42,6 +55,55 @@ Notify(Text, Duration:=1000) {
     SetTimer(() => (IsObject(NGui) ? NGui.Destroy() : ""), -Duration)
 }
 
+; Suppress Start Menu on simple press, allowing it only if held
+#HotIf NavToggleKey == "LWin"
+$LWin:: {
+    StartTime := A_TickCount
+    SpaceTriggered := False
+    
+    While GetKeyState("LWin", "P") {
+        if (NavMode && GetKeyState("Space", "P")) { ; Only check for Space combo if NavMode is active
+            if !SpaceTriggered {
+                Global MouseMode := !MouseMode
+                if (MouseMode) {
+                    Notify("Mouse Mode: PERMANENT")
+                } else {
+                    Notify("Mouse Mode: TRANSIENT")
+                }
+                SpaceTriggered := True
+            }
+        }
+        
+        if (A_TickCount - StartTime > 350) { ; Held for more than 0.35s
+            Send "{LWin Down}"
+            KeyWait "LWin"
+            Send "{LWin Up}"
+            return
+        }
+        Sleep 10
+    }
+    
+    ; Key Released
+    if (SpaceTriggered) {
+        return ; Handled by Space combo
+    }
+    
+    if (A_TickCount - StartTime <= 350) { ; Released within 0.35s (Tap)
+        if (A_PriorKey = "LWin") { ; Only if no other key was pressed
+            Global NavMode := !NavMode
+            if (NavMode) {
+                Notify("Navigation Mode: ON")
+                SoundBeep 1000, 150
+            } else {
+                Notify("Navigation Mode: OFF")
+                SoundBeep 500, 150
+            }
+        }
+    }
+}
+#HotIf
+
+#HotIf NavToggleKey == "Ctrl"
 ~Ctrl Up:: {
 	Critical ; Prevents this thread from being interrupted
 	if (A_PriorKey = "LControl" || A_PriorKey = "RControl") {
@@ -55,6 +117,7 @@ Notify(Text, Duration:=1000) {
 		}
 	}
 }
+#HotIf
 
 ToggleNavStyle(*) {
 	Global NavStyle
@@ -76,35 +139,71 @@ ToggleNavStyle(*) {
 
 ToggleMirrorStyle(*) {
 	Global MirrorStyle
-	PrevName := (MirrorStyle = "Standard" ? "Mirror Style: &Standard" : "Mirror Style: &Overlapping")
+	PrevName := (MirrorStyle = "Standard" ? "Mirror Style: &Standard" : MirrorStyle = "Overlapping" ? "Mirror Style: &Overlapping" : "Mirror Style: &Hybrid")
 	
 	if (MirrorStyle = "Standard") {
 		MirrorStyle := "Overlapping"
 		Notify("Mirror Style: Overlapping")
+	} else if (MirrorStyle = "Overlapping") {
+		MirrorStyle := "Hybrid"
+		Notify("Mirror Style: Hybrid")
 	} else {
 		MirrorStyle := "Standard"
 		Notify("Mirror Style: Standard")
 	}
 	StreamWrite("MirrorKeys", "MirrorStyle", MirrorStyle)
 	
-	NewName := (MirrorStyle = "Standard" ? "Mirror Style: &Standard" : "Mirror Style: &Overlapping")
+	NewName := (MirrorStyle = "Standard" ? "Mirror Style: &Standard" : MirrorStyle = "Overlapping" ? "Mirror Style: &Overlapping" : "Mirror Style: &Hybrid")
 	Tray.Rename(PrevName, NewName)
 }
 
+SwitchNavToggleKey(*) {
+    Global NavToggleKey
+    PrevName := "Nav Toggle Key: " . NavToggleKey
+    
+    if (NavToggleKey = "LWin") {
+        NavToggleKey := "Ctrl"
+    } else {
+        NavToggleKey := "LWin"
+    }
+    
+    Notify("Nav Toggle Key: " . NavToggleKey)
+    StreamWrite("MirrorKeys", "NavToggleKey", NavToggleKey)
+    
+    NewName := "Nav Toggle Key: " . NavToggleKey
+    Tray.Rename(PrevName, NewName)
+}
 
-#HotIf NavMode && NavStyle == "Old"
+
+#HotIf NavMode && NavStyle == "Old" && !MouseMode
 w::Up
 a::Left
 s::Down
 d::Right
 q::Home
 e::End
+c::SendEvent "{Blind}{PgUp}"
+v::SendEvent "{Blind}{PgDn}"
 x::Delete
 p::SendEvent "{Blind}{PgUp}"
 i::SendEvent "{Blind}{PgDn}"
 #HotIf
 
-#HotIf NavMode && NavStyle == "New"
+#HotIf NavMode && NavStyle == "Old" && MouseMode
+Space & w::Up
+Space & a::Left
+Space & s::Down
+Space & d::Right
+Space & q::Home
+Space & e::End
+Space & c::SendEvent "{Blind}{PgUp}"
+Space & v::SendEvent "{Blind}{PgDn}"
+Space & x::Delete
+Space & p::SendEvent "{Blind}{PgUp}"
+Space & i::SendEvent "{Blind}{PgDn}"
+#HotIf
+
+#HotIf NavMode && NavStyle == "New" && !MouseMode
 ; New Navigation (ESDF)
 e::Up
 s::Left
@@ -112,6 +211,8 @@ d::Down
 f::Right
 w::Home
 r::End
+v::SendEvent "{Blind}{PgUp}"
+b::SendEvent "{Blind}{PgDn}"
 o:: {
 	SetKeyDelay -1, 50
 	SendEvent "{Blind}{PgUp}"
@@ -121,6 +222,26 @@ u:: {
 	SendEvent "{Blind}{PgDn}"
 }
 x::Delete
+#HotIf
+
+#HotIf NavMode && NavStyle == "New" && MouseMode
+Space & e::Up
+Space & s::Left
+Space & d::Down
+Space & f::Right
+Space & w::Home
+Space & r::End
+Space & v::SendEvent "{Blind}{PgUp}"
+Space & b::SendEvent "{Blind}{PgDn}"
+Space & o:: {
+	SetKeyDelay -1, 50
+	SendEvent "{Blind}{PgUp}"
+}
+Space & u:: {
+	SetKeyDelay -1, 50
+	SendEvent "{Blind}{PgDn}"
+}
+Space & x::Delete
 #HotIf
 
 
@@ -140,7 +261,7 @@ Space Up:: {
 	}
 }
 
-#HotIf MirrorStyle == "Standard"
+#HotIf MirrorStyle == "Standard" && !NavMode
 ; Left half ===============================================
 ; Function row --------------------------------------------
 Space & F1:: MirrorSend("{F12}")
@@ -229,7 +350,7 @@ Space & n:: MirrorSend("b")
 Space & b:: MirrorSend("n")
 #HotIf
 
-#HotIf MirrorStyle == "Overlapping"
+#HotIf MirrorStyle == "Overlapping" && !NavMode
 ; Left half (Overlapping Style) ===========================
 ; Function row (Same as standard for now) -----------------
 Space & F1:: MirrorSend("{F12}")
@@ -400,11 +521,12 @@ Tray.Add("Reopen mirror &map", Keyboard_Display)
 Tray.Add() ;Line break
 Tray.Add("Switch &Navigation Style", ToggleNavStyle)
 Tray.Add("Switch &Mirror Style", ToggleMirrorStyle)
+Tray.Add("Nav Toggle Key: " . NavToggleKey, SwitchNavToggleKey)
 
 ; Initialize Tray Menu State
 Tray.Rename("Switch &Navigation Style", NavStyle = "New" ? "Use &New Navigation (ESDF)" : "Use &Old Navigation (WASD)")
 Tray.Check(NavStyle = "New" ? "Use &New Navigation (ESDF)" : "Use &Old Navigation (WASD)")
-Tray.Rename("Switch &Mirror Style", MirrorStyle = "Standard" ? "Mirror Style: &Standard" : "Mirror Style: &Overlapping")
+Tray.Rename("Switch &Mirror Style", MirrorStyle = "Standard" ? "Mirror Style: &Standard" : MirrorStyle = "Overlapping" ? "Mirror Style: &Overlapping" : "Mirror Style: &Hybrid")
 
 Tray.Add() ;Line break
 Tray.Add("View project on &Github", Launch_Github)
@@ -642,3 +764,197 @@ StreamWrite(INI_section, INI_key, INI_value) {
 ; If autostart_map_state {
 ; 	Keyboard_Display()
 ; }
+
+
+#HotIf MirrorStyle == "Hybrid" && !NavMode
+; Left half (Hybrid) ======================================
+; Function row (Standard) ---------------------------------
+Space & F1:: MirrorSend("{F12}")
+Space & F2:: MirrorSend("{F11}")
+Space & F3:: MirrorSend("{F10}")
+Space & F4:: MirrorSend("{F9}")
+Space & F5:: MirrorSend("{F8}")
+Space & F6:: MirrorSend("{F7}")
+
+; Number row (Overlapping) --------------------------------
+Space & `:: MirrorSend("-")
+Space & 1:: MirrorSend("6")
+Space & 2:: MirrorSend("7")
+Space & 3:: MirrorSend("8")
+Space & 4:: MirrorSend("9")
+Space & 5:: MirrorSend("0")
+
+; Top row (Overlapping) -----------------------------------
+Space & Tab:: MirrorSend("{Backspace}")
+Space & q:: MirrorSend("y")
+Space & w:: MirrorSend("u")
+Space & e:: MirrorSend("i")
+Space & r:: MirrorSend("o")
+Space & t:: MirrorSend("p")
+
+Capslock:: {
+	SetCapsLockState "Off"
+	SendEvent("{Enter}")
+}
+
+; Middle row (Overlapping) --------------------------------
+Space & Capslock:: MirrorSend("'")
+Space & a:: MirrorSend("h")
+Space & s:: MirrorSend("j")
+Space & d:: MirrorSend("k")
+Space & f:: MirrorSend("l")
+Space & g:: MirrorSend("'")
+
+; Bottom row (Standard) -----------------------------------
+Space & z:: MirrorSend("/")
+Space & x:: MirrorSend(".")
+Space & c:: MirrorSend(",")
+Space & v:: MirrorSend("m")
+Space & b:: MirrorSend("n")
+
+; Right half (Hybrid) =====================================
+; Function row (Standard) ---------------------------------
+Space & F7:: MirrorSend("{F6}")
+Space & F8:: MirrorSend("{F5}")
+Space & F9:: MirrorSend("{F4}")
+Space & F10:: MirrorSend("{F3}")
+Space & F11:: MirrorSend("{F2}")
+Space & F12:: MirrorSend("{F1}")
+
+; Number row (Overlapping) --------------------------------
+Space & =:: MirrorSend("``")
+Space & -:: MirrorSend("``")
+Space & 0:: MirrorSend("5")
+Space & 9:: MirrorSend("4")
+Space & 8:: MirrorSend("3")
+Space & 7:: MirrorSend("2")
+Space & 6:: MirrorSend("1")
+
+; Top row (Overlapping) -----------------------------------
+Space & \:: MirrorSend("{Tab}")
+Space & ]:: MirrorSend("{Tab}")
+Space & [:: MirrorSend("{Tab}")
+Space & p:: MirrorSend("t")
+Space & o:: MirrorSend("r")
+Space & i:: MirrorSend("e")
+Space & u:: MirrorSend("w")
+Space & y:: MirrorSend("q")
+
+; Middle row (Overlapping) --------------------------------
+Space & `;:: MirrorSend("g")
+Space & l:: MirrorSend("f")
+Space & k:: MirrorSend("d")
+Space & j:: MirrorSend("s")
+Space & h:: MirrorSend("a")
+
+; Bottom row (Standard) -----------------------------------
+Space & /:: MirrorSend("z")
+Space & .:: MirrorSend("x")
+Space & ,:: MirrorSend("c")
+Space & m:: MirrorSend("v")
+Space & n:: MirrorSend("b")
+#HotIf
+
+
+; =========================================================
+; 			NAV MODE MOUSE CONTROL
+; =========================================================
+MoveMouseTick() {
+    static current_speed := 1
+    static acceleration := 0.33
+    
+    dirX := 0
+    dirY := 0
+    
+    if (NavStyle == "New") {
+        if GetKeyState("e", "P") {
+            dirY -= 1
+        }
+        if GetKeyState("d", "P") {
+            dirY += 1
+        }
+        if GetKeyState("s", "P") {
+            dirX -= 1
+        }
+        if GetKeyState("f", "P") {
+            dirX += 1
+        }
+    } else {
+        if GetKeyState("w", "P") {
+            dirY -= 1
+        }
+        if GetKeyState("s", "P") {
+            dirY += 1
+        }
+        if GetKeyState("a", "P") {
+            dirX -= 1
+        }
+        if GetKeyState("d", "P") {
+            dirX += 1
+        }
+    }
+    
+    if (dirX != 0 || dirY != 0) {
+        current_speed += acceleration
+        MouseMove dirX * current_speed, dirY * current_speed, 0, "R"
+    } else {
+        current_speed := 1 ; Reset speed
+        SetTimer MoveMouseTick, 0 ; Stop if no keys are held
+    }
+}
+
+#HotIf NavMode
+Capslock::SendEvent("{Enter}")
+Space & Tab::SendEvent("{Blind}{Backspace}")
+Space & Capslock:: {
+    Click "Down"
+    KeyWait "Capslock"
+    Click "Up"
+}
+Space & LShift::Click "Right"
+Space & RShift::Click "Right"
+
+; Mouse Navigation (Overrides Mirroring if NavMode is ON)
+#HotIf NavMode && NavStyle == "New" && !MouseMode
+; ESDF Mouse
+Space & e::SetTimer MoveMouseTick, 10
+Space & s::SetTimer MoveMouseTick, 10
+Space & d::SetTimer MoveMouseTick, 10
+Space & f::SetTimer MoveMouseTick, 10
+; ESDF Mouse Wheel
+Space & w::Click "WheelUp"
+Space & r::Click "WheelDown"
+#HotIf
+
+#HotIf NavMode && NavStyle == "New" && MouseMode
+; ESDF Mouse
+e::SetTimer MoveMouseTick, 10
+s::SetTimer MoveMouseTick, 10
+d::SetTimer MoveMouseTick, 10
+f::SetTimer MoveMouseTick, 10
+; ESDF Mouse Wheel
+w::Click "WheelUp"
+r::Click "WheelDown"
+#HotIf
+
+#HotIf NavMode && NavStyle == "Old" && !MouseMode
+; WASD Mouse
+Space & w::SetTimer MoveMouseTick, 10
+Space & a::SetTimer MoveMouseTick, 10
+Space & s::SetTimer MoveMouseTick, 10
+Space & d::SetTimer MoveMouseTick, 10
+; WASD Mouse Wheel
+Space & q::Click "WheelUp"
+Space & e::Click "WheelDown"
+#HotIf
+
+#HotIf NavMode && NavStyle == "Old" && MouseMode
+; WASD Mouse
+w::SetTimer MoveMouseTick, 10
+a::SetTimer MoveMouseTick, 10
+s::SetTimer MoveMouseTick, 10
+d::SetTimer MoveMouseTick, 10
+; WASD Mouse Wheel
+q::Click "WheelUp"
+e::Click "WheelDown"
+#HotIf
