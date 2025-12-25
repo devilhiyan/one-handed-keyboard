@@ -33,7 +33,7 @@ Global NavMode := False
 Global NavStyle := StreamRead("MirrorKeys", "NavStyle", "New") ; Default to New (ESDF)
 Global MirrorStyle := StreamRead("MirrorKeys", "MirrorStyle", "Hybrid") ; Default to Hybrid
 Global NavToggleKey := StreamRead("MirrorKeys", "NavToggleKey", "LWin") ; Default to LWin
-Global MouseMode := StreamRead("MirrorKeys", "MouseMode", False) ; Default to Transient (False)
+Global MouseMode := Integer(StreamRead("MirrorKeys", "MouseMode", 0)) ; Default to Transient (0)
 
 ; Startup Notification
 Notify("Mirrored Keyboard Active", 1500)
@@ -117,6 +117,18 @@ $LWin:: {
 			SoundBeep 500, 150
 		}
 	}
+}
+#HotIf
+
+#HotIf NavToggleKey == "Ctrl" && NavMode
+^Space:: {
+    Global MouseMode := !MouseMode
+    StreamWrite("MirrorKeys", "MouseMode", MouseMode)
+    if (MouseMode) {
+        Notify("Mouse Mode: PERMANENT")
+    } else {
+        Notify("Mouse Mode: TRANSIENT")
+    }
 }
 #HotIf
 
@@ -630,25 +642,13 @@ toggle_map_startup(this_MenuItem, this_ItemPos, this_Menu) {
 ; Global stream_fallback := "MirrorKeys-Settings-" A_Username ".ini" ; Moved to top
 
 StreamRead(INI_section, INI_key, defaultTo := False) {
-	; Reads the key's value from the given section of the data stream
-	stream_value := IniRead(A_ScriptFullPath ":Stream:$DATA", INI_section, INI_key, defaultTo)
-	If stream_value = defaultTo {
-		Global stream_fallback
-		stream_value := IniRead(stream_fallback, INI_section, INI_key, defaultTo)
-	}
-	Return stream_value
+	Global stream_fallback
+	Return IniRead(stream_fallback, INI_section, INI_key, defaultTo)
 }
 
 StreamWrite(INI_section, INI_key, INI_value) {
-	; Writes the value to the key
-	; This will fail if the file isn't in an NTFS folder, E.G., if it's in Box Drive, which is FAT-32
-	Try {
-		IniWrite(INI_value, A_ScriptFullPath ":Stream:$DATA", INI_section, INI_key)
-	}
-	Catch {
-		Global stream_fallback
-		IniWrite(INI_value, stream_fallback, INI_section, INI_key)
-	}
+	Global stream_fallback
+	IniWrite(INI_value, stream_fallback, INI_section, INI_key)
 }
 
 
@@ -914,32 +914,51 @@ MoveMouseTick() {
 
 #HotIf NavMode
 Space & Tab::SendEvent("{Blind}{Backspace}")
-#HotIf
 
-#HotIf NavMode && !MouseMode
-Capslock::SendEvent("{Enter}")
-Space & Capslock:: {
-    Click "Down"
-    KeyWait "Capslock"
-    Click "Up"
+Capslock:: {
+    if (MouseMode) {
+        Click "Down"
+        KeyWait "Capslock"
+        Click "Up"
+    } else {
+        SendEvent("{Enter}")
+    }
 }
-Space & LShift::Click "Right"
-Space & RShift::Click "Right"
+
+Space & Capslock:: {
+    if (MouseMode) {
+        SendEvent("{Enter}")
+    } else {
+        Click "Down"
+        KeyWait "Capslock"
+        Click "Up"
+    }
+}
+
+Space & LShift:: {
+    if (MouseMode) {
+        SendEvent "{LShift Down}"
+        KeyWait "LShift"
+        SendEvent "{LShift Up}"
+    } else {
+        Click "Right"
+    }
+}
+
+Space & RShift:: {
+    if (MouseMode) {
+        SendEvent "{RShift Down}"
+        KeyWait "RShift"
+        SendEvent "{RShift Up}"
+    } else {
+        Click "Right"
+    }
+}
 #HotIf
 
 #HotIf NavMode && MouseMode
-Capslock:: {
-    Click "Down"
-    KeyWait "Capslock"
-    Click "Up"
-}
 LShift::Click "Right"
 RShift::Click "Right"
-Space & Capslock::SendEvent("{Enter}")
-Space & LShift::SendEvent "{LShift Down}"
-Space & LShift Up::SendEvent "{LShift Up}"
-Space & RShift::SendEvent "{RShift Down}"
-Space & RShift Up::SendEvent "{RShift Up}"
 #HotIf
 
 ; Mouse Navigation (Overrides Mirroring if NavMode is ON)
@@ -963,6 +982,15 @@ Space & r::Click "WheelDown"
 ; ESDF Mouse Wheel
 w::Click "WheelUp"
 r::Click "WheelDown"
+; ESDF Keyboard Actions (Space + Key)
+Space & e::SendEvent "{Blind}{Up}"
+Space & s::SendEvent "{Blind}{Left}"
+Space & d::SendEvent "{Blind}{Down}"
+Space & f::SendEvent "{Blind}{Right}"
+Space & w::SendEvent "{Blind}{Home}"
+Space & r::SendEvent "{Blind}{End}"
+Space & v::SendEvent "{Blind}{PgUp}"
+Space & b::SendEvent "{Blind}{PgDn}"
 #HotIf
 
 #HotIf NavMode && NavStyle == "Old" && !MouseMode
@@ -985,4 +1013,13 @@ Space & e::Click "WheelDown"
 ; WASD Mouse Wheel
 q::Click "WheelUp"
 e::Click "WheelDown"
+; WASD Keyboard Actions (Space + Key)
+Space & w::SendEvent "{Blind}{Up}"
+Space & a::SendEvent "{Blind}{Left}"
+Space & s::SendEvent "{Blind}{Down}"
+Space & d::SendEvent "{Blind}{Right}"
+Space & q::SendEvent "{Blind}{Home}"
+Space & e::SendEvent "{Blind}{End}"
+Space & c::SendEvent "{Blind}{PgUp}"
+Space & v::SendEvent "{Blind}{PgDn}"
 #HotIf
