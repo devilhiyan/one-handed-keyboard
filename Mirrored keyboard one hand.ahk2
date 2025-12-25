@@ -33,7 +33,7 @@ Global NavMode := False
 Global NavStyle := StreamRead("MirrorKeys", "NavStyle", "New") ; Default to New (ESDF)
 Global MirrorStyle := StreamRead("MirrorKeys", "MirrorStyle", "Hybrid") ; Default to Hybrid
 Global NavToggleKey := StreamRead("MirrorKeys", "NavToggleKey", "LWin") ; Default to LWin
-Global MouseMode := False ; Default to Transient (Space required for mouse)
+Global MouseMode := StreamRead("MirrorKeys", "MouseMode", False) ; Default to Transient (False)
 
 ; Startup Notification
 Notify("Mirrored Keyboard Active", 1500)
@@ -65,6 +65,7 @@ $LWin:: {
         if (NavMode && GetKeyState("Space", "P")) { ; Only check for Space combo if NavMode is active
             if !SpaceTriggered {
                 Global MouseMode := !MouseMode
+                StreamWrite("MirrorKeys", "MouseMode", MouseMode)
                 if (MouseMode) {
                     Notify("Mouse Mode: PERMANENT")
                 } else {
@@ -74,7 +75,7 @@ $LWin:: {
             }
         }
         
-        if (A_TickCount - StartTime > 350) { ; Held for more than 0.35s
+        if (A_TickCount - StartTime > 500) { ; Held for more than 0.50s
             Send "{LWin Down}"
             KeyWait "LWin"
             Send "{LWin Up}"
@@ -88,11 +89,11 @@ $LWin:: {
         return ; Handled by Space combo
     }
     
-    if (A_TickCount - StartTime <= 350) { ; Released within 0.35s (Tap)
+    if (A_TickCount - StartTime <= 500) { ; Released within 0.50s (Tap)
         if (A_PriorKey = "LWin") { ; Only if no other key was pressed
             Global NavMode := !NavMode
             if (NavMode) {
-                Notify("Navigation Mode: ON")
+                Notify("Navigation Mode: ON (" . (MouseMode ? "Permanent" : "Transient") . ")")
                 SoundBeep 1000, 150
             } else {
                 Notify("Navigation Mode: OFF")
@@ -256,12 +257,20 @@ MirrorSend(this_key) {
 
 
 Space Up:: {
+    static last_space_release := 0
 	if (A_PriorKey = "Space") {
-		SendEvent("{Space}")
-	}
+        if (A_TickCount - last_space_release < 300) {
+		    SendEvent("{Space}")
+            last_space_release := 0 ; Reset to prevent triple tap sending two spaces
+        } else {
+            last_space_release := A_TickCount
+        }
+	} else {
+        last_space_release := 0
+    }
 }
 
-#HotIf MirrorStyle == "Standard" && !NavMode
+#HotIf MirrorStyle == "Standard"
 ; Left half ===============================================
 ; Function row --------------------------------------------
 Space & F1:: MirrorSend("{F12}")
@@ -350,7 +359,7 @@ Space & n:: MirrorSend("b")
 Space & b:: MirrorSend("n")
 #HotIf
 
-#HotIf MirrorStyle == "Overlapping" && !NavMode
+#HotIf MirrorStyle == "Overlapping"
 ; Left half (Overlapping Style) ===========================
 ; Function row (Same as standard for now) -----------------
 Space & F1:: MirrorSend("{F12}")
@@ -766,7 +775,7 @@ StreamWrite(INI_section, INI_key, INI_value) {
 ; }
 
 
-#HotIf MirrorStyle == "Hybrid" && !NavMode
+#HotIf MirrorStyle == "Hybrid"
 ; Left half (Hybrid) ======================================
 ; Function row (Standard) ---------------------------------
 Space & F1:: MirrorSend("{F12}")
@@ -904,8 +913,11 @@ MoveMouseTick() {
 }
 
 #HotIf NavMode
-Capslock::SendEvent("{Enter}")
 Space & Tab::SendEvent("{Blind}{Backspace}")
+#HotIf
+
+#HotIf NavMode && !MouseMode
+Capslock::SendEvent("{Enter}")
 Space & Capslock:: {
     Click "Down"
     KeyWait "Capslock"
@@ -913,6 +925,22 @@ Space & Capslock:: {
 }
 Space & LShift::Click "Right"
 Space & RShift::Click "Right"
+#HotIf
+
+#HotIf NavMode && MouseMode
+Capslock:: {
+    Click "Down"
+    KeyWait "Capslock"
+    Click "Up"
+}
+LShift::Click "Right"
+RShift::Click "Right"
+Space & Capslock::SendEvent("{Enter}")
+Space & LShift::SendEvent "{LShift Down}"
+Space & LShift Up::SendEvent "{LShift Up}"
+Space & RShift::SendEvent "{RShift Down}"
+Space & RShift Up::SendEvent "{RShift Up}"
+#HotIf
 
 ; Mouse Navigation (Overrides Mirroring if NavMode is ON)
 #HotIf NavMode && NavStyle == "New" && !MouseMode
@@ -928,10 +956,10 @@ Space & r::Click "WheelDown"
 
 #HotIf NavMode && NavStyle == "New" && MouseMode
 ; ESDF Mouse
-e::SetTimer MoveMouseTick, 10
-s::SetTimer MoveMouseTick, 10
-d::SetTimer MoveMouseTick, 10
-f::SetTimer MoveMouseTick, 10
+*e::SetTimer MoveMouseTick, 10
+*s::SetTimer MoveMouseTick, 10
+*d::SetTimer MoveMouseTick, 10
+*f::SetTimer MoveMouseTick, 10
 ; ESDF Mouse Wheel
 w::Click "WheelUp"
 r::Click "WheelDown"
@@ -950,10 +978,10 @@ Space & e::Click "WheelDown"
 
 #HotIf NavMode && NavStyle == "Old" && MouseMode
 ; WASD Mouse
-w::SetTimer MoveMouseTick, 10
-a::SetTimer MoveMouseTick, 10
-s::SetTimer MoveMouseTick, 10
-d::SetTimer MoveMouseTick, 10
+*w::SetTimer MoveMouseTick, 10
+*a::SetTimer MoveMouseTick, 10
+*s::SetTimer MoveMouseTick, 10
+*d::SetTimer MoveMouseTick, 10
 ; WASD Mouse Wheel
 q::Click "WheelUp"
 e::Click "WheelDown"
