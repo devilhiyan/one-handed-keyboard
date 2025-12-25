@@ -188,73 +188,179 @@ SwitchNavToggleKey(*) {
 }
 
 
-#HotIf NavMode && NavStyle == "Old" && !MouseMode
-w::Up
-a::Left
-s::Down
-d::Right
-q::Home
-e::End
-c::SendEvent "{Blind}{PgUp}"
-v::SendEvent "{Blind}{PgDn}"
+; =========================================================
+; 			NAV MODE MOUSE CONTROL
+; =========================================================
+MoveMouseTick() {
+    static current_speed := 1
+    static acceleration := 0.33
+    
+    dirX := 0
+    dirY := 0
+    
+    if (NavStyle == "New") {
+        if GetKeyState("e", "P") {
+            dirY -= 1
+        }
+        if GetKeyState("d", "P") {
+            dirY += 1
+        }
+        if GetKeyState("s", "P") {
+            dirX -= 1
+        }
+        if GetKeyState("f", "P") {
+            dirX += 1
+        }
+    } else {
+        if GetKeyState("w", "P") {
+            dirY -= 1
+        }
+        if GetKeyState("s", "P") {
+            dirY += 1
+        }
+        if GetKeyState("a", "P") {
+            dirX -= 1
+        }
+        if GetKeyState("d", "P") {
+            dirX += 1
+        }
+    }
+    
+    if (dirX != 0 || dirY != 0) {
+        current_speed += acceleration
+        MouseMove dirX * current_speed, dirY * current_speed, 0, "R"
+    } else {
+        current_speed := 1 ; Reset speed
+        SetTimer MoveMouseTick, 0 ; Stop if no keys are held
+    }
+}
+
+; ---------------------------------------------------------
+; Permanent Mode (Mouse-First)
+; Keys = Mouse | Space+Keys = Keyboard
+; ---------------------------------------------------------
+#HotIf NavMode && MouseMode
+
+; Shared Keys
+Space & Tab::SendEvent("{Blind}{Backspace}")
+
+; Capslock (Left Click / Drag)
+Capslock:: {
+    Click "Down"
+    KeyWait "Capslock"
+    Click "Up"
+}
+; Space + Capslock (Enter)
+Space & Capslock::SendEvent("{Enter}")
+
+; Shift (Right Click)
+LShift::Click "Right"
+RShift::Click "Right"
+
+#HotIf
+
+#HotIf NavMode && MouseMode && NavStyle == "New"
+; ESDF Mouse (Direct)
+*e::SetTimer MoveMouseTick, 10
+*s::SetTimer MoveMouseTick, 10
+*d::SetTimer MoveMouseTick, 10
+*f::SetTimer MoveMouseTick, 10
+; ESDF Wheel (Direct)
+w::Click "WheelUp"
+r::Click "WheelDown"
+
+; ESDF Keyboard Actions (Space + Key)
+Space & e::SendEvent "{Blind}{Up}"
+Space & s::SendEvent "{Blind}{Left}"
+Space & d::SendEvent "{Blind}{Down}"
+Space & f::SendEvent "{Blind}{Right}"
+Space & w::SendEvent "{Blind}{Home}"
+Space & r::SendEvent "{Blind}{End}"
+#HotIf
+
+#HotIf NavMode && MouseMode && NavStyle == "Old"
+; WASD Mouse (Direct)
+*w::SetTimer MoveMouseTick, 10
+*a::SetTimer MoveMouseTick, 10
+*s::SetTimer MoveMouseTick, 10
+*d::SetTimer MoveMouseTick, 10
+; WASD Wheel (Direct)
+q::Click "WheelUp"
+e::Click "WheelDown"
+
+; WASD Keyboard Actions (Space + Key)
+Space & w::SendEvent "{Blind}{Up}"
+Space & a::SendEvent "{Blind}{Left}"
+Space & s::SendEvent "{Blind}{Down}"
+Space & d::SendEvent "{Blind}{Right}"
+Space & q::SendEvent "{Blind}{Home}"
+Space & e::SendEvent "{Blind}{End}"
+#HotIf
+
+
+; ---------------------------------------------------------
+; Transient Mode (Keyboard-First)
+; Keys = Keyboard | Space+Keys = Mouse
+; ---------------------------------------------------------
+#HotIf NavMode && !MouseMode
+
+; Shared Keys
+Space & Tab::SendEvent("{Blind}{Backspace}")
+
+; Capslock (Enter)
+Capslock::SendEvent("{Enter}")
+; Space + Capslock (Left Click / Drag)
+Space & Capslock:: {
+    Click "Down"
+    KeyWait "Capslock"
+    Click "Up"
+}
+
+; Space + Shift (Right Click)
+Space & LShift::Click "Right"
+Space & RShift::Click "Right"
+
+; x::Delete (Retained from original)
 x::Delete
-p::SendEvent "{Blind}{PgUp}"
-i::SendEvent "{Blind}{PgDn}"
+
 #HotIf
 
-#HotIf NavMode && NavStyle == "Old" && MouseMode
-Space & w::Up
-Space & a::Left
-Space & s::Down
-Space & d::Right
-Space & q::Home
-Space & e::End
-Space & c::SendEvent "{Blind}{PgUp}"
-Space & v::SendEvent "{Blind}{PgDn}"
-Space & x::Delete
-Space & p::SendEvent "{Blind}{PgUp}"
-Space & i::SendEvent "{Blind}{PgDn}"
+#HotIf NavMode && !MouseMode && NavStyle == "New"
+; ESDF Keyboard Actions (Direct)
+e::SendEvent "{Blind}{Up}"
+s::SendEvent "{Blind}{Left}"
+d::SendEvent "{Blind}{Down}"
+f::SendEvent "{Blind}{Right}"
+w::SendEvent "{Blind}{Home}"
+r::SendEvent "{Blind}{End}"
+
+; ESDF Mouse (Space + Key)
+Space & e::SetTimer MoveMouseTick, 10
+Space & s::SetTimer MoveMouseTick, 10
+Space & d::SetTimer MoveMouseTick, 10
+Space & f::SetTimer MoveMouseTick, 10
+; ESDF Wheel (Space + Key)
+Space & w::Click "WheelUp"
+Space & r::Click "WheelDown"
 #HotIf
 
-#HotIf NavMode && NavStyle == "New" && !MouseMode
-; New Navigation (ESDF)
-e::Up
-s::Left
-d::Down
-f::Right
-w::Home
-r::End
-v::SendEvent "{Blind}{PgUp}"
-b::SendEvent "{Blind}{PgDn}"
-o:: {
-	SetKeyDelay -1, 50
-	SendEvent "{Blind}{PgUp}"
-}
-u:: {
-	SetKeyDelay -1, 50
-	SendEvent "{Blind}{PgDn}"
-}
-x::Delete
-#HotIf
+#HotIf NavMode && !MouseMode && NavStyle == "Old"
+; WASD Keyboard Actions (Direct)
+w::SendEvent "{Blind}{Up}"
+a::SendEvent "{Blind}{Left}"
+s::SendEvent "{Blind}{Down}"
+d::SendEvent "{Blind}{Right}"
+q::SendEvent "{Blind}{Home}"
+e::SendEvent "{Blind}{End}"
 
-#HotIf NavMode && NavStyle == "New" && MouseMode
-Space & e::Up
-Space & s::Left
-Space & d::Down
-Space & f::Right
-Space & w::Home
-Space & r::End
-Space & v::SendEvent "{Blind}{PgUp}"
-Space & b::SendEvent "{Blind}{PgDn}"
-Space & o:: {
-	SetKeyDelay -1, 50
-	SendEvent "{Blind}{PgUp}"
-}
-Space & u:: {
-	SetKeyDelay -1, 50
-	SendEvent "{Blind}{PgDn}"
-}
-Space & x::Delete
+; WASD Mouse (Space + Key)
+Space & w::SetTimer MoveMouseTick, 10
+Space & a::SetTimer MoveMouseTick, 10
+Space & s::SetTimer MoveMouseTick, 10
+Space & d::SetTimer MoveMouseTick, 10
+; WASD Wheel (Space + Key)
+Space & q::Click "WheelUp"
+Space & e::Click "WheelDown"
 #HotIf
 
 
@@ -282,7 +388,7 @@ Space Up:: {
     }
 }
 
-#HotIf MirrorStyle == "Standard"
+#HotIf MirrorStyle == "Standard" && !NavMode
 ; Left half ===============================================
 ; Function row --------------------------------------------
 Space & F1:: MirrorSend("{F12}")
@@ -371,7 +477,7 @@ Space & n:: MirrorSend("b")
 Space & b:: MirrorSend("n")
 #HotIf
 
-#HotIf MirrorStyle == "Overlapping"
+#HotIf MirrorStyle == "Overlapping" && !NavMode
 ; Left half (Overlapping Style) ===========================
 ; Function row (Same as standard for now) -----------------
 Space & F1:: MirrorSend("{F12}")
@@ -775,7 +881,7 @@ StreamWrite(INI_section, INI_key, INI_value) {
 ; }
 
 
-#HotIf MirrorStyle == "Hybrid"
+#HotIf MirrorStyle == "Hybrid" && !NavMode
 ; Left half (Hybrid) ======================================
 ; Function row (Standard) ---------------------------------
 Space & F1:: MirrorSend("{F12}")
@@ -866,160 +972,3 @@ Space & n:: MirrorSend("b")
 
 
 ; =========================================================
-; 			NAV MODE MOUSE CONTROL
-; =========================================================
-MoveMouseTick() {
-    static current_speed := 1
-    static acceleration := 0.33
-    
-    dirX := 0
-    dirY := 0
-    
-    if (NavStyle == "New") {
-        if GetKeyState("e", "P") {
-            dirY -= 1
-        }
-        if GetKeyState("d", "P") {
-            dirY += 1
-        }
-        if GetKeyState("s", "P") {
-            dirX -= 1
-        }
-        if GetKeyState("f", "P") {
-            dirX += 1
-        }
-    } else {
-        if GetKeyState("w", "P") {
-            dirY -= 1
-        }
-        if GetKeyState("s", "P") {
-            dirY += 1
-        }
-        if GetKeyState("a", "P") {
-            dirX -= 1
-        }
-        if GetKeyState("d", "P") {
-            dirX += 1
-        }
-    }
-    
-    if (dirX != 0 || dirY != 0) {
-        current_speed += acceleration
-        MouseMove dirX * current_speed, dirY * current_speed, 0, "R"
-    } else {
-        current_speed := 1 ; Reset speed
-        SetTimer MoveMouseTick, 0 ; Stop if no keys are held
-    }
-}
-
-#HotIf NavMode
-Space & Tab::SendEvent("{Blind}{Backspace}")
-
-Capslock:: {
-    if (MouseMode) {
-        Click "Down"
-        KeyWait "Capslock"
-        Click "Up"
-    } else {
-        SendEvent("{Enter}")
-    }
-}
-
-Space & Capslock:: {
-    if (MouseMode) {
-        SendEvent("{Enter}")
-    } else {
-        Click "Down"
-        KeyWait "Capslock"
-        Click "Up"
-    }
-}
-
-Space & LShift:: {
-    if (MouseMode) {
-        SendEvent "{LShift Down}"
-        KeyWait "LShift"
-        SendEvent "{LShift Up}"
-    } else {
-        Click "Right"
-    }
-}
-
-Space & RShift:: {
-    if (MouseMode) {
-        SendEvent "{RShift Down}"
-        KeyWait "RShift"
-        SendEvent "{RShift Up}"
-    } else {
-        Click "Right"
-    }
-}
-#HotIf
-
-#HotIf NavMode && MouseMode
-LShift::Click "Right"
-RShift::Click "Right"
-#HotIf
-
-; Mouse Navigation (Overrides Mirroring if NavMode is ON)
-#HotIf NavMode && NavStyle == "New" && !MouseMode
-; ESDF Mouse
-Space & e::SetTimer MoveMouseTick, 10
-Space & s::SetTimer MoveMouseTick, 10
-Space & d::SetTimer MoveMouseTick, 10
-Space & f::SetTimer MoveMouseTick, 10
-; ESDF Mouse Wheel
-Space & w::Click "WheelUp"
-Space & r::Click "WheelDown"
-#HotIf
-
-#HotIf NavMode && NavStyle == "New" && MouseMode
-; ESDF Mouse
-*e::SetTimer MoveMouseTick, 10
-*s::SetTimer MoveMouseTick, 10
-*d::SetTimer MoveMouseTick, 10
-*f::SetTimer MoveMouseTick, 10
-; ESDF Mouse Wheel
-w::Click "WheelUp"
-r::Click "WheelDown"
-; ESDF Keyboard Actions (Space + Key)
-Space & e::SendEvent "{Blind}{Up}"
-Space & s::SendEvent "{Blind}{Left}"
-Space & d::SendEvent "{Blind}{Down}"
-Space & f::SendEvent "{Blind}{Right}"
-Space & w::SendEvent "{Blind}{Home}"
-Space & r::SendEvent "{Blind}{End}"
-Space & v::SendEvent "{Blind}{PgUp}"
-Space & b::SendEvent "{Blind}{PgDn}"
-#HotIf
-
-#HotIf NavMode && NavStyle == "Old" && !MouseMode
-; WASD Mouse
-Space & w::SetTimer MoveMouseTick, 10
-Space & a::SetTimer MoveMouseTick, 10
-Space & s::SetTimer MoveMouseTick, 10
-Space & d::SetTimer MoveMouseTick, 10
-; WASD Mouse Wheel
-Space & q::Click "WheelUp"
-Space & e::Click "WheelDown"
-#HotIf
-
-#HotIf NavMode && NavStyle == "Old" && MouseMode
-; WASD Mouse
-*w::SetTimer MoveMouseTick, 10
-*a::SetTimer MoveMouseTick, 10
-*s::SetTimer MoveMouseTick, 10
-*d::SetTimer MoveMouseTick, 10
-; WASD Mouse Wheel
-q::Click "WheelUp"
-e::Click "WheelDown"
-; WASD Keyboard Actions (Space + Key)
-Space & w::SendEvent "{Blind}{Up}"
-Space & a::SendEvent "{Blind}{Left}"
-Space & s::SendEvent "{Blind}{Down}"
-Space & d::SendEvent "{Blind}{Right}"
-Space & q::SendEvent "{Blind}{Home}"
-Space & e::SendEvent "{Blind}{End}"
-Space & c::SendEvent "{Blind}{PgUp}"
-Space & v::SendEvent "{Blind}{PgDn}"
-#HotIf
