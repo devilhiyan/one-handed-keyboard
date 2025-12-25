@@ -152,7 +152,7 @@ ToggleNavStyle(*) {
 
 ToggleMirrorStyle(*) {
 	Global MirrorStyle
-	PrevName := (MirrorStyle = "Standard" ? "Mirror Style: &Standard" : MirrorStyle = "Overlapping" ? "Mirror Style: &Overlapping" : "Mirror Style: &Hybrid")
+	PrevName := (MirrorStyle = "Standard" ? "Mirror Style: &Standard" : MirrorStyle = "Overlapping" ? "Mirror Style: &Overlapping" : MirrorStyle = "Hybrid" ? "Mirror Style: &Hybrid" : "Mirror Style: &Dvorak")
 	
 	if (MirrorStyle = "Standard") {
 		MirrorStyle := "Overlapping"
@@ -160,13 +160,16 @@ ToggleMirrorStyle(*) {
 	} else if (MirrorStyle = "Overlapping") {
 		MirrorStyle := "Hybrid"
 		Notify("Mirror Style: Hybrid")
+	} else if (MirrorStyle = "Hybrid") {
+		MirrorStyle := "Dvorak"
+		Notify("Mirror Style: Dvorak")
 	} else {
 		MirrorStyle := "Standard"
 		Notify("Mirror Style: Standard")
 	}
 	StreamWrite("MirrorKeys", "MirrorStyle", MirrorStyle)
 	
-	NewName := (MirrorStyle = "Standard" ? "Mirror Style: &Standard" : MirrorStyle = "Overlapping" ? "Mirror Style: &Overlapping" : "Mirror Style: &Hybrid")
+	NewName := (MirrorStyle = "Standard" ? "Mirror Style: &Standard" : MirrorStyle = "Overlapping" ? "Mirror Style: &Overlapping" : MirrorStyle = "Hybrid" ? "Mirror Style: &Hybrid" : "Mirror Style: &Dvorak")
 	Tray.Rename(PrevName, NewName)
 }
 
@@ -653,7 +656,7 @@ Tray.Add("Nav Toggle Key: " . NavToggleKey, SwitchNavToggleKey)
 ; Initialize Tray Menu State
 Tray.Rename("Switch &Navigation Style", NavStyle = "New" ? "Use &New Navigation (ESDF)" : "Use &Old Navigation (WASD)")
 Tray.Check(NavStyle = "New" ? "Use &New Navigation (ESDF)" : "Use &Old Navigation (WASD)")
-Tray.Rename("Switch &Mirror Style", MirrorStyle = "Standard" ? "Mirror Style: &Standard" : MirrorStyle = "Overlapping" ? "Mirror Style: &Overlapping" : "Mirror Style: &Hybrid")
+Tray.Rename("Switch &Mirror Style", MirrorStyle = "Standard" ? "Mirror Style: &Standard" : MirrorStyle = "Overlapping" ? "Mirror Style: &Overlapping" : MirrorStyle = "Hybrid" ? "Mirror Style: &Hybrid" : "Mirror Style: &Dvorak")
 
 Tray.Add() ;Line break
 Tray.Add("View project on &Github", Launch_Github)
@@ -972,3 +975,94 @@ Space & n:: MirrorSend("b")
 
 
 ; =========================================================
+
+#HotIf MirrorStyle == "Dvorak" && !NavMode
+; Left half (Dvorak) ======================================
+; Function row (Standard) ---------------------------------
+Space & F1:: MirrorSend("{F12}")
+Space & F2:: MirrorSend("{F11}")
+Space & F3:: MirrorSend("{F10}")
+Space & F4:: MirrorSend("{F9}")
+Space & F5:: MirrorSend("{F8}")
+Space & F6:: MirrorSend("{F7}")
+
+; Number row ----------------------------------------------
+Space & `:: MirrorSend("]")
+Space & 1:: MirrorSend("0")
+Space & 2:: MirrorSend("9")
+Space & 3:: MirrorSend("8")
+Space & 4:: MirrorSend("7")
+Space & 5:: MirrorSend("6")
+
+; Top row -------------------------------------------------
+Space & Tab:: MirrorSend("{Backspace}")
+Space & ':: MirrorSend("l")
+Space & ,:: MirrorSend("r")
+Space & .:: MirrorSend("c")
+Space & p:: MirrorSend("g")
+Space & y:: MirrorSend("f")
+
+Capslock:: {
+	SetCapsLockState "Off"
+	SendEvent("{Enter}")
+}
+
+; Middle row ----------------------------------------------
+Space & Capslock:: MirrorSend("'")
+Space & a:: MirrorSend("s")
+Space & o:: MirrorSend("n")
+Space & e:: MirrorSend("t")
+Space & u:: MirrorSend("h")
+Space & i:: MirrorSend("d")
+
+; Bottom row ----------------------------------------------
+Space & `;:: MirrorSend("z")
+Space & q:: MirrorSend("v")
+Space & j:: MirrorSend("w")
+Space & k:: MirrorSend("m")
+Space & x:: MirrorSend("b")
+
+; Right half (Dvorak) =====================================
+; Function row --------------------------------------------
+Space & F7:: MirrorSend("{F6}")
+Space & F8:: MirrorSend("{F5}")
+Space & F9:: MirrorSend("{F4}")
+Space & F10:: MirrorSend("{F3}")
+Space & F11:: MirrorSend("{F2}")
+Space & F12:: MirrorSend("{F1}")
+
+; Number row ----------------------------------------------
+Space & ]:: MirrorSend("``")
+Space & [:: MirrorSend("``")
+Space & 0:: MirrorSend("1")
+Space & 9:: MirrorSend("2")
+Space & 8:: MirrorSend("3")
+Space & 7:: MirrorSend("4")
+Space & 6:: MirrorSend("5")
+
+; Top row -------------------------------------------------
+Space & \:: MirrorSend("{Tab}")
+Space & =:: MirrorSend("{Tab}")
+Space & /:: MirrorSend("{Tab}")
+Space & f:: MirrorSend("y")
+Space & g:: MirrorSend("p")
+Space & c:: MirrorSend(".")
+Space & r:: MirrorSend(",")
+Space & l:: MirrorSend("'")
+
+; Middle row ----------------------------------------------
+Space & d:: MirrorSend("i")
+Space & h:: MirrorSend("u")
+Space & t:: MirrorSend("e")
+Space & n:: MirrorSend("o")
+Space & s:: MirrorSend("a")
+Space & -:: SendEvent("{Enter}")
+
+; Bottom row ----------------------------------------------
+Space & z:: MirrorSend(";")
+Space & v:: MirrorSend("q")
+Space & w:: MirrorSend("j")
+Space & m:: MirrorSend("k")
+Space & b:: MirrorSend("x")
+#HotIf
+
