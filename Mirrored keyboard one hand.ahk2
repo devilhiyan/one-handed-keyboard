@@ -19,6 +19,7 @@ A_MaxHotkeysPerInterval := 200 ; Prevents the script from stopping due to rapid 
 ProcessSetPriority "High" ; Ensures the script stays responsive under load
 SetKeyDelay -1, 0 ; Increases reliability of SendEvent by reducing delays
 InstallKeybdHook ; Explicitly install the keyboard hook for reliability
+OnMessage(0x404, Tray_Handler) ; Intercept Tray Icon clicks to prevent menu blocking
 
 ; ==========================================================
 ; 		STREAM SAVE SETTINGS (Moved to top for initialization)
@@ -1164,4 +1165,69 @@ q::SendEvent "q"
 r::SendEvent "r"
 
 #HotIf
+
+
+; =========================================================
+; CUSTOM TRAY MENU (Non-Blocking)
+; =========================================================
+Global CustomMenuGui := ""
+
+Tray_Handler(wParam, lParam, msg, hwnd) {
+    ; 0x205 = WM_RBUTTONUP
+    if (lParam == 0x205) {
+        Show_Custom_Menu()
+        return 1 ; Suppress standard menu
+    }
+}
+
+Show_Custom_Menu() {
+    Global CustomMenuGui, NavStyle, MirrorStyle, NavToggleKey
+    
+    if IsObject(CustomMenuGui)
+        CustomMenuGui.Destroy()
+    
+    CustomMenuGui := Gui("-Caption +AlwaysOnTop +ToolWindow +Owner")
+    CustomMenuGui.SetFont("s9", "Segoe UI")
+    CustomMenuGui.BackColor := "White"
+    CustomMenuGui.MarginX := 5
+    CustomMenuGui.MarginY := 5
+    
+    BtnStyle := "w250 h30 Left"
+    
+    ; Navigation Style
+    NavText := (NavStyle == "New" ? "✔ Use New Navigation (ESDF)" : "✔ Use Old Navigation (WASD)")
+    CustomMenuGui.Add("Button", BtnStyle, NavText).OnEvent("Click", (*) => (ToggleNavStyle(), CustomMenuGui.Destroy()))
+    
+    ; Mirror Style
+    ; ToggleMirrorStyle cycles styles.
+    MStyleText := "Mirror Style: " . MirrorStyle
+    CustomMenuGui.Add("Button", BtnStyle, MStyleText).OnEvent("Click", (*) => (ToggleMirrorStyle(), CustomMenuGui.Destroy()))
+    
+    ; Nav Toggle Key
+    CustomMenuGui.Add("Button", BtnStyle, "Nav Toggle Key: " . NavToggleKey).OnEvent("Click", (*) => (SwitchNavToggleKey(), CustomMenuGui.Destroy()))
+    
+    CustomMenuGui.Add("Text", "h1 0x10 w250") ; Separator
+    
+    CustomMenuGui.Add("Button", BtnStyle, "View project on Github").OnEvent("Click", (*) => (Launch_Github(), CustomMenuGui.Destroy()))
+    CustomMenuGui.Add("Button", BtnStyle, "Startup Instructions").OnEvent("Click", (*) => (Startup_Instructions(), CustomMenuGui.Destroy()))
+    
+    CustomMenuGui.Add("Text", "h1 0x10 w250") ; Separator
+    
+    IsPaused := A_IsSuspended
+    CustomMenuGui.Add("Button", BtnStyle, (IsPaused ? "✔ " : "   ") "Pause Mirror Keys").OnEvent("Click", (*) => (Suspend_Script(), CustomMenuGui.Destroy()))
+    CustomMenuGui.Add("Button", BtnStyle, "Reload").OnEvent("Click", (*) => (Reload(), CustomMenuGui.Destroy()))
+    CustomMenuGui.Add("Button", BtnStyle, "Quit").OnEvent("Click", (*) => (Quit_Script(), CustomMenuGui.Destroy()))
+    
+    ; Add Close Button (since it's a window)
+    CustomMenuGui.Add("Button", "w250 h20 Center", "Close Menu").OnEvent("Click", (*) => CustomMenuGui.Destroy())
+
+    MouseGetPos(&mx, &my)
+    ; Ensure menu doesn't go off screen (basic check)
+    XPos := mx - 20
+    YPos := my - 20
+    if (YPos > A_ScreenHeight - 300)
+        YPos := A_ScreenHeight - 300
+        
+    CustomMenuGui.Show("NoActivate x" XPos " y" YPos)
+}
 
