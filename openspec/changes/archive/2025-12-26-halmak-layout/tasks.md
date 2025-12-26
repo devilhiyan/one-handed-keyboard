@@ -1,0 +1,11 @@
+- [x] **Define Halmak HotIf Block**
+    - [x] Create `#HotIf MirrorStyle == "Halmak" && MirrorMode && !NavMode`.
+    - [x] Add Base Layer remaps (q::n, w::s, etc.).
+    - [x] Add Space Layer mappings (Space & q:: MirrorSend("g"), etc.).
+- [x] **Update Toggle Logic**
+    - [x] Add `Halmak` to the cycle in `ToggleMirrorStyle`.
+    - [x] Update `Tray.Rename` logic for Mirror Style.
+- [x] **Update GUI Menu**
+    - [x] Ensure `GetMirrorText()` correctly reflects the "Halmak" style.
+- [x] **Update Global Chords**
+    - [x] Add `Halmak` checks to the "Restore Typing" section for keys: w, e, a, s, d, f, r, q.

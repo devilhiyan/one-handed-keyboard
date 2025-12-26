@@ -171,24 +171,27 @@ ToggleMirrorMode(*) {
 
 ToggleMirrorStyle(*) {
 	Global MirrorStyle
-	PrevName := (MirrorStyle = "Standard" ? "Mirror Style: &Standard" : MirrorStyle = "Overlapping" ? "Mirror Style: &Overlapping" : MirrorStyle = "Hybrid" ? "Mirror Style: &Hybrid" : "Mirror Style: &Dvorak")
+	PrevName := "Mirror Style: " . MirrorStyle
 	
-	if (MirrorStyle = "Standard") {
+	if (MirrorStyle == "Standard") {
 		MirrorStyle := "Overlapping"
 		Notify("Mirror Style: Overlapping")
-	} else if (MirrorStyle = "Overlapping") {
+	} else if (MirrorStyle == "Overlapping") {
 		MirrorStyle := "Hybrid"
 		Notify("Mirror Style: Hybrid")
-	} else if (MirrorStyle = "Hybrid") {
+	} else if (MirrorStyle == "Hybrid") {
 		MirrorStyle := "Dvorak"
 		Notify("Mirror Style: Dvorak")
+	} else if (MirrorStyle == "Dvorak") {
+		MirrorStyle := "Halmak"
+		Notify("Mirror Style: Halmak")
 	} else {
 		MirrorStyle := "Standard"
 		Notify("Mirror Style: Standard")
 	}
 	StreamWrite("MirrorKeys", "MirrorStyle", MirrorStyle)
 	
-	NewName := (MirrorStyle = "Standard" ? "Mirror Style: &Standard" : MirrorStyle = "Overlapping" ? "Mirror Style: &Overlapping" : MirrorStyle = "Hybrid" ? "Mirror Style: &Hybrid" : "Mirror Style: &Dvorak")
+	NewName := "Mirror Style: " . MirrorStyle
 	Tray.Rename(PrevName, NewName)
 }
 
@@ -680,8 +683,7 @@ else
 	Tray.Uncheck("Enable &Mirroring")
 
 Tray.Rename("Switch &Navigation Style", NavStyle == "New" ? "Use &New Navigation (ESDF)" : "Use &Old Navigation (WASD)")
-Tray.Check(NavStyle = "New" ? "Use &New Navigation (ESDF)" : "Use &Old Navigation (WASD)")
-Tray.Rename("Switch &Mirror Style", MirrorStyle = "Standard" ? "Mirror Style: &Standard" : MirrorStyle = "Overlapping" ? "Mirror Style: &Overlapping" : MirrorStyle = "Hybrid" ? "Mirror Style: &Hybrid" : "Mirror Style: &Dvorak")
+Tray.Rename("Switch &Mirror Style", "Mirror Style: " . MirrorStyle)
 
 Tray.Add() ;Line break
 Tray.Add("View project on &Github", Launch_Github)
@@ -1115,6 +1117,65 @@ Space & /:: MirrorSend("z") ; Fallback (Standard)
 
 
 ; =========================================================
+
+#HotIf MirrorStyle == "Halmak" && MirrorMode && !NavMode
+
+; --- Base Layer (Standard Tap) ---
+q::n
+w::s
+e::t
+r::h
+t::r
+
+a::e
+s::a
+d::i
+f::o
+g::u
+
+z::l
+x::d
+c::c
+v::m
+
+; --- Space Layer (Hold Space) ---
+Space & q:: MirrorSend("g")
+Space & w:: MirrorSend("p")
+Space & e:: MirrorSend("w")
+Space & r:: MirrorSend("y")
+Space & t:: MirrorSend("f")
+
+Space & a:: MirrorSend("k")
+Space & s:: MirrorSend("j")
+Space & d:: MirrorSend("x")
+Space & f:: MirrorSend("q")
+Space & g:: MirrorSend("z")
+
+Space & c:: MirrorSend("b")
+Space & v:: MirrorSend("v")
+
+; --- Numbers/Function Keys (Standard Mirror Fallback for now) ---
+Space & `:: MirrorSend("-")
+Space & 1:: MirrorSend("0")
+Space & 2:: MirrorSend("9")
+Space & 3:: MirrorSend("8")
+Space & 4:: MirrorSend("7")
+Space & 5:: MirrorSend("6")
+
+Space & F1:: MirrorSend("{F12}")
+Space & F2:: MirrorSend("{F11}")
+Space & F3:: MirrorSend("{F10}")
+Space & F4:: MirrorSend("{F9}")
+Space & F5:: MirrorSend("{F8}")
+Space & F6:: MirrorSend("{F7}")
+
+Space & Tab:: MirrorSend("{Backspace}")
+Space & Capslock:: MirrorSend("'")
+
+#HotIf
+
+
+; =========================================================
 ; GLOBAL CHORDS (Enabled when NOT in NavMode and MirrorMode is ON)
 ; =========================================================
 #HotIf !NavMode && MirrorMode
@@ -1179,14 +1240,39 @@ r & e::PerformChord("r", "e", "{Blind}{End}", "WheelDown")
 
 ; --- Restore Typing (Prefix Release) ---
 ; Only fire if the key was PRESSED and RELEASED without triggering a chord.
-w::SendEvent "w"
-e::SendEvent "e"
-a::SendEvent "a"
-q::SendEvent "q"
+w:: {
+    if (MirrorStyle == "Halmak")
+        SendEvent "s"
+    else
+        SendEvent "w"
+}
+
+e:: {
+    if (MirrorStyle == "Halmak")
+        SendEvent "t"
+    else
+        SendEvent "e"
+}
+
+a:: {
+    if (MirrorStyle == "Halmak")
+        SendEvent "e"
+    else
+        SendEvent "a"
+}
+
+q:: {
+    if (MirrorStyle == "Halmak")
+        SendEvent "n"
+    else
+        SendEvent "q"
+}
 
 s:: {
     if (MirrorStyle == "Dvorak")
         SendEvent "o"
+    else if (MirrorStyle == "Halmak")
+        SendEvent "a"
     else
         SendEvent "s"
 }
@@ -1194,6 +1280,8 @@ s:: {
 d:: {
     if (MirrorStyle == "Dvorak")
         SendEvent "e"
+    else if (MirrorStyle == "Halmak")
+        SendEvent "i"
     else
         SendEvent "d"
 }
@@ -1201,6 +1289,8 @@ d:: {
 f:: {
     if (MirrorStyle == "Dvorak")
         SendEvent "u"
+    else if (MirrorStyle == "Halmak")
+        SendEvent "o"
     else
         SendEvent "f"
 }
@@ -1208,6 +1298,8 @@ f:: {
 r:: {
     if (MirrorStyle == "Dvorak")
         SendEvent "p"
+    else if (MirrorStyle == "Halmak")
+        SendEvent "h"
     else
         SendEvent "r"
 }
