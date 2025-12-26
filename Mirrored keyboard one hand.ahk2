@@ -978,7 +978,7 @@ Space & n:: MirrorSend("b")
 
 #HotIf MirrorStyle == "Dvorak" && !NavMode
 
-; --- Function Keys (Mirror Only) ---
+; --- Function Keys (Standard Mirror) ---
 Space & F1:: MirrorSend("{F12}")
 Space & F2:: MirrorSend("{F11}")
 Space & F3:: MirrorSend("{F10}")
@@ -992,31 +992,23 @@ Space & F10:: MirrorSend("{F3}")
 Space & F11:: MirrorSend("{F2}")
 Space & F12:: MirrorSend("{F1}")
 
-; --- Row 1 (Numbers) ---
-; Normal Remap
--::[
-=::]
-
-; Mirror Remap
-Space & `::]
-Space & 1::0
-Space & 2::9
-Space & 3::8
-Space & 4::7
-Space & 5::6
-Space & 6::5
-Space & 7::4
-Space & 8::3
-Space & 9::2
-Space & 0::1
-Space & -::]
-Space & =::[
+; --- Row 1 (Numbers) - Standard Mirror ---
+Space & `:: MirrorSend("=")
+Space & 1:: MirrorSend("0")
+Space & 2:: MirrorSend("9")
+Space & 3:: MirrorSend("8")
+Space & 4:: MirrorSend("7")
+Space & 5:: MirrorSend("6")
+Space & 6:: MirrorSend("5")
+Space & 7:: MirrorSend("4")
+Space & 8:: MirrorSend("3")
+Space & 9:: MirrorSend("2")
+Space & 0:: MirrorSend("1")
+Space & -:: MirrorSend("``")
+Space & =:: MirrorSend("``")
 
 ; --- Row 2 (Top) ---
-; Normal Remap
-q::'
-w::,
-e::.
+; Normal (Alpha Remaps Only)
 r::p
 t::y
 y::f
@@ -1024,27 +1016,25 @@ u::g
 i::c
 o::r
 p::l
-[::/
-]::=
 
-; Mirror Remap
-Space & Tab::Backspace
-Space & q::l
-Space & w::r
-Space & e::c
-Space & r::g
-Space & t::f
-Space & y::y
-Space & u::p
-Space & i::.
-Space & o::,
-Space & p::'
-Space & [::Backspace
-Space & ]::Backspace
-Space & \::Tab
+; Mirror
+Space & Tab:: MirrorSend("{Backspace}")
+Space & q:: MirrorSend("l")
+Space & w:: MirrorSend("r")
+Space & e:: MirrorSend("c")
+Space & r:: MirrorSend("g")
+Space & t:: MirrorSend("f")
+Space & y:: MirrorSend("y")
+Space & u:: MirrorSend("p")
+Space & i:: MirrorSend("e") ; Fallback (Standard)
+Space & o:: MirrorSend("w") ; Fallback (Standard)
+Space & p:: MirrorSend("q") ; Fallback (Standard)
+Space & [:: MirrorSend("{Tab}")
+Space & ]:: MirrorSend("{Tab}")
+Space & \:: MirrorSend("{Tab}")
 
 ; --- Row 3 (Home) ---
-; Normal Remap
+; Normal (Alpha Remaps Only)
 s::o
 d::e
 f::u
@@ -1054,29 +1044,27 @@ j::h
 k::t
 l::n
 `;::s
-'::-
 
-; Mirror Remap
+; Mirror
 Capslock:: {
 	SetCapsLockState "Off"
 	SendEvent("{Enter}")
 }
-Space & Capslock::'
-Space & a::s
-Space & s::n
-Space & d::t
-Space & f::h
-Space & g::d
-Space & h::i
-Space & j::u
-Space & k::e
-Space & l::o
-Space & `;::a
-Space & '::Enter
+Space & Capslock:: MirrorSend("'")
+Space & a:: MirrorSend("s")
+Space & s:: MirrorSend("n")
+Space & d:: MirrorSend("t")
+Space & f:: MirrorSend("h")
+Space & g:: MirrorSend("d")
+Space & h:: MirrorSend("i")
+Space & j:: MirrorSend("u")
+Space & k:: MirrorSend("e")
+Space & l:: MirrorSend("o")
+Space & `;:: MirrorSend("a")
+Space & ':: SendEvent("{Enter}")
 
 ; --- Row 4 (Bottom) ---
-; Normal Remap
-z::`;
+; Normal (Alpha Remaps Only)
 x::q
 c::j
 v::k
@@ -1086,17 +1074,17 @@ n::b
 .::v
 /::z
 
-; Mirror Remap
-Space & z::z
-Space & x::v
-Space & c::w
-Space & v::m
-Space & b::x
-Space & n::b
-Space & m::k
-Space & ,::j
-Space & .::q
-Space & /::`;
+; Mirror
+Space & z:: MirrorSend("z")
+Space & x:: MirrorSend("v")
+Space & c:: MirrorSend("w")
+Space & v:: MirrorSend("m")
+Space & b:: MirrorSend("x")
+Space & n:: MirrorSend("b")
+Space & m:: MirrorSend("k")
+Space & ,:: MirrorSend("j")
+Space & .:: MirrorSend("q")
+Space & /:: MirrorSend("z") ; Fallback (Standard)
 
 #HotIf
 
