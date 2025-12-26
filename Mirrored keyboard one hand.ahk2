@@ -1135,6 +1135,42 @@ x::d
 c::c
 v::m
 
+; --- Halmak Chords (Explicitly Defined) ---
+; Up (WE)
+w & e::PerformChord("w", "e", "{Blind}{Up}", "Up")
+e & w::PerformChord("e", "w", "{Blind}{Up}", "Up")
+
+; Down (SD)
+s & d::PerformChord("s", "d", "{Blind}{Down}", "Down")
+d & s::PerformChord("d", "s", "{Blind}{Down}", "Down")
+
+; Left (AS)
+a & s::PerformChord("a", "s", "{Blind}{Left}", "Left")
+s & a::PerformChord("s", "a", "{Blind}{Left}", "Left")
+
+; Right (DF)
+d & f::PerformChord("d", "f", "{Blind}{Right}", "Right")
+f & d::PerformChord("f", "d", "{Blind}{Right}", "Right")
+
+; Home / Wheel Up (QW)
+q & w::PerformChord("q", "w", "{Blind}{Home}", "WheelUp")
+w & q::PerformChord("w", "q", "{Blind}{Home}", "WheelUp")
+
+; End / Wheel Down (ER)
+e & r::PerformChord("e", "r", "{Blind}{End}", "WheelDown")
+r & e::PerformChord("r", "e", "{Blind}{End}", "WheelDown")
+
+; --- Halmak Restore Typing (Explicitly Defined) ---
+w::SendEvent "{Blind}" . GetRemappedKey("w")
+e::SendEvent "{Blind}" . GetRemappedKey("e")
+a::SendEvent "{Blind}" . GetRemappedKey("a")
+q::SendEvent "{Blind}" . GetRemappedKey("q")
+s::SendEvent "{Blind}" . GetRemappedKey("s")
+d::SendEvent "{Blind}" . GetRemappedKey("d")
+f::SendEvent "{Blind}" . GetRemappedKey("f")
+r::SendEvent "{Blind}" . GetRemappedKey("r")
+
+
 ; --- Space Layer (Hold Space) ---
 Space & q:: MirrorSend("g")
 Space & w:: MirrorSend("p")
@@ -1198,7 +1234,11 @@ GetRemappedKey(key) {
         }
     } else if (MirrorStyle == "Dvorak") {
         switch key {
+            case "q": return "'"
+            case "w": return ","
+            case "e": return "."
             case "r": return "p"
+            case "a": return "a"
             case "s": return "o"
             case "d": return "e"
             case "f": return "u"
