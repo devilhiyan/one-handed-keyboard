@@ -1221,13 +1221,28 @@ Show_Custom_Menu() {
     ; Add Close Button (since it's a window)
     CustomMenuGui.Add("Button", "w250 h20 Center", "Close Menu").OnEvent("Click", (*) => CustomMenuGui.Destroy())
 
+    ; --- Positioning Logic ---
+    CoordMode "Mouse", "Screen"
     MouseGetPos(&mx, &my)
-    ; Ensure menu doesn't go off screen (basic check)
-    XPos := mx - 20
-    YPos := my - 20
-    if (YPos > A_ScreenHeight - 300)
-        YPos := A_ScreenHeight - 300
+    
+    CustomMenuGui.Show("Hide AutoSize") ; Calculate dimensions
+    CustomMenuGui.GetPos(,, &w, &h)
+    
+    nx := mx - (w / 2)
+    
+    ; Determine Y (Above if near bottom)
+    if (my > A_ScreenHeight / 2) {
+        ny := my - h - 15
+    } else {
+        ny := my + 15
+    }
+    
+    ; Boundaries
+    if (nx < 0)
+        nx := 0
+    if (nx + w > A_ScreenWidth)
+        nx := A_ScreenWidth - w
         
-    CustomMenuGui.Show("NoActivate x" XPos " y" YPos)
+    CustomMenuGui.Show("NoActivate x" nx " y" ny)
 }
 
