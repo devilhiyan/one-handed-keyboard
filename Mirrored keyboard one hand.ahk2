@@ -1100,3 +1100,80 @@ Space & /::`;
 
 #HotIf
 
+
+; =========================================================
+; GLOBAL CHORDS (Enabled when NOT in NavMode)
+; =========================================================
+#HotIf !NavMode
+
+; --- Helper Function ---
+ChordAction(KeyAction, MouseAction) {
+    if GetKeyState("Space", "P") {
+        ; Mouse Mode
+        if (MouseAction == "Up")
+            MouseMove 0, -20, 0, "R"
+        else if (MouseAction == "Down")
+            MouseMove 0, 20, 0, "R"
+        else if (MouseAction == "Left")
+            MouseMove -20, 0, 0, "R"
+        else if (MouseAction == "Right")
+            MouseMove 20, 0, 0, "R"
+        else if (MouseAction == "WheelUp")
+            Click "WheelUp"
+        else if (MouseAction == "WheelDown")
+            Click "WheelDown"
+    } else {
+        ; Keyboard Mode
+        SendEvent KeyAction
+    }
+}
+
+; --- Chord Loops (Repeat while held) ---
+PerformChord(Key1, Key2, KeyAct, MouseAct) {
+    ChordAction(KeyAct, MouseAct) ; First action
+    Sleep 200 ; Initial delay
+    while (GetKeyState(Key1, "P") && GetKeyState(Key2, "P")) {
+        ChordAction(KeyAct, MouseAct)
+        Sleep 50 ; Repeat rate
+    }
+}
+
+; --- Mappings ---
+
+; Up (WE)
+w & e::PerformChord("w", "e", "{Blind}{Up}", "Up")
+e & w::PerformChord("e", "w", "{Blind}{Up}", "Up")
+
+; Down (SD)
+s & d::PerformChord("s", "d", "{Blind}{Down}", "Down")
+d & s::PerformChord("d", "s", "{Blind}{Down}", "Down")
+
+; Left (AS)
+a & s::PerformChord("a", "s", "{Blind}{Left}", "Left")
+s & a::PerformChord("s", "a", "{Blind}{Left}", "Left")
+
+; Right (DF)
+d & f::PerformChord("d", "f", "{Blind}{Right}", "Right")
+f & d::PerformChord("f", "d", "{Blind}{Right}", "Right")
+
+; Home / Wheel Up (QW)
+q & w::PerformChord("q", "w", "{Blind}{Home}", "WheelUp")
+w & q::PerformChord("w", "q", "{Blind}{Home}", "WheelUp")
+
+; End / Wheel Down (ER)
+e & r::PerformChord("e", "r", "{Blind}{End}", "WheelDown")
+r & e::PerformChord("r", "e", "{Blind}{End}", "WheelDown")
+
+; --- Restore Typing (Prefix Release) ---
+; Only fire if the key was PRESSED and RELEASED without triggering a chord.
+w::SendEvent "w"
+e::SendEvent "e"
+s::SendEvent "s"
+d::SendEvent "d"
+a::SendEvent "a"
+f::SendEvent "f"
+q::SendEvent "q"
+r::SendEvent "r"
+
+#HotIf
+
