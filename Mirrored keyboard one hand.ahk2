@@ -1158,12 +1158,36 @@ r & e::PerformChord("r", "e", "{Blind}{End}", "WheelDown")
 ; Only fire if the key was PRESSED and RELEASED without triggering a chord.
 w::SendEvent "w"
 e::SendEvent "e"
-s::SendEvent "s"
-d::SendEvent "d"
 a::SendEvent "a"
-f::SendEvent "f"
 q::SendEvent "q"
-r::SendEvent "r"
+
+s:: {
+    if (MirrorStyle == "Dvorak")
+        SendEvent "o"
+    else
+        SendEvent "s"
+}
+
+d:: {
+    if (MirrorStyle == "Dvorak")
+        SendEvent "e"
+    else
+        SendEvent "d"
+}
+
+f:: {
+    if (MirrorStyle == "Dvorak")
+        SendEvent "u"
+    else
+        SendEvent "f"
+}
+
+r:: {
+    if (MirrorStyle == "Dvorak")
+        SendEvent "p"
+    else
+        SendEvent "r"
+}
 
 #HotIf
 
