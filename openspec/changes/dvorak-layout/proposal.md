@@ -1,65 +1,128 @@
-# Dvorak Mirroring Mode
+# Dvorak Layout & Mirroring
 
 ## 1. Problem
-The current `Mirror Keys` implementation supports "Standard" (QWERTY symmetric), "Overlapping" (QWERTY shifted), and "Hybrid" styles. Users who use the **Dvorak** keyboard layout (either via OS settings or preference) cannot effectively use the mirroring feature because the mirrored keys are calculated based on QWERTY geometry.
+The previous implementation assumed the user had their OS layout set to Dvorak. The new requirement is to make the "Dvorak" Mirror Style act as a complete **Dvorak Emulator** for users with a Physical QWERTY keyboard and QWERTY OS setting.
 
-For a Dvorak user:
-*   Left Home Row (`A O E U I`) should mirror to Right Home Row (`D H T N S`).
-*   Current "Standard" mirroring maps `A` -> `;`, `S` -> `L`, which is incorrect for Dvorak geometry.
+When `MirrorStyle == "Dvorak"`:
+1.  Normal typing should output Dvorak characters.
+2.  Mirror typing (`Space` + Key) should output the mirrored Dvorak character.
 
 ## 2. Proposed Solution
-Add a new **Mirror Style** option: **"Dvorak"**.
+Modify the `#HotIf MirrorStyle == "Dvorak" && !NavMode` block to include mappings for ALL standard keys.
 
-When this style is active (`MirrorStyle == "Dvorak"`):
-*   The script will map `Space` + [Left Dvorak Key] to [Right Dvorak Key] (and vice versa).
-*   This allows a user typing with the Dvorak layout to access the other half of the keyboard symmetrically.
+### Logic Table (Physical QWERTY Input)
 
-### Key Mapping (Dvorak)
-
-| Hand | Row | Input (Space +) | Output |
+| Physical Key | Dvorak Output (Normal) | Mirror Target (Dvorak) | Mirror Output |
 | :--- | :--- | :--- | :--- |
-| **Left** | **Top** | `'` | `l` |
-| | | `,` | `r` |
-| | | `.` | `c` |
-| | | `p` | `g` |
-| | | `y` | `f` |
-| | **Home** | `a` | `s` |
-| | | `o` | `n` |
-| | | `e` | `t` |
-| | | `u` | `h` |
-| | | `i` | `d` |
-| | **Bottom** | `;` | `z` |
-| | | `q` | `v` |
-| | | `j` | `w` |
-| | | `k` | `m` |
-| | | `x` | `b` |
-| | | | |
-| **Right** | **Top** | `f` | `y` |
-| | | `g` | `p` |
-| | | `c` | `.` |
-| | | `r` | `,` |
-| | | `l` | `'` |
-| | **Home** | `d` | `i` |
-| | | `h` | `u` |
-| | | `t` | `e` |
-| | | `n` | `o` |
-| | | `s` | `a` |
-| | **Bottom** | `b` | `x` |
-| | | `m` | `k` |
-| | | `w` | `j` |
-| | | `v` | `q` |
-| | | `z` | `;` |
+| **Row 1** | | | |
+| `-` | `[` | `]` (Right Top Ext 2) | `=` |
+| `=` | `]` | `[` (Right Top Ext 1) | `[`? No. `[` mirrors to `]`. Wait. |
 
-*Note: Function keys (F1-F12) and Numbers (1-0) generally remain standard or follow the existing QWERTY mirroring pattern as Dvorak keeps the number row standard.*
+**Mirroring Logic Review (Dvorak Geometry):**
+*   **Numbers**: `1-5` <-> `6-0`. `[` <-> `]`.
+    *   Left `[` (Physical `-`) mirrors to Right `]` (Physical `=`).
+    *   Right `]` (Physical `=`) mirrors to Left `[` (Physical `-`).
+*   **Top Row**: `' , . P Y` <-> `F G C R L`. `/` <-> `?`
+    *   `'` (Phys `Q`) <-> `L` (Phys `P`)
+    *   `,` (Phys `W`) <-> `R` (Phys `O`?) No.
+    *   Let's trace Physical to Dvorak to Mirror.
 
-## 3. Implementation Details
-1.  **Update `ToggleMirrorStyle` function**: Add "Dvorak" to the rotation cycle.
-2.  **Add Hotkey Block**: Create a new `#HotIf MirrorStyle == "Dvorak" && !NavMode` block containing the mappings above.
-3.  **UI Updates**: Ensure the System Tray menu reflects the "Dvorak" style name.
+| Phys Key | Dvorak Char | Dvorak Hand/Pos | Mirror Dvorak Char | Output |
+| :--- | :--- | :--- | :--- | :--- |
+| **Row 2** | | | | |
+| `q` | `'` | L Pinky | `l` | `l` |
+| `w` | `,` | L Ring | `r` | `r` |
+| `e` | `.` | L Mid | `c` | `c` |
+| `r` | `p` | L Index | `g` | `g` |
+| `t` | `y` | L Index Ext | `f` | `f` |
+| `y` | `f` | R Index Ext | `y` | `y` |
+| `u` | `g` | R Index | `p` | `p` |
+| `i` | `c` | R Mid | `.` | `.` |
+| `o` | `r` | R Ring | `,` | `,` |
+| `p` | `l` | R Pinky | `'` | `'` |
+| `[` | `/` | R Ext 1 | `[` (Num Row?) | `[` ? No. |
+| `]` | `=` | R Ext 2 | `]` | `]` ? |
 
-## 4. Dependencies / Conflicts
-*   **Navigation Mode**: Navigation keys are currently defined by characters (`e`, `s`, `d`, `f`). If a user is on Dvorak, these keys are physically scattered.
-    *   *Decision*: For this proposal, we focus **only** on the Mirroring aspect. Navigation mode might be awkward for Dvorak users unless they switch to "Old" (WASD) style (which is physically `,aoe` on Dvorak - clustered on left hand) or we implement a ScanCode-based Nav mode in a future update.
+**Wait**, Mirroring `/` and `=`.
+Dvorak `/` (Phys `[`) is Right Top Ext.
+Mirror is Left Top Ext?
+Left Top Ext is `?` No. Dvorak Left Top Ext is... nothing?
+Dvorak Row 1: `... 9 0 [ ]`.
+Dvorak Row 2: `' , ...`. (Starts at Pinky).
+So `/` (Phys `[`) mirrors to... `Tab` (or Backspace)?
+In previous Standard logic: `[` mirrors to `Tab`.
+So `Space & [` -> `Tab` (or Backspace).
 
-## 5. Why
-To make the application accessible to one-handed users who type using the Dvorak layout.
+| Phys Key | Dvorak Char | Mirror Output |
+| :--- | :--- | :--- |
+| **Row 3** | | |
+| `a` | `a` | `s` |
+| `s` | `o` | `n` |
+| `d` | `e` | `t` |
+| `f` | `u` | `h` |
+| `g` | `i` | `d` |
+| `h` | `d` | `i` |
+| `j` | `h` | `u` |
+| `k` | `t` | `e` |
+| `l` | `n` | `o` |
+| `;` | `s` | `a` |
+| `'` | `-` | `Enter` (Mirror of Capslock) |
+
+| Phys Key | Dvorak Char | Mirror Output |
+| :--- | :--- | :--- |
+| **Row 4** | | |
+| `z` | `;` | `z` |
+| `x` | `q` | `v` |
+| `c` | `j` | `w` |
+| `v` | `k` | `m` |
+| `b` | `x` | `b` |
+| `n` | `b` | `x` |
+| `m` | `m` | `k` |
+| `,` | `w` | `j` |
+| `.` | `v` | `q` |
+| `/` | `z` | `;` |
+
+## 3. Implementation Code Structure
+
+```ahk
+#HotIf MirrorStyle == "Dvorak" && !NavMode
+
+; --- ROW 1 (Numbers) ---
+; Normal
+-::[
+=::]
+; Mirror
+Space & -::]
+Space & =::[
+Space & 1::0 ...
+
+; --- ROW 2 (Top) ---
+; Normal
+q::'
+w::,
+e::.
+r::p
+t::y
+y::f
+u::g
+i::c
+o::r
+p::l
+[::/
+]::=
+; Mirror
+Space & q::l
+Space & w::r
+Space & e::c
+Space & r::g
+Space & t::f
+Space & y::y
+Space & u::p
+Space & i::.
+Space & o::,
+Space & p::'
+Space & [::Backspace ; (Mirror of Tab/Backsp)
+Space & ]::Backspace
+
+; ... etc for other rows
+```

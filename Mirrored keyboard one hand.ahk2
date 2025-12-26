@@ -977,53 +977,14 @@ Space & n:: MirrorSend("b")
 ; =========================================================
 
 #HotIf MirrorStyle == "Dvorak" && !NavMode
-; Left half (Dvorak) ======================================
-; Function row (Standard) ---------------------------------
+
+; --- Function Keys (Mirror Only) ---
 Space & F1:: MirrorSend("{F12}")
 Space & F2:: MirrorSend("{F11}")
 Space & F3:: MirrorSend("{F10}")
 Space & F4:: MirrorSend("{F9}")
 Space & F5:: MirrorSend("{F8}")
 Space & F6:: MirrorSend("{F7}")
-
-; Number row ----------------------------------------------
-Space & `:: MirrorSend("]")
-Space & 1:: MirrorSend("0")
-Space & 2:: MirrorSend("9")
-Space & 3:: MirrorSend("8")
-Space & 4:: MirrorSend("7")
-Space & 5:: MirrorSend("6")
-
-; Top row -------------------------------------------------
-Space & Tab:: MirrorSend("{Backspace}")
-Space & ':: MirrorSend("l")
-Space & ,:: MirrorSend("r")
-Space & .:: MirrorSend("c")
-Space & p:: MirrorSend("g")
-Space & y:: MirrorSend("f")
-
-Capslock:: {
-	SetCapsLockState "Off"
-	SendEvent("{Enter}")
-}
-
-; Middle row ----------------------------------------------
-Space & Capslock:: MirrorSend("'")
-Space & a:: MirrorSend("s")
-Space & o:: MirrorSend("n")
-Space & e:: MirrorSend("t")
-Space & u:: MirrorSend("h")
-Space & i:: MirrorSend("d")
-
-; Bottom row ----------------------------------------------
-Space & `;:: MirrorSend("z")
-Space & q:: MirrorSend("v")
-Space & j:: MirrorSend("w")
-Space & k:: MirrorSend("m")
-Space & x:: MirrorSend("b")
-
-; Right half (Dvorak) =====================================
-; Function row --------------------------------------------
 Space & F7:: MirrorSend("{F6}")
 Space & F8:: MirrorSend("{F5}")
 Space & F9:: MirrorSend("{F4}")
@@ -1031,38 +992,111 @@ Space & F10:: MirrorSend("{F3}")
 Space & F11:: MirrorSend("{F2}")
 Space & F12:: MirrorSend("{F1}")
 
-; Number row ----------------------------------------------
-Space & ]:: MirrorSend("``")
-Space & [:: MirrorSend("``")
-Space & 0:: MirrorSend("1")
-Space & 9:: MirrorSend("2")
-Space & 8:: MirrorSend("3")
-Space & 7:: MirrorSend("4")
-Space & 6:: MirrorSend("5")
+; --- Row 1 (Numbers) ---
+; Normal Remap
+-::[
+=::]
 
-; Top row -------------------------------------------------
-Space & \:: MirrorSend("{Tab}")
-Space & =:: MirrorSend("{Tab}")
-Space & /:: MirrorSend("{Tab}")
-Space & f:: MirrorSend("y")
-Space & g:: MirrorSend("p")
-Space & c:: MirrorSend(".")
-Space & r:: MirrorSend(",")
-Space & l:: MirrorSend("'")
+; Mirror Remap
+Space & `::]
+Space & 1::0
+Space & 2::9
+Space & 3::8
+Space & 4::7
+Space & 5::6
+Space & 6::5
+Space & 7::4
+Space & 8::3
+Space & 9::2
+Space & 0::1
+Space & -::]
+Space & =::[
 
-; Middle row ----------------------------------------------
-Space & d:: MirrorSend("i")
-Space & h:: MirrorSend("u")
-Space & t:: MirrorSend("e")
-Space & n:: MirrorSend("o")
-Space & s:: MirrorSend("a")
-Space & -:: SendEvent("{Enter}")
+; --- Row 2 (Top) ---
+; Normal Remap
+q::'
+w::,
+e::.
+r::p
+t::y
+y::f
+u::g
+i::c
+o::r
+p::l
+[::/
+]::=
 
-; Bottom row ----------------------------------------------
-Space & z:: MirrorSend(";")
-Space & v:: MirrorSend("q")
-Space & w:: MirrorSend("j")
-Space & m:: MirrorSend("k")
-Space & b:: MirrorSend("x")
+; Mirror Remap
+Space & Tab::Backspace
+Space & q::l
+Space & w::r
+Space & e::c
+Space & r::g
+Space & t::f
+Space & y::y
+Space & u::p
+Space & i::.
+Space & o::,
+Space & p::'
+Space & [::Backspace
+Space & ]::Backspace
+Space & \::Tab
+
+; --- Row 3 (Home) ---
+; Normal Remap
+s::o
+d::e
+f::u
+g::i
+h::d
+j::h
+k::t
+l::n
+`;::s
+'::-
+
+; Mirror Remap
+Capslock:: {
+	SetCapsLockState "Off"
+	SendEvent("{Enter}")
+}
+Space & Capslock::'
+Space & a::s
+Space & s::n
+Space & d::t
+Space & f::h
+Space & g::d
+Space & h::i
+Space & j::u
+Space & k::e
+Space & l::o
+Space & `;::a
+Space & '::Enter
+
+; --- Row 4 (Bottom) ---
+; Normal Remap
+z::`;
+x::q
+c::j
+v::k
+b::x
+n::b
+,::w
+.::v
+/::z
+
+; Mirror Remap
+Space & z::z
+Space & x::v
+Space & c::w
+Space & v::m
+Space & b::x
+Space & n::b
+Space & m::k
+Space & ,::j
+Space & .::q
+Space & /::`;
+
 #HotIf
 
