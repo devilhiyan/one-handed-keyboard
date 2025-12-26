@@ -41,15 +41,14 @@ Global MouseMode := Integer(StreamRead("MirrorKeys", "MouseMode", 0)) ; Default 
 ; --- Chord Timeout Globals ---
 Global ChordKeys := "wesdafqr"
 Global KeyPressTimes := Map()
-Global ChordHook := InputHook("V L0")
+Global ChordHook := InputHook("V L0 I1") ; I1 to see keys caught by other hotkeys
 ChordHook.KeyOpt("{All}", "N")
 ChordHook.OnKeyDown := RecordChordKeyDown
 ChordHook.Start()
 
 RecordChordKeyDown(ih, vk, sc) {
     keyName := StrLower(GetKeyName(Format("vk{:x}sc{:x}", vk, sc)))
-    if InStr(ChordKeys, keyName)
-        KeyPressTimes[keyName] := A_TickCount
+    KeyPressTimes[keyName] := A_TickCount
 }
 
 ; Startup Notification
@@ -1271,13 +1270,28 @@ ChordAction(KeyAction, MouseAction) {
 
 ; --- Chord Loops (Repeat while held) ---
 PerformChord(Key1, Key2, KeyAct, MouseAct) {
-    ; Timeout Check (50ms)
-    timeDiff := 0
-    if KeyPressTimes.Has(Key1)
-        timeDiff := A_TickCount - KeyPressTimes[Key1]
+    Global KeyPressTimes
+    t1 := KeyPressTimes.Has(Key1) ? KeyPressTimes[Key1] : 0
+    t2 := KeyPressTimes.Has(Key2) ? KeyPressTimes[Key2] : 0
     
-    ; If time diff is too large (> 150ms), treat as separate keys (Rollover typing)
-    if (timeDiff > 150) {
+    ; Logic:
+    ; 1. Simultaneous: Pressed within 100ms of each other -> Chord
+    ; 2. Modifier: First key held for > 300ms -> Chord
+    ; 3. Rollover: Gap between 100-300ms -> Typing (Preserves Halmak digraphs like EA)
+    
+    diff := Abs(t1 - t2)
+    firstKeyTime := (t1 < t2 && t1 != 0) ? t1 : t2
+    heldDuration := A_TickCount - firstKeyTime
+    
+    isChord := False
+    if (diff < 100) {
+        isChord := True
+    } else if (heldDuration > 300) {
+        isChord := True
+    }
+    
+    if !isChord {
+        ; Typing Rollover
         SendEvent "{Blind}" . GetRemappedKey(Key1)
         SendEvent "{Blind}" . GetRemappedKey(Key2)
         return
