@@ -414,16 +414,8 @@ MirrorSend(this_key) {
 
 
 Space Up:: {
-    static last_space_release := 0
-	if (A_PriorKey = "Space") {
-        if (A_TickCount - last_space_release < 300) {
-		    SendEvent("{Space}")
-            last_space_release := 0 ; Reset to prevent triple tap sending two spaces
-        } else {
-            last_space_release := A_TickCount
-        }
-	} else {
-        last_space_release := 0
+    if (A_PriorKey = "Space") {
+        SendEvent("{Space}")
     }
 }
 
@@ -1176,6 +1168,11 @@ Space & F6:: MirrorSend("{F7}")
 
 Space & Tab:: MirrorSend("{Backspace}")
 Space & Capslock:: MirrorSend("'")
+
+Capslock:: {
+	SetCapsLockState "Off"
+	SendEvent("{Enter}")
+}
 
 #HotIf
 
