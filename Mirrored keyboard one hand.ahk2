@@ -32,6 +32,7 @@ Global stream_fallback := "MirrorKeys-Settings-" A_Username ".ini"
 ; 			NAVIGATION MODE
 ; =========================================================
 Global NavMode := False
+Global MirrorMode := False
 Global NavStyle := StreamRead("MirrorKeys", "NavStyle", "New") ; Default to New (ESDF)
 Global MirrorStyle := StreamRead("MirrorKeys", "MirrorStyle", "Hybrid") ; Default to Hybrid
 Global NavToggleKey := StreamRead("MirrorKeys", "NavToggleKey", "LWin") ; Default to LWin
@@ -150,6 +151,22 @@ ToggleNavStyle(*) {
 	NewName := (NavStyle = "New" ? "Use &New Navigation (ESDF)" : "Use &Old Navigation (WASD)")
 	Tray.Rename(PrevName, NewName)
 	Tray.Check(NewName)
+}
+
+ToggleMirrorMode(*) {
+	Global MirrorMode
+	MirrorMode := !MirrorMode
+	
+	if (MirrorMode) {
+		Notify("Mirror Mode: ON")
+		SoundBeep 1000, 150
+	} else {
+		Notify("Mirror Mode: OFF")
+		SoundBeep 500, 150
+	}
+	
+	; Update Tray Menu checkmark
+	Tray.ToggleCheck("Enable &Mirroring")
 }
 
 ToggleMirrorStyle(*) {
@@ -393,7 +410,7 @@ Space Up:: {
     }
 }
 
-#HotIf MirrorStyle == "Standard" && !NavMode
+#HotIf MirrorStyle == "Standard" && MirrorMode && !NavMode
 ; Left half ===============================================
 ; Function row --------------------------------------------
 Space & F1:: MirrorSend("{F12}")
@@ -482,7 +499,7 @@ Space & n:: MirrorSend("b")
 Space & b:: MirrorSend("n")
 #HotIf
 
-#HotIf MirrorStyle == "Overlapping" && !NavMode
+#HotIf MirrorStyle == "Overlapping" && MirrorMode && !NavMode
 ; Left half (Overlapping Style) ===========================
 ; Function row (Same as standard for now) -----------------
 Space & F1:: MirrorSend("{F12}")
@@ -650,13 +667,19 @@ Tray := A_TrayMenu
 Tray.Delete() ;Removes the default menu
 
 Tray.Add("Reopen mirror &map", Keyboard_Display)
+Tray.Add("Enable &Mirroring", ToggleMirrorMode)
 Tray.Add() ;Line break
 Tray.Add("Switch &Navigation Style", ToggleNavStyle)
 Tray.Add("Switch &Mirror Style", ToggleMirrorStyle)
 Tray.Add("Nav Toggle Key: " . NavToggleKey, SwitchNavToggleKey)
 
 ; Initialize Tray Menu State
-Tray.Rename("Switch &Navigation Style", NavStyle = "New" ? "Use &New Navigation (ESDF)" : "Use &Old Navigation (WASD)")
+if (MirrorMode)
+	Tray.Check("Enable &Mirroring")
+else
+	Tray.Uncheck("Enable &Mirroring")
+
+Tray.Rename("Switch &Navigation Style", NavStyle == "New" ? "Use &New Navigation (ESDF)" : "Use &Old Navigation (WASD)")
 Tray.Check(NavStyle = "New" ? "Use &New Navigation (ESDF)" : "Use &Old Navigation (WASD)")
 Tray.Rename("Switch &Mirror Style", MirrorStyle = "Standard" ? "Mirror Style: &Standard" : MirrorStyle = "Overlapping" ? "Mirror Style: &Overlapping" : MirrorStyle = "Hybrid" ? "Mirror Style: &Hybrid" : "Mirror Style: &Dvorak")
 
@@ -886,7 +909,7 @@ StreamWrite(INI_section, INI_key, INI_value) {
 ; }
 
 
-#HotIf MirrorStyle == "Hybrid" && !NavMode
+#HotIf MirrorStyle == "Hybrid" && MirrorMode && !NavMode
 ; Left half (Hybrid) ======================================
 ; Function row (Standard) ---------------------------------
 Space & F1:: MirrorSend("{F12}")
@@ -978,7 +1001,7 @@ Space & n:: MirrorSend("b")
 
 ; =========================================================
 
-#HotIf MirrorStyle == "Dvorak" && !NavMode
+#HotIf MirrorStyle == "Dvorak" && MirrorMode && !NavMode
 
 ; --- Function Keys (Standard Mirror) ---
 Space & F1:: MirrorSend("{F12}")
@@ -1092,9 +1115,9 @@ Space & /:: MirrorSend("z") ; Fallback (Standard)
 
 
 ; =========================================================
-; GLOBAL CHORDS (Enabled when NOT in NavMode)
+; GLOBAL CHORDS (Enabled when NOT in NavMode and MirrorMode is ON)
 ; =========================================================
-#HotIf !NavMode
+#HotIf !NavMode && MirrorMode
 
 ; --- Helper Function ---
 ChordAction(KeyAction, MouseAction) {
@@ -1197,6 +1220,7 @@ r:: {
 ; =========================================================
 Global CustomMenuGui := ""
 Global BtnNavStyle := ""
+Global BtnMirrorMode := ""
 Global BtnMirrorStyle := ""
 
 Tray_Handler(wParam, lParam, msg, hwnd) {
@@ -1220,6 +1244,11 @@ CloseMenuGui() {
         CustomMenuGui.Destroy()
 }
 
+GetMirrorModeText() {
+    Global MirrorMode
+    return (MirrorMode ? "✔ Enable Mirroring" : "   Enable Mirroring")
+}
+
 GetNavText() {
     Global NavStyle
     return (NavStyle == "New" ? "✔ Use New Navigation (ESDF)" : "✔ Use Old Navigation (WASD)")
@@ -1231,7 +1260,7 @@ GetMirrorText() {
 }
 
 Show_Custom_Menu() {
-    Global CustomMenuGui, NavStyle, MirrorStyle, NavToggleKey, BtnNavStyle, BtnMirrorStyle
+    Global CustomMenuGui, NavStyle, MirrorStyle, MirrorMode, NavToggleKey, BtnNavStyle, BtnMirrorStyle, BtnMirrorMode
     
     if IsObject(CustomMenuGui)
         CustomMenuGui.Destroy()
@@ -1244,6 +1273,10 @@ Show_Custom_Menu() {
     
     BtnStyle := "w250 h30 Left"
     
+    ; Mirror Mode Toggle
+    BtnMirrorMode := CustomMenuGui.Add("Button", BtnStyle, GetMirrorModeText())
+    BtnMirrorMode.OnEvent("Click", (*) => (ToggleMirrorMode(), BtnMirrorMode.Text := GetMirrorModeText()))
+
     ; Navigation Style (Toggle Update)
     BtnNavStyle := CustomMenuGui.Add("Button", BtnStyle, GetNavText())
     BtnNavStyle.OnEvent("Click", (*) => (ToggleNavStyle(), BtnNavStyle.Text := GetNavText()))
