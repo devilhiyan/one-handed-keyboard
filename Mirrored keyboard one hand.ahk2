@@ -1276,8 +1276,8 @@ PerformChord(Key1, Key2, KeyAct, MouseAct) {
     if KeyPressTimes.Has(Key1)
         timeDiff := A_TickCount - KeyPressTimes[Key1]
     
-    ; If time diff is too large (> 50ms), treat as separate keys
-    if (timeDiff > 50) {
+    ; If time diff is too large (> 90ms), treat as separate keys (Rollover typing)
+    if (timeDiff > 90) {
         SendEvent "{Blind}" . GetRemappedKey(Key1)
         SendEvent "{Blind}" . GetRemappedKey(Key2)
         return
