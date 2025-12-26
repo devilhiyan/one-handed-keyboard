@@ -15,7 +15,7 @@ if not A_IsAdmin {
 }
 #SingleInstance Force ; Prevents multiple versions of script running
 #UseHook ; Helps ensure modifier keys don't remain pressed after hotkey ends
-A_MaxHotkeysPerInterval := 200 ; Prevents the script from stopping due to rapid key presses
+A_MaxHotkeysPerInterval := 1000 ; Increased for stability during rapid input
 ProcessSetPriority "High" ; Ensures the script stays responsive under load
 SetKeyDelay -1, 0 ; Increases reliability of SendEvent by reducing delays
 InstallKeybdHook ; Explicitly install the keyboard hook for reliability
@@ -48,7 +48,8 @@ ChordHook.Start()
 
 RecordChordKeyDown(ih, vk, sc) {
     keyName := StrLower(GetKeyName(Format("vk{:x}sc{:x}", vk, sc)))
-    KeyPressTimes[keyName] := A_TickCount
+    if InStr(ChordKeys, keyName)
+        KeyPressTimes[keyName] := A_TickCount
 }
 
 ; Startup Notification
@@ -407,8 +408,8 @@ Space & e::Click "WheelDown"
 ; =========================================================
 MirrorSend(this_key) {
 	; Uses Blind mode to send the key with any currently held modifiers.
-	; Uses SendEvent for better stability during rapid key presses.
-	SendEvent("{Blind}" . this_key)
+	; Uses Send for better speed/stability during rapid key presses.
+	Send("{Blind}" . this_key)
 }
 
 
@@ -1160,14 +1161,14 @@ e & r::PerformChord("e", "r", "{Blind}{End}", "WheelDown")
 r & e::PerformChord("r", "e", "{Blind}{End}", "WheelDown")
 
 ; --- Halmak Restore Typing (Explicitly Defined) ---
-w::SendEvent "{Blind}" . GetRemappedKey("w")
-e::SendEvent "{Blind}" . GetRemappedKey("e")
-a::SendEvent "{Blind}" . GetRemappedKey("a")
-q::SendEvent "{Blind}" . GetRemappedKey("q")
-s::SendEvent "{Blind}" . GetRemappedKey("s")
-d::SendEvent "{Blind}" . GetRemappedKey("d")
-f::SendEvent "{Blind}" . GetRemappedKey("f")
-r::SendEvent "{Blind}" . GetRemappedKey("r")
+w::Send "{Blind}" . GetRemappedKey("w")
+e::Send "{Blind}" . GetRemappedKey("e")
+a::Send "{Blind}" . GetRemappedKey("a")
+q::Send "{Blind}" . GetRemappedKey("q")
+s::Send "{Blind}" . GetRemappedKey("s")
+d::Send "{Blind}" . GetRemappedKey("d")
+f::Send "{Blind}" . GetRemappedKey("f")
+r::Send "{Blind}" . GetRemappedKey("r")
 
 
 ; --- Space Layer (Hold Space) ---
@@ -1333,14 +1334,14 @@ r & e::PerformChord("r", "e", "{Blind}{End}", "WheelDown")
 
 ; --- Restore Typing (Prefix Release) ---
 ; Only fire if the key was PRESSED and RELEASED without triggering a chord.
-w::SendEvent "{Blind}" . GetRemappedKey("w")
-e::SendEvent "{Blind}" . GetRemappedKey("e")
-a::SendEvent "{Blind}" . GetRemappedKey("a")
-q::SendEvent "{Blind}" . GetRemappedKey("q")
-s::SendEvent "{Blind}" . GetRemappedKey("s")
-d::SendEvent "{Blind}" . GetRemappedKey("d")
-f::SendEvent "{Blind}" . GetRemappedKey("f")
-r::SendEvent "{Blind}" . GetRemappedKey("r")
+w::Send "{Blind}" . GetRemappedKey("w")
+e::Send "{Blind}" . GetRemappedKey("e")
+a::Send "{Blind}" . GetRemappedKey("a")
+q::Send "{Blind}" . GetRemappedKey("q")
+s::Send "{Blind}" . GetRemappedKey("s")
+d::Send "{Blind}" . GetRemappedKey("d")
+f::Send "{Blind}" . GetRemappedKey("f")
+r::Send "{Blind}" . GetRemappedKey("r")
 
 #HotIf
 
