@@ -8,26 +8,22 @@ This layout is designed for high-speed one-handed typing using only the left-han
 - **Excluded Keys:** None (All 26 letters included).
 
 ---
+# 14-Key Left-Hand Optimized Layout (N-S-T-H-R)
 
 ## 1. Base Layer (Standard Tap)
-*Optimized for minimal movement and "inner rolls."*
-
 | Row | Q (Pinky) | W (Ring) | E (Middle) | R (Index) | T (Index+) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Top** | L | D | C | U | M |
-| **Home** | **A** | **S** | **E** | **R** | **T** |
-| **Bottom**| F | O | I | H | N |
+| Top | N | S | T | H | R |
+| Home | E | A | I | O | U |
+| Bottom | L | D | C | M |   |
 
----
-
-## 2. Space Layer (Hold Space + Key)
-*For the remaining 12 letters and rare characters.*
-
+## 2. Space Layer (Hold Space)
 | Row | Q (Pinky) | W (Ring) | E (Middle) | R (Index) | T (Index+) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Top** | G | P | W | Y | — |
-| **Home** | K | J | X | Q | Z |
-| **Bottom**| — | — | **B** | **V** | — |
+| Top | G | P | W | Y | F |
+| Home | K | J | X | Q | Z |
+| Bottom |   |   | B | V |   |
+
 
 ---
 

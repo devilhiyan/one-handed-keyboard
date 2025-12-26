@@ -38,6 +38,20 @@ Global MirrorStyle := StreamRead("MirrorKeys", "MirrorStyle", "Hybrid") ; Defaul
 Global NavToggleKey := StreamRead("MirrorKeys", "NavToggleKey", "LWin") ; Default to LWin
 Global MouseMode := Integer(StreamRead("MirrorKeys", "MouseMode", 0)) ; Default to Transient (0)
 
+; --- Chord Timeout Globals ---
+Global ChordKeys := "wesdafqr"
+Global KeyPressTimes := Map()
+Global ChordHook := InputHook("V L0")
+ChordHook.KeyOpt("{All}", "N")
+ChordHook.OnKeyDown := RecordChordKeyDown
+ChordHook.Start()
+
+RecordChordKeyDown(ih, vk, sc) {
+    keyName := StrLower(GetKeyName(Format("vk{:x}sc{:x}", vk, sc)))
+    if InStr(ChordKeys, keyName)
+        KeyPressTimes[keyName] := A_TickCount
+}
+
 ; Startup Notification
 Notify("Mirrored Keyboard Active", 1500)
 
@@ -1036,7 +1050,7 @@ Space & =:: MirrorSend("``")
 
 ; --- Row 2 (Top) ---
 ; Normal (Alpha Remaps Only)
-r::p
+; r handled by Global Chords
 t::y
 y::f
 u::g
@@ -1062,9 +1076,7 @@ Space & \:: MirrorSend("{Tab}")
 
 ; --- Row 3 (Home) ---
 ; Normal (Alpha Remaps Only)
-s::o
-d::e
-f::u
+; s, d, f handled by Global Chords
 g::i
 h::d
 j::h
@@ -1121,16 +1133,9 @@ Space & /:: MirrorSend("z") ; Fallback (Standard)
 #HotIf MirrorStyle == "Halmak" && MirrorMode && !NavMode
 
 ; --- Base Layer (Standard Tap) ---
-q::n
-w::s
-e::t
-r::h
+; q, w, e, r, a, s, d, f handled by Global Chords restore logic
 t::r
 
-a::e
-s::a
-d::i
-f::o
 g::u
 
 z::l
@@ -1181,6 +1186,31 @@ Space & Capslock:: MirrorSend("'")
 #HotIf !NavMode && MirrorMode
 
 ; --- Helper Function ---
+GetRemappedKey(key) {
+    Global MirrorStyle
+    if (MirrorStyle == "Halmak") {
+        switch key {
+            case "q": return "n"
+            case "w": return "s"
+            case "e": return "t"
+            case "r": return "h"
+            case "a": return "e"
+            case "s": return "a"
+            case "d": return "i"
+            case "f": return "o"
+        }
+    } else if (MirrorStyle == "Dvorak") {
+        switch key {
+            case "r": return "p"
+            case "s": return "o"
+            case "d": return "e"
+            case "f": return "u"
+            case "t": return "y" ; Included for completeness if t is used in future chords
+        }
+    }
+    return key ; Standard/Overlapping/Hybrid or default passthrough
+}
+
 ChordAction(KeyAction, MouseAction) {
     if GetKeyState("Space", "P") {
         ; Mouse Mode
@@ -1204,6 +1234,18 @@ ChordAction(KeyAction, MouseAction) {
 
 ; --- Chord Loops (Repeat while held) ---
 PerformChord(Key1, Key2, KeyAct, MouseAct) {
+    ; Timeout Check (50ms)
+    timeDiff := 0
+    if KeyPressTimes.Has(Key1)
+        timeDiff := A_TickCount - KeyPressTimes[Key1]
+    
+    ; If time diff is too large (> 50ms), treat as separate keys
+    if (timeDiff > 50) {
+        SendEvent "{Blind}" . GetRemappedKey(Key1)
+        SendEvent "{Blind}" . GetRemappedKey(Key2)
+        return
+    }
+
     ChordAction(KeyAct, MouseAct) ; First action
     Sleep 200 ; Initial delay
     while (GetKeyState(Key1, "P") && GetKeyState(Key2, "P")) {
@@ -1240,69 +1282,14 @@ r & e::PerformChord("r", "e", "{Blind}{End}", "WheelDown")
 
 ; --- Restore Typing (Prefix Release) ---
 ; Only fire if the key was PRESSED and RELEASED without triggering a chord.
-w:: {
-    if (MirrorStyle == "Halmak")
-        SendEvent "s"
-    else
-        SendEvent "w"
-}
-
-e:: {
-    if (MirrorStyle == "Halmak")
-        SendEvent "t"
-    else
-        SendEvent "e"
-}
-
-a:: {
-    if (MirrorStyle == "Halmak")
-        SendEvent "e"
-    else
-        SendEvent "a"
-}
-
-q:: {
-    if (MirrorStyle == "Halmak")
-        SendEvent "n"
-    else
-        SendEvent "q"
-}
-
-s:: {
-    if (MirrorStyle == "Dvorak")
-        SendEvent "o"
-    else if (MirrorStyle == "Halmak")
-        SendEvent "a"
-    else
-        SendEvent "s"
-}
-
-d:: {
-    if (MirrorStyle == "Dvorak")
-        SendEvent "e"
-    else if (MirrorStyle == "Halmak")
-        SendEvent "i"
-    else
-        SendEvent "d"
-}
-
-f:: {
-    if (MirrorStyle == "Dvorak")
-        SendEvent "u"
-    else if (MirrorStyle == "Halmak")
-        SendEvent "o"
-    else
-        SendEvent "f"
-}
-
-r:: {
-    if (MirrorStyle == "Dvorak")
-        SendEvent "p"
-    else if (MirrorStyle == "Halmak")
-        SendEvent "h"
-    else
-        SendEvent "r"
-}
+w::SendEvent "{Blind}" . GetRemappedKey("w")
+e::SendEvent "{Blind}" . GetRemappedKey("e")
+a::SendEvent "{Blind}" . GetRemappedKey("a")
+q::SendEvent "{Blind}" . GetRemappedKey("q")
+s::SendEvent "{Blind}" . GetRemappedKey("s")
+d::SendEvent "{Blind}" . GetRemappedKey("d")
+f::SendEvent "{Blind}" . GetRemappedKey("f")
+r::SendEvent "{Blind}" . GetRemappedKey("r")
 
 #HotIf
 
