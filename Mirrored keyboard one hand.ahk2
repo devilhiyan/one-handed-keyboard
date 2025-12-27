@@ -43,8 +43,8 @@ StateHook_KeyDown(ih, vk, sc) {
     global MirrorActionOccurred, SpaceDownTime
     Critical()
     if (vk == 0x20) { ; Spacebar
+        MirrorActionOccurred := False ; Reset on every physical press
         if (!KeyTracker[vk]) { ; Only on first physical press
-            MirrorActionOccurred := False
             SpaceDownTime := A_TickCount
         }
     }
@@ -405,7 +405,7 @@ Space & e::Click "WheelDown"
 ; =========================================================
 MirrorSend(this_key) {
     global MirrorActionOccurred, LastMirrorActionTime
-    if GetKeyState("Space", "P") {
+    if (KeyTracker[0x20]) {
         MirrorActionOccurred := True
         LastMirrorActionTime := A_TickCount
     }
@@ -422,6 +422,7 @@ Space Up:: {
     ; Safety reset: Ensure state is cleared for the next interaction
     Global MirrorActionOccurred := False
     KeyTracker[0x20] := 0
+    ActiveChords.Clear() ; Ensure no lingering chords
 }
 #HotIf
 
@@ -858,7 +859,7 @@ GetRemappedKey(key) {
 
 ChordAction(KeyAction, MouseAction) {
     global MirrorActionOccurred, LastMirrorActionTime
-    if GetKeyState("Space", "P") {
+    if (KeyTracker[0x20]) {
         MirrorActionOccurred := True
         LastMirrorActionTime := A_TickCount
         if (MouseAction == "Up")
