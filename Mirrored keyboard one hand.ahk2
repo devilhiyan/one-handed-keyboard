@@ -16,9 +16,18 @@ if not A_IsAdmin {
 #SingleInstance Force ; Prevents multiple versions of script running
 #UseHook ; Helps ensure modifier keys don't remain pressed after hotkey ends
 #MaxThreadsPerHotkey 1 ; Prevent thread buildup during rapid input
-A_MaxHotkeysPerInterval := 1000 ; Increased for stability during rapid input
+A_MaxHotkeysPerInterval := 2000 ; Increased for stability during rapid input
 A_MenuMaskKey := "vkE8" ; Prevent Start Menu/Menu bar focus during rapid prefix key use
 ProcessSetPriority "High" ; Ensures the script stays responsive under load
+
+; --- Key State Tracking (High Reliability) ---
+Global KeyTracker := Map()
+KeyTracker.Default := 0
+Global StateHook := InputHook("V L0 I1") ; I1 to see keys caught by other hotkeys
+StateHook.KeyOpt("{All}", "N")
+StateHook.OnKeyDown := (ih, vk, sc) => (KeyTracker[vk] := 1)
+StateHook.OnKeyUp := (ih, vk, sc) => (KeyTracker[vk] := 0)
+StateHook.Start()
 SetKeyDelay -1, 0 ; Increases reliability of SendInput by reducing delays
 InstallKeybdHook ; Explicitly install the keyboard hook for reliability
 OnMessage(0x404, Tray_Handler) ; Intercept Tray Icon clicks to prevent menu blocking
@@ -97,6 +106,7 @@ $LWin:: {
     if (A_TickCount - StartTime <= 500) { ; Released within 0.50s (Tap)
         if (A_PriorKey = "LWin") { ; Only if no other key was pressed
             Global NavMode := !NavMode
+            ActiveChords.Clear()
             if (NavMode) {
                 Notify("Navigation Mode: ON (" . (MouseMode ? "Permanent" : "Transient") . ")")
                 SoundBeep 1000, 150
@@ -114,6 +124,7 @@ $LWin:: {
 	Critical ; Prevents this thread from being interrupted
 	if (A_PriorKey = "LControl" || A_PriorKey = "RControl") {
 		Global NavMode := !NavMode
+        ActiveChords.Clear()
 		if (NavMode) {
 			Notify("Navigation Mode: ON")
 			SoundBeep 1000, 150
@@ -156,8 +167,9 @@ ToggleNavStyle(*) {
 }
 
 ToggleMirrorMode(*) {
-	Global MirrorMode
+	Global MirrorMode, ActiveChords
 	MirrorMode := !MirrorMode
+    ActiveChords.Clear()
 	StreamWrite("MirrorKeys", "MirrorMode", MirrorMode)
 	
 	if (MirrorMode) {
@@ -863,8 +875,11 @@ ChordMasterTick() {
     }
     
     for ID, Data in ActiveChords.Clone() {
-        ; Kill chord immediately if either key is released
-        if (!GetKeyState(Data.k1, "P") || !GetKeyState(Data.k2, "P")) {
+        ; Use KeyTracker (InputHook) for physical release detection
+        vk1 := GetKeyVK(Data.k1)
+        vk2 := GetKeyVK(Data.k2)
+        
+        if (!KeyTracker[vk1] || !KeyTracker[vk2]) {
             ActiveChords.Delete(ID)
             continue
         }
