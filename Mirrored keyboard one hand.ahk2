@@ -910,9 +910,21 @@ PerformChord(Key1, Key2, KeyAct, MouseAct, Key3 := "", KeyAct3 := "") {
         ; We need a unique ID that includes all 3 keys
         keys := [Key1, Key2, Key3]
         ; Sort keys for ID
-        if StrCompare(keys[1], keys[2]) > 0 { tmp := keys[1], keys[1] := keys[2], keys[2] := tmp }
-        if StrCompare(keys[2], keys[3]) > 0 { tmp := keys[2], keys[2] := keys[3], keys[3] := tmp }
-        if StrCompare(keys[1], keys[2]) > 0 { tmp := keys[1], keys[1] := keys[2], keys[2] := tmp }
+        if (StrCompare(keys[1], keys[2]) > 0) {
+            tmp := keys[1]
+            keys[1] := keys[2]
+            keys[2] := tmp
+        }
+        if (StrCompare(keys[2], keys[3]) > 0) {
+            tmp := keys[2]
+            keys[2] := keys[3]
+            keys[3] := tmp
+        }
+        if (StrCompare(keys[1], keys[2]) > 0) {
+            tmp := keys[1]
+            keys[1] := keys[2]
+            keys[2] := tmp
+        }
         ChordID := keys[1] . keys[2] . keys[3]
 
         if ActiveChords.Has(ChordID)
