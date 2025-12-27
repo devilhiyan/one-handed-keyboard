@@ -42,11 +42,13 @@ StateHook.Start()
 StateHook_KeyDown(ih, vk, sc) {
     global MirrorActionOccurred, SpaceDownTime
     Critical()
-    KeyTracker[vk] := 1
     if (vk == 0x20) { ; Spacebar
-        MirrorActionOccurred := False
-        SpaceDownTime := A_TickCount
+        if (!KeyTracker[vk]) { ; Only on first physical press
+            MirrorActionOccurred := False
+            SpaceDownTime := A_TickCount
+        }
     }
+    KeyTracker[vk] := 1
 }
 SetKeyDelay -1, 0 ; Increases reliability of SendInput by reducing delays
 InstallKeybdHook ; Explicitly install the keyboard hook for reliability
@@ -403,19 +405,23 @@ Space & e::Click "WheelDown"
 ; =========================================================
 MirrorSend(this_key) {
     global MirrorActionOccurred, LastMirrorActionTime
-	MirrorActionOccurred := True
-    LastMirrorActionTime := A_TickCount
+    if GetKeyState("Space", "P") {
+        MirrorActionOccurred := True
+        LastMirrorActionTime := A_TickCount
+    }
 	; Uses SendInput for high performance and stability during rapid key presses.
 	SendInput("{Blind}" . this_key)
 }
 
 
+#HotIf MirrorMode || NavMode
 Space Up:: {
     Duration := A_TickCount - SpaceDownTime
     if (!MirrorActionOccurred && Duration < SpaceTapThreshold) {
         SendInput("{Space}")
     }
 }
+#HotIf
 
 ; =========================================================
 ; 			HALMAK MIRRORING
