@@ -814,7 +814,7 @@ GetRemappedKey(key) {
 }
 
 ; --- Chord Repetition Logic ---
-Global ChordState := Map() ; Track active timers to prevent overlap
+Global ActiveChords := Map() ; Track active chords for the master timer
 
 ChordAction(KeyAction, MouseAction) {
     if GetKeyState("Space", "P") {
@@ -837,36 +837,43 @@ ChordAction(KeyAction, MouseAction) {
     }
 }
 
-; --- Chord Loops (Repeat while held) ---
+; --- Chord Loops (Managed by Master Timer) ---
 PerformChord(Key1, Key2, KeyAct, MouseAct) {
-    ; Normalize ID: Sort keys alphabetically so 'we' and 'ew' share the same timer.
-    ; Use StrCompare to avoid TypeError in AHK v2.
+    ; Normalize ID: Sort keys alphabetically so 'we' and 'ew' share the same entry.
     if StrCompare(Key1, Key2) < 0
         ChordID := Key1 . Key2
     else
         ChordID := Key2 . Key1
 
-    if ChordState.Has(ChordID)
-        return ; Already running for this physical pair
+    if ActiveChords.Has(ChordID)
+        return ; Already being processed
     
-    ChordAction(KeyAct, MouseAct) ; First action
+    ChordAction(KeyAct, MouseAct) ; First action immediately
     
-    ; Setup repetition timer
-    TimerFunc := () => ChordTimerCallback(Key1, Key2, KeyAct, MouseAct, ChordID)
-    ChordState[ChordID] := TimerFunc
-    SetTimer TimerFunc, 200 ; Initial delay
+    ; Add to processing queue for repetition
+    ActiveChords[ChordID] := {k1:Key1, k2:Key2, act:KeyAct, mAct:MouseAct, count:0}
+    
+    SetTimer ChordMasterTick, 50
 }
 
-ChordTimerCallback(Key1, Key2, KeyAct, MouseAct, ChordID) {
-    ; Kill timer immediately if either key is released to prevent ghosting/queueing
-    if (!GetKeyState(Key1, "P") || !GetKeyState(Key2, "P")) {
-        SetTimer ChordState[ChordID], 0 ; Stop
-        ChordState.Delete(ChordID)
+ChordMasterTick() {
+    if ActiveChords.Count == 0 {
+        SetTimer , 0 ; Stop timer if no chords are active
         return
     }
-
-    ChordAction(KeyAct, MouseAct)
-    SetTimer ChordState[ChordID], 50 ; Repetition rate
+    
+    for ID, Data in ActiveChords.Clone() {
+        ; Kill chord immediately if either key is released
+        if (!GetKeyState(Data.k1, "P") || !GetKeyState(Data.k2, "P")) {
+            ActiveChords.Delete(ID)
+            continue
+        }
+        
+        Data.count += 1
+        if (Data.count >= 4) { ; ~200ms initial delay (4 * 50ms)
+            ChordAction(Data.act, Data.mAct)
+        }
+    }
 }
 
 ; --- Mappings ---
