@@ -17,7 +17,7 @@ if not A_IsAdmin {
 #UseHook ; Helps ensure modifier keys don't remain pressed after hotkey ends
 A_MaxHotkeysPerInterval := 1000 ; Increased for stability during rapid input
 ProcessSetPriority "High" ; Ensures the script stays responsive under load
-SetKeyDelay -1, 0 ; Increases reliability of SendEvent by reducing delays
+SetKeyDelay -1, 0 ; Increases reliability of SendInput by reducing delays
 InstallKeybdHook ; Explicitly install the keyboard hook for reliability
 OnMessage(0x404, Tray_Handler) ; Intercept Tray Icon clicks to prevent menu blocking
 OnMessage(0x0006, Menu_LostFocus) ; Monitor Focus Loss to auto-close custom menu
@@ -34,23 +34,9 @@ Global stream_fallback := "MirrorKeys-Settings-" A_Username ".ini"
 Global NavMode := False
 Global MirrorMode := False
 Global NavStyle := StreamRead("MirrorKeys", "NavStyle", "New") ; Default to New (ESDF)
-Global MirrorStyle := StreamRead("MirrorKeys", "MirrorStyle", "Hybrid") ; Default to Hybrid
+Global MirrorStyle := "Halmak" ; Optimized for Halmak
 Global NavToggleKey := StreamRead("MirrorKeys", "NavToggleKey", "LWin") ; Default to LWin
 Global MouseMode := Integer(StreamRead("MirrorKeys", "MouseMode", 0)) ; Default to Transient (0)
-
-; --- Chord Timeout Globals ---
-Global ChordKeys := "wesdafqr"
-Global KeyPressTimes := Map()
-Global ChordHook := InputHook("V L0 I1") ; I1 to see keys caught by other hotkeys
-ChordHook.KeyOpt("{All}", "N")
-ChordHook.OnKeyDown := RecordChordKeyDown
-ChordHook.Start()
-
-RecordChordKeyDown(ih, vk, sc) {
-    keyName := StrLower(GetKeyName(Format("vk{:x}sc{:x}", vk, sc)))
-    if InStr(ChordKeys, keyName)
-        KeyPressTimes[keyName] := A_TickCount
-}
 
 ; Startup Notification
 Notify("Mirrored Keyboard Active", 1500)
@@ -93,9 +79,9 @@ $LWin:: {
         }
         
         if (A_TickCount - StartTime > 500) { ; Held for more than 0.50s
-            Send "{LWin Down}"
+            SendInput "{LWin Down}"
             KeyWait "LWin"
-            Send "{LWin Up}"
+            SendInput "{LWin Up}"
             return
         }
         Sleep 10
@@ -183,32 +169,6 @@ ToggleMirrorMode(*) {
 	Tray.ToggleCheck("Enable &Mirroring")
 }
 
-ToggleMirrorStyle(*) {
-	Global MirrorStyle
-	PrevName := "Mirror Style: " . MirrorStyle
-	
-	if (MirrorStyle == "Standard") {
-		MirrorStyle := "Overlapping"
-		Notify("Mirror Style: Overlapping")
-	} else if (MirrorStyle == "Overlapping") {
-		MirrorStyle := "Hybrid"
-		Notify("Mirror Style: Hybrid")
-	} else if (MirrorStyle == "Hybrid") {
-		MirrorStyle := "Dvorak"
-		Notify("Mirror Style: Dvorak")
-	} else if (MirrorStyle == "Dvorak") {
-		MirrorStyle := "Halmak"
-		Notify("Mirror Style: Halmak")
-	} else {
-		MirrorStyle := "Standard"
-		Notify("Mirror Style: Standard")
-	}
-	StreamWrite("MirrorKeys", "MirrorStyle", MirrorStyle)
-	
-	NewName := "Mirror Style: " . MirrorStyle
-	Tray.Rename(PrevName, NewName)
-}
-
 SwitchNavToggleKey(*) {
     Global NavToggleKey
     PrevName := "Nav Toggle Key: " . NavToggleKey
@@ -281,7 +241,7 @@ MoveMouseTick() {
 #HotIf NavMode && MouseMode
 
 ; Shared Keys
-Space & Tab::SendEvent("{Blind}{Backspace}")
+Space & Tab::SendInput("{Blind}{Backspace}")
 
 ; Capslock (Left Click / Drag)
 Capslock:: {
@@ -290,7 +250,7 @@ Capslock:: {
     Click "Up"
 }
 ; Space + Capslock (Enter)
-Space & Capslock::SendEvent("{Enter}")
+Space & Capslock::SendInput("{Enter}")
 
 ; Shift (Right Click)
 LShift::Click "Right"
@@ -309,12 +269,12 @@ w::Click "WheelUp"
 r::Click "WheelDown"
 
 ; ESDF Keyboard Actions (Space + Key)
-Space & e::SendEvent "{Blind}{Up}"
-Space & s::SendEvent "{Blind}{Left}"
-Space & d::SendEvent "{Blind}{Down}"
-Space & f::SendEvent "{Blind}{Right}"
-Space & w::SendEvent "{Blind}{Home}"
-Space & r::SendEvent "{Blind}{End}"
+Space & e::SendInput "{Blind}{Up}"
+Space & s::SendInput "{Blind}{Left}"
+Space & d::SendInput "{Blind}{Down}"
+Space & f::SendInput "{Blind}{Right}"
+Space & w::SendInput "{Blind}{Home}"
+Space & r::SendInput "{Blind}{End}"
 #HotIf
 
 #HotIf NavMode && MouseMode && NavStyle == "Old"
@@ -328,12 +288,12 @@ q::Click "WheelUp"
 e::Click "WheelDown"
 
 ; WASD Keyboard Actions (Space + Key)
-Space & w::SendEvent "{Blind}{Up}"
-Space & a::SendEvent "{Blind}{Left}"
-Space & s::SendEvent "{Blind}{Down}"
-Space & d::SendEvent "{Blind}{Right}"
-Space & q::SendEvent "{Blind}{Home}"
-Space & e::SendEvent "{Blind}{End}"
+Space & w::SendInput "{Blind}{Up}"
+Space & a::SendInput "{Blind}{Left}"
+Space & s::SendInput "{Blind}{Down}"
+Space & d::SendInput "{Blind}{Right}"
+Space & q::SendInput "{Blind}{Home}"
+Space & e::SendInput "{Blind}{End}"
 #HotIf
 
 
@@ -344,10 +304,10 @@ Space & e::SendEvent "{Blind}{End}"
 #HotIf NavMode && !MouseMode
 
 ; Shared Keys
-Space & Tab::SendEvent("{Blind}{Backspace}")
+Space & Tab::SendInput("{Blind}{Backspace}")
 
 ; Capslock (Enter)
-Capslock::SendEvent("{Enter}")
+Capslock::SendInput("{Enter}")
 ; Space + Capslock (Left Click / Drag)
 Space & Capslock:: {
     Click "Down"
@@ -366,12 +326,12 @@ x::Delete
 
 #HotIf NavMode && !MouseMode && NavStyle == "New"
 ; ESDF Keyboard Actions (Direct)
-e::SendEvent "{Blind}{Up}"
-s::SendEvent "{Blind}{Left}"
-d::SendEvent "{Blind}{Down}"
-f::SendEvent "{Blind}{Right}"
-w::SendEvent "{Blind}{Home}"
-r::SendEvent "{Blind}{End}"
+e::SendInput "{Blind}{Up}"
+s::SendInput "{Blind}{Left}"
+d::SendInput "{Blind}{Down}"
+f::SendInput "{Blind}{Right}"
+w::SendInput "{Blind}{Home}"
+r::SendInput "{Blind}{End}"
 
 ; ESDF Mouse (Space + Key)
 Space & e::SetTimer MoveMouseTick, 10
@@ -385,12 +345,12 @@ Space & r::Click "WheelDown"
 
 #HotIf NavMode && !MouseMode && NavStyle == "Old"
 ; WASD Keyboard Actions (Direct)
-w::SendEvent "{Blind}{Up}"
-a::SendEvent "{Blind}{Left}"
-s::SendEvent "{Blind}{Down}"
-d::SendEvent "{Blind}{Right}"
-q::SendEvent "{Blind}{Home}"
-e::SendEvent "{Blind}{End}"
+w::SendInput "{Blind}{Up}"
+a::SendInput "{Blind}{Left}"
+s::SendInput "{Blind}{Down}"
+d::SendInput "{Blind}{Right}"
+q::SendInput "{Blind}{Home}"
+e::SendInput "{Blind}{End}"
 
 ; WASD Mouse (Space + Key)
 Space & w::SetTimer MoveMouseTick, 10
@@ -407,195 +367,21 @@ Space & e::Click "WheelDown"
 ; 			MIRROR KEYS
 ; =========================================================
 MirrorSend(this_key) {
-	; Uses Blind mode to send the key with any currently held modifiers.
-	; Uses Send for better speed/stability during rapid key presses.
-	Send("{Blind}" . this_key)
+	; Uses SendInput for high performance and stability during rapid key presses.
+	SendInput("{Blind}" . this_key)
 }
 
 
 Space Up:: {
     if (A_PriorKey = "Space") {
-        SendEvent("{Space}")
+        SendInput("{Space}")
     }
 }
 
-#HotIf MirrorStyle == "Standard" && MirrorMode && !NavMode
-; Left half ===============================================
-; Function row --------------------------------------------
-Space & F1:: MirrorSend("{F12}")
-Space & F2:: MirrorSend("{F11}")
-Space & F3:: MirrorSend("{F10}")
-Space & F4:: MirrorSend("{F9}")
-Space & F5:: MirrorSend("{F8}")
-Space & F6:: MirrorSend("{F7}")
-
-; Number row ----------------------------------------------
-Space & `:: MirrorSend("-")
-Space & 1:: MirrorSend("0")
-Space & 2:: MirrorSend("9")
-Space & 3:: MirrorSend("8")
-Space & 4:: MirrorSend("7")
-Space & 5:: MirrorSend("6")
-
-; Top row -------------------------------------------------
-Space & Tab:: MirrorSend("{Backspace}")
-Space & q:: MirrorSend("p")
-Space & w:: MirrorSend("o")
-Space & e:: MirrorSend("i")
-Space & r:: MirrorSend("u")
-Space & t:: MirrorSend("y")
-
-Capslock:: {
-	SetCapsLockState "Off"
-	SendEvent("{Enter}")
-}
-
-; Middle row ----------------------------------------------
-Space & Capslock:: MirrorSend("'")
-Space & a:: MirrorSend(";")
-Space & s:: MirrorSend("l")
-Space & d:: MirrorSend("k")
-Space & f:: MirrorSend("j")
-Space & g:: MirrorSend("h")
-
-; Bottom row ----------------------------------------------
-Space & z:: MirrorSend("/")
-Space & x:: MirrorSend(".")
-Space & c:: MirrorSend(",")
-Space & v:: MirrorSend("m")
-
-; Right half ==============================================
-; Function row --------------------------------------------
-Space & F7:: MirrorSend("{F6}")
-Space & F8:: MirrorSend("{F5}")
-Space & F9:: MirrorSend("{F4}")
-Space & F10:: MirrorSend("{F3}")
-Space & F11:: MirrorSend("{F2}")
-Space & F12:: MirrorSend("{F1}")
-
-; Number row ----------------------------------------------
-Space & =:: MirrorSend("``")
-Space & -:: MirrorSend("``")
-Space & 0:: MirrorSend("1")
-Space & 9:: MirrorSend("2")
-Space & 8:: MirrorSend("3")
-Space & 7:: MirrorSend("4")
-Space & 6:: MirrorSend("5")
-
-; Top row -------------------------------------------------
-Space & \:: MirrorSend("{Tab}")
-Space & ]:: MirrorSend("{Tab}")
-Space & [:: MirrorSend("{Tab}")
-Space & p:: MirrorSend("q")
-Space & o:: MirrorSend("w")
-Space & i:: MirrorSend("e")
-Space & u:: MirrorSend("r")
-Space & y:: MirrorSend("t")
-
-; Middle row ----------------------------------------------
-Space & `;:: MirrorSend("a")
-Space & l:: MirrorSend("s")
-Space & k:: MirrorSend("d")
-Space & j:: MirrorSend("f")
-Space & h:: MirrorSend("g")
-
-; Bottom row ----------------------------------------------
-Space & /:: MirrorSend("z")
-Space & .:: MirrorSend("x")
-Space & ,:: MirrorSend("c")
-Space & m:: MirrorSend("v")
-Space & n:: MirrorSend("b")
-Space & b:: MirrorSend("n")
-#HotIf
-
-#HotIf MirrorStyle == "Overlapping" && MirrorMode && !NavMode
-; Left half (Overlapping Style) ===========================
-; Function row (Same as standard for now) -----------------
-Space & F1:: MirrorSend("{F12}")
-Space & F2:: MirrorSend("{F11}")
-Space & F3:: MirrorSend("{F10}")
-Space & F4:: MirrorSend("{F9}")
-Space & F5:: MirrorSend("{F8}")
-Space & F6:: MirrorSend("{F7}")
-
-; Number row ----------------------------------------------
-Space & `:: MirrorSend("-")
-Space & 1:: MirrorSend("6")
-Space & 2:: MirrorSend("7")
-Space & 3:: MirrorSend("8")
-Space & 4:: MirrorSend("9")
-Space & 5:: MirrorSend("0")
-
-; Top row -------------------------------------------------
-Space & Tab:: MirrorSend("{Backspace}")
-Space & q:: MirrorSend("y")
-Space & w:: MirrorSend("u")
-Space & e:: MirrorSend("i")
-Space & r:: MirrorSend("o")
-Space & t:: MirrorSend("p")
-
-Capslock:: {
-	SetCapsLockState "Off"
-	SendEvent("{Enter}")
-}
-
-; Middle row ----------------------------------------------
-Space & Capslock:: MirrorSend("'")
-Space & a:: MirrorSend("h")
-Space & s:: MirrorSend("j")
-Space & d:: MirrorSend("k")
-Space & f:: MirrorSend("l")
-Space & g:: MirrorSend("'")
-
-; Bottom row ----------------------------------------------
-Space & z:: MirrorSend("n")
-Space & x:: MirrorSend("m")
-Space & c:: MirrorSend(",")
-Space & v:: MirrorSend(".")
-Space & b:: MirrorSend("/")
-
-; Right half (Overlapping Style) ==========================
-; Function row --------------------------------------------
-Space & F7:: MirrorSend("{F6}")
-Space & F8:: MirrorSend("{F5}")
-Space & F9:: MirrorSend("{F4}")
-Space & F10:: MirrorSend("{F3}")
-Space & F11:: MirrorSend("{F2}")
-Space & F12:: MirrorSend("{F1}")
-
-; Number row ----------------------------------------------
-Space & =:: MirrorSend("``")
-Space & -:: MirrorSend("``")
-Space & 0:: MirrorSend("5")
-Space & 9:: MirrorSend("4")
-Space & 8:: MirrorSend("3")
-Space & 7:: MirrorSend("2")
-Space & 6:: MirrorSend("1")
-
-; Top row -------------------------------------------------
-Space & \:: MirrorSend("{Tab}")
-Space & ]:: MirrorSend("{Tab}")
-Space & [:: MirrorSend("{Tab}")
-Space & p:: MirrorSend("t")
-Space & o:: MirrorSend("r")
-Space & i:: MirrorSend("e")
-Space & u:: MirrorSend("w")
-Space & y:: MirrorSend("q")
-
-; Middle row ----------------------------------------------
-Space & `;:: MirrorSend("g")
-Space & l:: MirrorSend("f")
-Space & k:: MirrorSend("d")
-Space & j:: MirrorSend("s")
-Space & h:: MirrorSend("a")
-
-; Bottom row ----------------------------------------------
-Space & /:: MirrorSend("b")
-Space & .:: MirrorSend("v")
-Space & ,:: MirrorSend("c")
-Space & m:: MirrorSend("x")
-Space & n:: MirrorSend("z")
-#HotIf
+#HotIf MirrorMode && !NavMode
+; =========================================================
+; 			HALMAK MIRRORING
+; =========================================================
 
 
 ; =========================================================
@@ -679,7 +465,6 @@ Tray.Add("Reopen mirror &map", Keyboard_Display)
 Tray.Add("Enable &Mirroring", ToggleMirrorMode)
 Tray.Add() ;Line break
 Tray.Add("Switch &Navigation Style", ToggleNavStyle)
-Tray.Add("Switch &Mirror Style", ToggleMirrorStyle)
 Tray.Add("Nav Toggle Key: " . NavToggleKey, SwitchNavToggleKey)
 
 ; Initialize Tray Menu State
@@ -689,7 +474,6 @@ else
 	Tray.Uncheck("Enable &Mirroring")
 
 Tray.Rename("Switch &Navigation Style", NavStyle == "New" ? "Use &New Navigation (ESDF)" : "Use &Old Navigation (WASD)")
-Tray.Rename("Switch &Mirror Style", "Mirror Style: " . MirrorStyle)
 
 Tray.Add() ;Line break
 Tray.Add("View project on &Github", Launch_Github)
@@ -917,212 +701,11 @@ StreamWrite(INI_section, INI_key, INI_value) {
 ; }
 
 
-#HotIf MirrorStyle == "Hybrid" && MirrorMode && !NavMode
-; Left half (Hybrid) ======================================
-; Function row (Standard) ---------------------------------
-Space & F1:: MirrorSend("{F12}")
-Space & F2:: MirrorSend("{F11}")
-Space & F3:: MirrorSend("{F10}")
-Space & F4:: MirrorSend("{F9}")
-Space & F5:: MirrorSend("{F8}")
-Space & F6:: MirrorSend("{F7}")
-
-; Number row (Overlapping) --------------------------------
-Space & `:: MirrorSend("-")
-Space & 1:: MirrorSend("6")
-Space & 2:: MirrorSend("7")
-Space & 3:: MirrorSend("8")
-Space & 4:: MirrorSend("9")
-Space & 5:: MirrorSend("0")
-
-; Top row (Overlapping) -----------------------------------
-Space & Tab:: MirrorSend("{Backspace}")
-Space & q:: MirrorSend("y")
-Space & w:: MirrorSend("u")
-Space & e:: MirrorSend("i")
-Space & r:: MirrorSend("o")
-Space & t:: MirrorSend("p")
-
-Capslock:: {
-	SetCapsLockState "Off"
-	SendEvent("{Enter}")
-}
-
-; Middle row (Overlapping) --------------------------------
-Space & Capslock:: MirrorSend("'")
-Space & a:: MirrorSend("h")
-Space & s:: MirrorSend("j")
-Space & d:: MirrorSend("k")
-Space & f:: MirrorSend("l")
-Space & g:: MirrorSend("'")
-
-; Bottom row (Standard) -----------------------------------
-Space & z:: MirrorSend("/")
-Space & x:: MirrorSend(".")
-Space & c:: MirrorSend(",")
-Space & v:: MirrorSend("m")
-Space & b:: MirrorSend("n")
-
-; Right half (Hybrid) =====================================
-; Function row (Standard) ---------------------------------
-Space & F7:: MirrorSend("{F6}")
-Space & F8:: MirrorSend("{F5}")
-Space & F9:: MirrorSend("{F4}")
-Space & F10:: MirrorSend("{F3}")
-Space & F11:: MirrorSend("{F2}")
-Space & F12:: MirrorSend("{F1}")
-
-; Number row (Overlapping) --------------------------------
-Space & =:: MirrorSend("``")
-Space & -:: MirrorSend("``")
-Space & 0:: MirrorSend("5")
-Space & 9:: MirrorSend("4")
-Space & 8:: MirrorSend("3")
-Space & 7:: MirrorSend("2")
-Space & 6:: MirrorSend("1")
-
-; Top row (Overlapping) -----------------------------------
-Space & \:: MirrorSend("{Tab}")
-Space & ]:: MirrorSend("{Tab}")
-Space & [:: MirrorSend("{Tab}")
-Space & p:: MirrorSend("t")
-Space & o:: MirrorSend("r")
-Space & i:: MirrorSend("e")
-Space & u:: MirrorSend("w")
-Space & y:: MirrorSend("q")
-
-; Middle row (Overlapping) --------------------------------
-Space & `;:: MirrorSend("g")
-Space & l:: MirrorSend("f")
-Space & k:: MirrorSend("d")
-Space & j:: MirrorSend("s")
-Space & h:: MirrorSend("a")
-
-; Bottom row (Standard) -----------------------------------
-Space & /:: MirrorSend("z")
-Space & .:: MirrorSend("x")
-Space & ,:: MirrorSend("c")
-Space & m:: MirrorSend("v")
-Space & n:: MirrorSend("b")
-#HotIf
-
+; =========================================================
 
 ; =========================================================
 
-#HotIf MirrorStyle == "Dvorak" && MirrorMode && !NavMode
-
-; --- Function Keys (Standard Mirror) ---
-Space & F1:: MirrorSend("{F12}")
-Space & F2:: MirrorSend("{F11}")
-Space & F3:: MirrorSend("{F10}")
-Space & F4:: MirrorSend("{F9}")
-Space & F5:: MirrorSend("{F8}")
-Space & F6:: MirrorSend("{F7}")
-Space & F7:: MirrorSend("{F6}")
-Space & F8:: MirrorSend("{F5}")
-Space & F9:: MirrorSend("{F4}")
-Space & F10:: MirrorSend("{F3}")
-Space & F11:: MirrorSend("{F2}")
-Space & F12:: MirrorSend("{F1}")
-
-; --- Row 1 (Numbers) - Standard Mirror ---
-Space & `:: MirrorSend("=")
-Space & 1:: MirrorSend("0")
-Space & 2:: MirrorSend("9")
-Space & 3:: MirrorSend("8")
-Space & 4:: MirrorSend("7")
-Space & 5:: MirrorSend("6")
-Space & 6:: MirrorSend("5")
-Space & 7:: MirrorSend("4")
-Space & 8:: MirrorSend("3")
-Space & 9:: MirrorSend("2")
-Space & 0:: MirrorSend("1")
-Space & -:: MirrorSend("``")
-Space & =:: MirrorSend("``")
-
-; --- Row 2 (Top) ---
-; Normal (Alpha Remaps Only)
-; r handled by Global Chords
-t::y
-y::f
-u::g
-i::c
-o::r
-p::l
-
-; Mirror
-Space & Tab:: MirrorSend("{Backspace}")
-Space & q:: MirrorSend("l")
-Space & w:: MirrorSend("r")
-Space & e:: MirrorSend("c")
-Space & r:: MirrorSend("g")
-Space & t:: MirrorSend("f")
-Space & y:: MirrorSend("y")
-Space & u:: MirrorSend("p")
-Space & i:: MirrorSend("e") ; Fallback (Standard)
-Space & o:: MirrorSend("w") ; Fallback (Standard)
-Space & p:: MirrorSend("q") ; Fallback (Standard)
-Space & [:: MirrorSend("{Tab}")
-Space & ]:: MirrorSend("{Tab}")
-Space & \:: MirrorSend("{Tab}")
-
-; --- Row 3 (Home) ---
-; Normal (Alpha Remaps Only)
-; s, d, f handled by Global Chords
-g::i
-h::d
-j::h
-k::t
-l::n
-`;::s
-
-; Mirror
-Capslock:: {
-	SetCapsLockState "Off"
-	SendEvent("{Enter}")
-}
-Space & Capslock:: MirrorSend("'")
-Space & a:: MirrorSend("s")
-Space & s:: MirrorSend("n")
-Space & d:: MirrorSend("t")
-Space & f:: MirrorSend("h")
-Space & g:: MirrorSend("d")
-Space & h:: MirrorSend("i")
-Space & j:: MirrorSend("u")
-Space & k:: MirrorSend("e")
-Space & l:: MirrorSend("o")
-Space & `;:: MirrorSend("a")
-Space & ':: SendEvent("{Enter}")
-
-; --- Row 4 (Bottom) ---
-; Normal (Alpha Remaps Only)
-x::q
-c::j
-v::k
-b::x
-n::b
-,::w
-.::v
-/::z
-
-; Mirror
-Space & z:: MirrorSend("z")
-Space & x:: MirrorSend("v")
-Space & c:: MirrorSend("w")
-Space & v:: MirrorSend("m")
-Space & b:: MirrorSend("x")
-Space & n:: MirrorSend("b")
-Space & m:: MirrorSend("k")
-Space & ,:: MirrorSend("j")
-Space & .:: MirrorSend("q")
-Space & /:: MirrorSend("z") ; Fallback (Standard)
-
-#HotIf
-
-
-; =========================================================
-
-#HotIf MirrorStyle == "Halmak" && MirrorMode && !NavMode
+#HotIf MirrorMode && !NavMode
 
 ; --- Base Layer (Standard Tap) ---
 ; q, w, e, r, a, s, d, f handled by Global Chords restore logic
@@ -1159,16 +742,6 @@ w & q::PerformChord("w", "q", "{Blind}{Home}", "WheelUp")
 ; End / Wheel Down (ER)
 e & r::PerformChord("e", "r", "{Blind}{End}", "WheelDown")
 r & e::PerformChord("r", "e", "{Blind}{End}", "WheelDown")
-
-; --- Halmak Restore Typing (Explicitly Defined) ---
-w::Send "{Blind}" . GetRemappedKey("w")
-e::Send "{Blind}" . GetRemappedKey("e")
-a::Send "{Blind}" . GetRemappedKey("a")
-q::Send "{Blind}" . GetRemappedKey("q")
-s::Send "{Blind}" . GetRemappedKey("s")
-d::Send "{Blind}" . GetRemappedKey("d")
-f::Send "{Blind}" . GetRemappedKey("f")
-r::Send "{Blind}" . GetRemappedKey("r")
 
 
 ; --- Space Layer (Hold Space) ---
@@ -1207,7 +780,7 @@ Space & Capslock:: MirrorSend("'")
 
 Capslock:: {
 	SetCapsLockState "Off"
-	SendEvent("{Enter}")
+	SendInput("{Enter}")
 }
 
 #HotIf
@@ -1220,32 +793,18 @@ Capslock:: {
 
 ; --- Helper Function ---
 GetRemappedKey(key) {
-    Global MirrorStyle
-    if (MirrorStyle == "Halmak") {
-        switch key {
-            case "q": return "n"
-            case "w": return "s"
-            case "e": return "t"
-            case "r": return "h"
-            case "a": return "e"
-            case "s": return "a"
-            case "d": return "i"
-            case "f": return "o"
-        }
-    } else if (MirrorStyle == "Dvorak") {
-        switch key {
-            case "q": return "'"
-            case "w": return ","
-            case "e": return "."
-            case "r": return "p"
-            case "a": return "a"
-            case "s": return "o"
-            case "d": return "e"
-            case "f": return "u"
-            case "t": return "y" ; Included for completeness if t is used in future chords
-        }
+    ; Optimized for Halmak
+    switch key {
+        case "q": return "n"
+        case "w": return "s"
+        case "e": return "t"
+        case "r": return "h"
+        case "a": return "e"
+        case "s": return "a"
+        case "d": return "i"
+        case "f": return "o"
     }
-    return key ; Standard/Overlapping/Hybrid or default passthrough
+    return key
 }
 
 ChordAction(KeyAction, MouseAction) {
@@ -1265,39 +824,14 @@ ChordAction(KeyAction, MouseAction) {
             Click "WheelDown"
     } else {
         ; Keyboard Mode
-        SendEvent KeyAction
+        SendInput KeyAction
     }
 }
 
 ; --- Chord Loops (Repeat while held) ---
 PerformChord(Key1, Key2, KeyAct, MouseAct) {
-    Global KeyPressTimes
-    t1 := KeyPressTimes.Has(Key1) ? KeyPressTimes[Key1] : 0
-    t2 := KeyPressTimes.Has(Key2) ? KeyPressTimes[Key2] : 0
-    
-    ; Logic:
-    ; 1. Simultaneous: Pressed within 100ms of each other -> Chord
-    ; 2. Modifier: First key held for > 300ms -> Chord
-    ; 3. Rollover: Gap between 100-300ms -> Typing (Preserves Halmak digraphs like EA)
-    
-    diff := Abs(t1 - t2)
-    firstKeyTime := (t1 < t2 && t1 != 0) ? t1 : t2
-    heldDuration := A_TickCount - firstKeyTime
-    
-    isChord := False
-    if (diff < 100) {
-        isChord := True
-    } else if (heldDuration > 300) {
-        isChord := True
-    }
-    
-    if !isChord {
-        ; Typing Rollover
-        SendEvent "{Blind}" . GetRemappedKey(Key1)
-        SendEvent "{Blind}" . GetRemappedKey(Key2)
-        return
-    }
-
+    ; Instant Combo Logic: Any overlapping press is a chord.
+    Critical
     ChordAction(KeyAct, MouseAct) ; First action
     Sleep 200 ; Initial delay
     while (GetKeyState(Key1, "P") && GetKeyState(Key2, "P")) {
@@ -1334,14 +868,14 @@ r & e::PerformChord("r", "e", "{Blind}{End}", "WheelDown")
 
 ; --- Restore Typing (Prefix Release) ---
 ; Only fire if the key was PRESSED and RELEASED without triggering a chord.
-w::Send "{Blind}" . GetRemappedKey("w")
-e::Send "{Blind}" . GetRemappedKey("e")
-a::Send "{Blind}" . GetRemappedKey("a")
-q::Send "{Blind}" . GetRemappedKey("q")
-s::Send "{Blind}" . GetRemappedKey("s")
-d::Send "{Blind}" . GetRemappedKey("d")
-f::Send "{Blind}" . GetRemappedKey("f")
-r::Send "{Blind}" . GetRemappedKey("r")
+w::SendInput "{Blind}" . GetRemappedKey("w")
+e::SendInput "{Blind}" . GetRemappedKey("e")
+a::SendInput "{Blind}" . GetRemappedKey("a")
+q::SendInput "{Blind}" . GetRemappedKey("q")
+s::SendInput "{Blind}" . GetRemappedKey("s")
+d::SendInput "{Blind}" . GetRemappedKey("d")
+f::SendInput "{Blind}" . GetRemappedKey("f")
+r::SendInput "{Blind}" . GetRemappedKey("r")
 
 #HotIf
 
@@ -1352,7 +886,6 @@ r::Send "{Blind}" . GetRemappedKey("r")
 Global CustomMenuGui := ""
 Global BtnNavStyle := ""
 Global BtnMirrorMode := ""
-Global BtnMirrorStyle := ""
 
 Tray_Handler(wParam, lParam, msg, hwnd) {
     ; 0x205 = WM_RBUTTONUP
@@ -1385,13 +918,8 @@ GetNavText() {
     return (NavStyle == "New" ? "✔ Use New Navigation (ESDF)" : "✔ Use Old Navigation (WASD)")
 }
 
-GetMirrorText() {
-    Global MirrorStyle
-    return "Mirror Style: " . MirrorStyle
-}
-
 Show_Custom_Menu() {
-    Global CustomMenuGui, NavStyle, MirrorStyle, MirrorMode, NavToggleKey, BtnNavStyle, BtnMirrorStyle, BtnMirrorMode
+    Global CustomMenuGui, NavStyle, MirrorMode, NavToggleKey, BtnNavStyle, BtnMirrorMode
     
     if IsObject(CustomMenuGui)
         CustomMenuGui.Destroy()
@@ -1411,10 +939,6 @@ Show_Custom_Menu() {
     ; Navigation Style (Toggle Update)
     BtnNavStyle := CustomMenuGui.Add("Button", BtnStyle, GetNavText())
     BtnNavStyle.OnEvent("Click", (*) => (ToggleNavStyle(), BtnNavStyle.Text := GetNavText()))
-    
-    ; Mirror Style (Toggle Update)
-    BtnMirrorStyle := CustomMenuGui.Add("Button", BtnStyle, GetMirrorText())
-    BtnMirrorStyle.OnEvent("Click", (*) => (ToggleMirrorStyle(), BtnMirrorStyle.Text := GetMirrorText()))
     
     ; Nav Toggle Key (Toggle Update)
     BtnNavToggle := CustomMenuGui.Add("Button", BtnStyle, "Nav Toggle Key: " . NavToggleKey)
