@@ -15,7 +15,9 @@ if not A_IsAdmin {
 }
 #SingleInstance Force ; Prevents multiple versions of script running
 #UseHook ; Helps ensure modifier keys don't remain pressed after hotkey ends
+#MaxThreadsPerHotkey 1 ; Prevent thread buildup during rapid input
 A_MaxHotkeysPerInterval := 1000 ; Increased for stability during rapid input
+A_MenuMaskKey := "vkE8" ; Prevent Start Menu/Menu bar focus during rapid prefix key use
 ProcessSetPriority "High" ; Ensures the script stays responsive under load
 SetKeyDelay -1, 0 ; Increases reliability of SendInput by reducing delays
 InstallKeybdHook ; Explicitly install the keyboard hook for reliability
@@ -811,6 +813,9 @@ GetRemappedKey(key) {
     return key
 }
 
+; --- Chord Repetition Logic ---
+Global ChordState := Map() ; Track active timers to prevent overlap
+
 ChordAction(KeyAction, MouseAction) {
     if GetKeyState("Space", "P") {
         ; Mouse Mode
@@ -835,12 +840,25 @@ ChordAction(KeyAction, MouseAction) {
 ; --- Chord Loops (Repeat while held) ---
 PerformChord(Key1, Key2, KeyAct, MouseAct) {
     ; Instant Combo Logic: Any overlapping press is a chord.
-    Critical
+    ChordID := Key1 . Key2
+    if ChordState.Has(ChordID)
+        return ; Already running
+    
     ChordAction(KeyAct, MouseAct) ; First action
-    Sleep 200 ; Initial delay
-    while (GetKeyState(Key1, "P") && GetKeyState(Key2, "P")) {
+    
+    ; Setup repetition timer
+    TimerFunc := () => ChordTimerCallback(Key1, Key2, KeyAct, MouseAct, ChordID)
+    ChordState[ChordID] := TimerFunc
+    SetTimer TimerFunc, 200 ; Initial delay
+}
+
+ChordTimerCallback(Key1, Key2, KeyAct, MouseAct, ChordID) {
+    if (GetKeyState(Key1, "P") && GetKeyState(Key2, "P")) {
         ChordAction(KeyAct, MouseAct)
-        Sleep 50 ; Repeat rate
+        SetTimer ChordState[ChordID], 50 ; Repetition rate
+    } else {
+        SetTimer ChordState[ChordID], 0 ; Stop
+        ChordState.Delete(ChordID)
     }
 }
 
@@ -872,14 +890,14 @@ r & e::PerformChord("r", "e", "{Blind}{End}", "WheelDown")
 
 ; --- Restore Typing (Prefix Release) ---
 ; Only fire if the key was PRESSED and RELEASED without triggering a chord.
-w::SendInput "{Blind}" . GetRemappedKey("w")
-e::SendInput "{Blind}" . GetRemappedKey("e")
-a::SendInput "{Blind}" . GetRemappedKey("a")
-q::SendInput "{Blind}" . GetRemappedKey("q")
-s::SendInput "{Blind}" . GetRemappedKey("s")
-d::SendInput "{Blind}" . GetRemappedKey("d")
-f::SendInput "{Blind}" . GetRemappedKey("f")
-r::SendInput "{Blind}" . GetRemappedKey("r")
+$w::SendInput "{Blind}" . GetRemappedKey("w")
+$e::SendInput "{Blind}" . GetRemappedKey("e")
+$a::SendInput "{Blind}" . GetRemappedKey("a")
+$q::SendInput "{Blind}" . GetRemappedKey("q")
+$s::SendInput "{Blind}" . GetRemappedKey("s")
+$d::SendInput "{Blind}" . GetRemappedKey("d")
+$f::SendInput "{Blind}" . GetRemappedKey("f")
+$r::SendInput "{Blind}" . GetRemappedKey("r")
 
 #HotIf
 
