@@ -15,18 +15,30 @@ if not A_IsAdmin {
 }
 #SingleInstance Force ; Prevents multiple versions of script running
 #UseHook ; Helps ensure modifier keys don't remain pressed after hotkey ends
-#MaxThreadsPerHotkey 1 ; Prevent thread buildup during rapid input
-A_MaxHotkeysPerInterval := 2000 ; Increased for stability during rapid input
+#MaxThreadsBuffer On ; Queue hotkeys during execution to prevent bleeding
+#MaxThreadsPerHotkey 2 ; Allow overlap for rapid repeats
+A_MaxHotkeysPerInterval := 4000 ; Increased for stability during rapid input
 A_MenuMaskKey := "vkE8" ; Prevent Start Menu/Menu bar focus during rapid prefix key use
 ProcessSetPriority "High" ; Ensures the script stays responsive under load
 
-; --- Key State Tracking (High Reliability) ---
+; --- Global State ---
+Global MirrorActionOccurred := False ; Track if space was used as a modifier
+Global LastMirrorActionTime := 0     ; Timestamp of last mirror/chord action
 Global KeyTracker := Map()
 KeyTracker.Default := 0
+Global ActiveChords := Map() ; Track active chords for the master timer
+Global CustomMenuGui := ""
+Global BtnNavStyle := ""
+Global BtnMirrorMode := ""
+
 Global StateHook := InputHook("V L0 I1") ; I1 to see keys caught by other hotkeys
 StateHook.KeyOpt("{All}", "N")
-StateHook.OnKeyDown := (ih, vk, sc) => (KeyTracker[vk] := 1)
-StateHook.OnKeyUp := (ih, vk, sc) => (KeyTracker[vk] := 0)
+StateHook.OnKeyDown := (ih, vk, sc) => (
+    Critical(), 
+    KeyTracker[vk] := 1,
+    (vk == 0x20) ? (Global MirrorActionOccurred := False) : ""
+)
+StateHook.OnKeyUp := (ih, vk, sc) => (Critical(), KeyTracker[vk] := 0)
 StateHook.Start()
 SetKeyDelay -1, 0 ; Increases reliability of SendInput by reducing delays
 InstallKeybdHook ; Explicitly install the keyboard hook for reliability
@@ -256,20 +268,20 @@ MoveMouseTick() {
 #HotIf NavMode && MouseMode
 
 ; Shared Keys
-Space & Tab::SendInput("{Blind}{Backspace}")
+$*Space & Tab::SendInput("{Blind}{Backspace}")
 
 ; Capslock (Left Click / Drag)
-Capslock:: {
+$*Capslock:: {
     Click "Down"
     KeyWait "Capslock"
     Click "Up"
 }
 ; Space + Capslock (Enter)
-Space & Capslock::SendInput("{Enter}")
+$*Space & Capslock::SendInput("{Enter}")
 
 ; Shift (Right Click)
-LShift::Click "Right"
-RShift::Click "Right"
+$*LShift::Click "Right"
+$*RShift::Click "Right"
 
 #HotIf
 
@@ -280,8 +292,8 @@ RShift::Click "Right"
 *d::SetTimer MoveMouseTick, 10
 *f::SetTimer MoveMouseTick, 10
 ; ESDF Wheel (Direct)
-w::Click "WheelUp"
-r::Click "WheelDown"
+$*w::Click "WheelUp"
+$*r::Click "WheelDown"
 
 ; ESDF Keyboard Actions (Space + Key)
 Space & e::SendInput "{Blind}{Up}"
@@ -299,8 +311,8 @@ Space & r::SendInput "{Blind}{End}"
 *s::SetTimer MoveMouseTick, 10
 *d::SetTimer MoveMouseTick, 10
 ; WASD Wheel (Direct)
-q::Click "WheelUp"
-e::Click "WheelDown"
+$*q::Click "WheelUp"
+$*e::Click "WheelDown"
 
 ; WASD Keyboard Actions (Space + Key)
 Space & w::SendInput "{Blind}{Up}"
@@ -319,34 +331,34 @@ Space & e::SendInput "{Blind}{End}"
 #HotIf NavMode && !MouseMode
 
 ; Shared Keys
-Space & Tab::SendInput("{Blind}{Backspace}")
+$*Space & Tab::SendInput("{Blind}{Backspace}")
 
 ; Capslock (Enter)
-Capslock::SendInput("{Enter}")
+$*Capslock::SendInput("{Enter}")
 ; Space + Capslock (Left Click / Drag)
-Space & Capslock:: {
+$*Space & Capslock:: {
     Click "Down"
     KeyWait "Capslock"
     Click "Up"
 }
 
 ; Space + Shift (Right Click)
-Space & LShift::Click "Right"
-Space & RShift::Click "Right"
+$*Space & LShift::Click "Right"
+$*Space & RShift::Click "Right"
 
 ; x::Delete (Retained from original)
-x::Delete
+$*x::Delete
 
 #HotIf
 
 #HotIf NavMode && !MouseMode && NavStyle == "New"
 ; ESDF Keyboard Actions (Direct)
-e::SendInput "{Blind}{Up}"
-s::SendInput "{Blind}{Left}"
-d::SendInput "{Blind}{Down}"
-f::SendInput "{Blind}{Right}"
-w::SendInput "{Blind}{Home}"
-r::SendInput "{Blind}{End}"
+$*e::SendInput "{Blind}{Up}"
+$*s::SendInput "{Blind}{Left}"
+$*d::SendInput "{Blind}{Down}"
+$*f::SendInput "{Blind}{Right}"
+$*w::SendInput "{Blind}{Home}"
+$*r::SendInput "{Blind}{End}"
 
 ; ESDF Mouse (Space + Key)
 Space & e::SetTimer MoveMouseTick, 10
@@ -360,12 +372,12 @@ Space & r::Click "WheelDown"
 
 #HotIf NavMode && !MouseMode && NavStyle == "Old"
 ; WASD Keyboard Actions (Direct)
-w::SendInput "{Blind}{Up}"
-a::SendInput "{Blind}{Left}"
-s::SendInput "{Blind}{Down}"
-d::SendInput "{Blind}{Right}"
-q::SendInput "{Blind}{Home}"
-e::SendInput "{Blind}{End}"
+$*w::SendInput "{Blind}{Up}"
+$*a::SendInput "{Blind}{Left}"
+$*s::SendInput "{Blind}{Down}"
+$*d::SendInput "{Blind}{Right}"
+$*q::SendInput "{Blind}{Home}"
+$*e::SendInput "{Blind}{End}"
 
 ; WASD Mouse (Space + Key)
 Space & w::SetTimer MoveMouseTick, 10
@@ -382,18 +394,18 @@ Space & e::Click "WheelDown"
 ; 			MIRROR KEYS
 ; =========================================================
 MirrorSend(this_key) {
+	Global MirrorActionOccurred := True, LastMirrorActionTime := A_TickCount
 	; Uses SendInput for high performance and stability during rapid key presses.
 	SendInput("{Blind}" . this_key)
 }
 
 
 Space Up:: {
-    if (A_PriorKey = "Space") {
+    if (!MirrorActionOccurred && A_TickCount - LastMirrorActionTime > 50) {
         SendInput("{Space}")
     }
 }
 
-#HotIf MirrorMode && !NavMode
 ; =========================================================
 ; 			HALMAK MIRRORING
 ; =========================================================
@@ -717,23 +729,19 @@ StreamWrite(INI_section, INI_key, INI_value) {
 
 
 ; =========================================================
-
+; 			HALMAK MIRRORING & CHORDS
 ; =========================================================
+#HotIf !NavMode && MirrorMode
 
-#HotIf MirrorMode && !NavMode
+; --- Base Layer (Halmak Remappings) ---
+$*t::MirrorSend("r")
+$*g::MirrorSend("u")
+$*z::MirrorSend("l")
+$*x::MirrorSend("d")
+$*c::MirrorSend("n")
+$*v::MirrorSend("m")
 
-; --- Base Layer (Standard Tap) ---
-; q, w, e, r, a, s, d, f handled by Global Chords restore logic
-t::r
-
-g::u
-
-z::l
-x::d
-c::n
-v::m
-
-; --- Halmak Chords (Explicitly Defined) ---
+; --- Halmak Chords ---
 ; Up (WE)
 w & e::PerformChord("w", "e", "{Blind}{Up}", "Up")
 e & w::PerformChord("e", "w", "{Blind}{Up}", "Up")
@@ -757,7 +765,6 @@ w & q::PerformChord("w", "q", "{Blind}{Home}", "WheelUp")
 ; End / Wheel Down (ER)
 e & r::PerformChord("e", "r", "{Blind}{End}", "WheelDown")
 r & e::PerformChord("r", "e", "{Blind}{End}", "WheelDown")
-
 
 ; --- Space Layer (Hold Space) ---
 Space & q:: MirrorSend("b")
@@ -778,7 +785,6 @@ Space & c:: MirrorSend("g")
 Space & v:: MirrorSend("v")
 Space & b:: MirrorSend("c")
 
-; --- Numbers/Function Keys (Standard Mirror Fallback for now) ---
 Space & `:: MirrorSend("-")
 Space & 1:: MirrorSend("0")
 Space & 2:: MirrorSend("9")
@@ -796,22 +802,28 @@ Space & F6:: MirrorSend("{F7}")
 Space & Tab:: MirrorSend("{Backspace}")
 Space & Capslock:: MirrorSend("'")
 
-Capslock:: {
+$*Capslock:: {
 	SetCapsLockState "Off"
 	SendInput("{Enter}")
 }
 
+; --- Typing Restore (Prefix Release) ---
+$*q::SendInput "{Blind}" . GetRemappedKey("q")
+$*w::SendInput "{Blind}" . GetRemappedKey("w")
+$*e::SendInput "{Blind}" . GetRemappedKey("e")
+$*r::SendInput "{Blind}" . GetRemappedKey("r")
+$*a::SendInput "{Blind}" . GetRemappedKey("a")
+$*s::SendInput "{Blind}" . GetRemappedKey("s")
+$*d::SendInput "{Blind}" . GetRemappedKey("d")
+$*f::SendInput "{Blind}" . GetRemappedKey("f")
+
 #HotIf
 
-
 ; =========================================================
-; GLOBAL CHORDS (Enabled when NOT in NavMode and MirrorMode is ON)
+; 			CHORD ENGINE & HELPERS
 ; =========================================================
-#HotIf !NavMode && MirrorMode
 
-; --- Helper Function ---
 GetRemappedKey(key) {
-    ; Optimized for Halmak
     switch key {
         case "q": return "c"
         case "w": return "s"
@@ -825,12 +837,9 @@ GetRemappedKey(key) {
     return key
 }
 
-; --- Chord Repetition Logic ---
-Global ActiveChords := Map() ; Track active chords for the master timer
-
 ChordAction(KeyAction, MouseAction) {
     if GetKeyState("Space", "P") {
-        ; Mouse Mode
+        Global MirrorActionOccurred := True, LastMirrorActionTime := A_TickCount
         if (MouseAction == "Up")
             MouseMove 0, -20, 0, "R"
         else if (MouseAction == "Down")
@@ -844,38 +853,33 @@ ChordAction(KeyAction, MouseAction) {
         else if (MouseAction == "WheelDown")
             Click "WheelDown"
     } else {
-        ; Keyboard Mode
         SendInput KeyAction
     }
 }
 
-; --- Chord Loops (Managed by Master Timer) ---
 PerformChord(Key1, Key2, KeyAct, MouseAct) {
-    ; Normalize ID: Sort keys alphabetically so 'we' and 'ew' share the same entry.
+    Critical()
     if StrCompare(Key1, Key2) < 0
         ChordID := Key1 . Key2
     else
         ChordID := Key2 . Key1
 
     if ActiveChords.Has(ChordID)
-        return ; Already being processed
+        return
     
-    ChordAction(KeyAct, MouseAct) ; First action immediately
-    
-    ; Add to processing queue for repetition
+    ChordAction(KeyAct, MouseAct)
     ActiveChords[ChordID] := {k1:Key1, k2:Key2, act:KeyAct, mAct:MouseAct, count:0}
-    
     SetTimer ChordMasterTick, 50
 }
 
 ChordMasterTick() {
+    Critical()
     if ActiveChords.Count == 0 {
-        SetTimer , 0 ; Stop timer if no chords are active
+        SetTimer , 0
         return
     }
     
     for ID, Data in ActiveChords.Clone() {
-        ; Use KeyTracker (InputHook) for physical release detection
         vk1 := GetKeyVK(Data.k1)
         vk2 := GetKeyVK(Data.k2)
         
@@ -885,71 +889,25 @@ ChordMasterTick() {
         }
         
         Data.count += 1
-        if (Data.count >= 4) { ; ~200ms initial delay (4 * 50ms)
+        if (Data.count >= 4) {
             ChordAction(Data.act, Data.mAct)
         }
     }
 }
 
-; --- Mappings ---
-
-; Up (WE)
-w & e::PerformChord("w", "e", "{Blind}{Up}", "Up")
-e & w::PerformChord("e", "w", "{Blind}{Up}", "Up")
-
-; Down (SD)
-s & d::PerformChord("s", "d", "{Blind}{Down}", "Down")
-d & s::PerformChord("d", "s", "{Blind}{Down}", "Down")
-
-; Left (AS)
-a & s::PerformChord("a", "s", "{Blind}{Left}", "Left")
-s & a::PerformChord("s", "a", "{Blind}{Left}", "Left")
-
-; Right (DF)
-d & f::PerformChord("d", "f", "{Blind}{Right}", "Right")
-f & d::PerformChord("f", "d", "{Blind}{Right}", "Right")
-
-; Home / Wheel Up (QW)
-q & w::PerformChord("q", "w", "{Blind}{Home}", "WheelUp")
-w & q::PerformChord("w", "q", "{Blind}{Home}", "WheelUp")
-
-; End / Wheel Down (ER)
-e & r::PerformChord("e", "r", "{Blind}{End}", "WheelDown")
-r & e::PerformChord("r", "e", "{Blind}{End}", "WheelDown")
-
-; --- Restore Typing (Prefix Release) ---
-; Only fire if the key was PRESSED and RELEASED without triggering a chord.
-$w::SendInput "{Blind}" . GetRemappedKey("w")
-$e::SendInput "{Blind}" . GetRemappedKey("e")
-$a::SendInput "{Blind}" . GetRemappedKey("a")
-$q::SendInput "{Blind}" . GetRemappedKey("q")
-$s::SendInput "{Blind}" . GetRemappedKey("s")
-$d::SendInput "{Blind}" . GetRemappedKey("d")
-$f::SendInput "{Blind}" . GetRemappedKey("f")
-$r::SendInput "{Blind}" . GetRemappedKey("r")
-
-#HotIf
-
-
 ; =========================================================
 ; CUSTOM TRAY MENU (Non-Blocking)
 ; =========================================================
-Global CustomMenuGui := ""
-Global BtnNavStyle := ""
-Global BtnMirrorMode := ""
 
 Tray_Handler(wParam, lParam, msg, hwnd) {
-    ; 0x205 = WM_RBUTTONUP
     if (lParam == 0x205) {
         Show_Custom_Menu()
-        return 1 ; Suppress standard menu
+        return 1
     }
 }
 
 Menu_LostFocus(wParam, lParam, msg, hwnd) {
-    ; wParam: 0 = Inactive
     if (IsObject(CustomMenuGui) && hwnd == CustomMenuGui.Hwnd && wParam == 0) {
-        ; Destroy menu on focus loss (click outside)
         SetTimer CloseMenuGui, -50 
     }
 }
@@ -983,56 +941,47 @@ Show_Custom_Menu() {
     
     BtnStyle := "w250 h30 Left"
     
-    ; Mirror Mode Toggle
     BtnMirrorMode := CustomMenuGui.Add("Button", BtnStyle, GetMirrorModeText())
     BtnMirrorMode.OnEvent("Click", (*) => (ToggleMirrorMode(), BtnMirrorMode.Text := GetMirrorModeText()))
 
-    ; Navigation Style (Toggle Update)
     BtnNavStyle := CustomMenuGui.Add("Button", BtnStyle, GetNavText())
     BtnNavStyle.OnEvent("Click", (*) => (ToggleNavStyle(), BtnNavStyle.Text := GetNavText()))
     
-    ; Nav Toggle Key (Toggle Update)
     BtnNavToggle := CustomMenuGui.Add("Button", BtnStyle, "Nav Toggle Key: " . NavToggleKey)
     BtnNavToggle.OnEvent("Click", (*) => (SwitchNavToggleKey(), BtnNavToggle.Text := "Nav Toggle Key: " . NavToggleKey))
     
-    CustomMenuGui.Add("Text", "h1 0x10 w250") ; Separator
+    CustomMenuGui.Add("Text", "h1 0x10 w250")
     
     CustomMenuGui.Add("Button", BtnStyle, "View project on Github").OnEvent("Click", (*) => (Launch_Github(), CloseMenuGui()))
     CustomMenuGui.Add("Button", BtnStyle, "Startup Instructions").OnEvent("Click", (*) => (Startup_Instructions(), CloseMenuGui()))
     
-    CustomMenuGui.Add("Text", "h1 0x10 w250") ; Separator
+    CustomMenuGui.Add("Text", "h1 0x10 w250")
     
     IsPaused := A_IsSuspended
     CustomMenuGui.Add("Button", BtnStyle, (IsPaused ? "✔ " : "   ") "Pause Mirror Keys").OnEvent("Click", (*) => (Suspend_Script(), CloseMenuGui()))
     CustomMenuGui.Add("Button", BtnStyle, "Reload").OnEvent("Click", (*) => (Reload(), CloseMenuGui()))
     CustomMenuGui.Add("Button", BtnStyle, "Quit").OnEvent("Click", (*) => (Quit_Script(), CloseMenuGui()))
     
-    ; Add Close Button
     CustomMenuGui.Add("Button", "w250 h20 Center", "Close Menu").OnEvent("Click", (*) => CloseMenuGui())
 
-    ; Positioning logic
     CoordMode "Mouse", "Screen"
     MouseGetPos(&mx, &my)
     
-    CustomMenuGui.Show("Hide AutoSize") ; Calculate dimensions
+    CustomMenuGui.Show("Hide AutoSize")
     CustomMenuGui.GetPos(,, &w, &h)
     
     nx := mx - (w / 2)
-    
-    ; Determine Y (Above if near bottom)
     if (my > A_ScreenHeight / 2) {
         ny := my - h - 15
     } else {
         ny := my + 15
     }
     
-    ; Boundaries
     if (nx < 0)
         nx := 0
     if (nx + w > A_ScreenWidth)
         nx := A_ScreenWidth - w
         
-    ; Show ACTIVE to allow focus tracking
     CustomMenuGui.Show("x" nx " y" ny)
 }
 
