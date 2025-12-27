@@ -840,7 +840,8 @@ ChordAction(KeyAction, MouseAction) {
 ; --- Chord Loops (Repeat while held) ---
 PerformChord(Key1, Key2, KeyAct, MouseAct) {
     ; Normalize ID: Sort keys alphabetically so 'we' and 'ew' share the same timer.
-    if (Key1 < Key2)
+    ; Use StrCompare to avoid TypeError in AHK v2.
+    if StrCompare(Key1, Key2) < 0
         ChordID := Key1 . Key2
     else
         ChordID := Key2 . Key1
