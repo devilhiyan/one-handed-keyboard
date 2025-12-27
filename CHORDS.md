@@ -10,6 +10,8 @@ This document tracks all unique key combinations (chords) and their assigned act
 | **sd** | `Down` | `Mouse Move Down` |
 | **as** | `Left` | `Mouse Move Left` |
 | **df** | `Right` | `Mouse Move Right` |
+| **asd** | `Backspace` | - |
+| **sdf** | `Delete` | - |
 | **qw** | `Home` | `Mouse Wheel Up` |
 | **er** | `End` | `Mouse Wheel Down` |
 

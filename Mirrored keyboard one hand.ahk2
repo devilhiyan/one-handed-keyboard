@@ -767,16 +767,30 @@ w & e::PerformChord("w", "e", "{Blind}{Up}", "Up")
 e & w::PerformChord("e", "w", "{Blind}{Up}", "Up")
 
 ; Down (SD)
-s & d::PerformChord("s", "d", "{Blind}{Down}", "Down")
-d & s::PerformChord("d", "s", "{Blind}{Down}", "Down")
+s & d:: {
+    if KeyTracker[GetKeyVK("a")]
+        PerformChord("s", "d", "{Blind}{Down}", "Down", "a", "{Blind}{Backspace}")
+    else if KeyTracker[GetKeyVK("f")]
+        PerformChord("s", "d", "{Blind}{Down}", "Down", "f", "{Blind}{Delete}")
+    else
+        PerformChord("s", "d", "{Blind}{Down}", "Down")
+}
+d & s:: {
+    if KeyTracker[GetKeyVK("a")]
+        PerformChord("d", "s", "{Blind}{Down}", "Down", "a", "{Blind}{Backspace}")
+    else if KeyTracker[GetKeyVK("f")]
+        PerformChord("d", "s", "{Blind}{Down}", "Down", "f", "{Blind}{Delete}")
+    else
+        PerformChord("d", "s", "{Blind}{Down}", "Down")
+}
 
 ; Left (AS)
-a & s::PerformChord("a", "s", "{Blind}{Left}", "Left")
-s & a::PerformChord("s", "a", "{Blind}{Left}", "Left")
+a & s::PerformChord("a", "s", "{Blind}{Left}", "Left", "d", "{Blind}{Backspace}")
+s & a::PerformChord("s", "a", "{Blind}{Left}", "Left", "d", "{Blind}{Backspace}")
 
 ; Right (DF)
-d & f::PerformChord("d", "f", "{Blind}{Right}", "Right")
-f & d::PerformChord("f", "d", "{Blind}{Right}", "Right")
+d & f::PerformChord("d", "f", "{Blind}{Right}", "Right", "s", "{Blind}{Delete}")
+f & d::PerformChord("f", "d", "{Blind}{Right}", "Right", "s", "{Blind}{Delete}")
 
 ; Home / Wheel Up (QW)
 q & w::PerformChord("q", "w", "{Blind}{Home}", "WheelUp")
@@ -785,6 +799,14 @@ w & q::PerformChord("w", "q", "{Blind}{Home}", "WheelUp")
 ; End / Wheel Down (ER)
 e & r::PerformChord("e", "r", "{Blind}{End}", "WheelDown")
 r & e::PerformChord("r", "e", "{Blind}{End}", "WheelDown")
+
+; Backspace (EAI / Physical AD)
+a & d::PerformChord("a", "d", "{Blind}{Backspace}", "", "s", "{Blind}{Backspace}")
+d & a::PerformChord("d", "a", "{Blind}{Backspace}", "", "s", "{Blind}{Backspace}")
+
+; Delete (AIO / Physical SF)
+s & f::PerformChord("s", "f", "{Blind}{Delete}", "", "d", "{Blind}{Delete}")
+f & s::PerformChord("f", "s", "{Blind}{Delete}", "", "d", "{Blind}{Delete}")
 
 ; --- Space Layer (Hold Space) ---
 Space & q:: MirrorSend("b")
@@ -879,8 +901,30 @@ ChordAction(KeyAction, MouseAction) {
     }
 }
 
-PerformChord(Key1, Key2, KeyAct, MouseAct) {
+PerformChord(Key1, Key2, KeyAct, MouseAct, Key3 := "", KeyAct3 := "") {
     Critical()
+    
+    ; Check for 3-key chord first if Key3 is provided
+    if (Key3 != "" && KeyTracker[GetKeyVK(Key3)]) {
+        ; Use 3rd key logic
+        ; We need a unique ID that includes all 3 keys
+        keys := [Key1, Key2, Key3]
+        ; Sort keys for ID
+        if StrCompare(keys[1], keys[2]) > 0 { tmp := keys[1], keys[1] := keys[2], keys[2] := tmp }
+        if StrCompare(keys[2], keys[3]) > 0 { tmp := keys[2], keys[2] := keys[3], keys[3] := tmp }
+        if StrCompare(keys[1], keys[2]) > 0 { tmp := keys[1], keys[1] := keys[2], keys[2] := tmp }
+        ChordID := keys[1] . keys[2] . keys[3]
+
+        if ActiveChords.Has(ChordID)
+            return
+
+        ChordAction(KeyAct3, "")
+        ActiveChords[ChordID] := {k1:keys[1], k2:keys[2], k3:keys[3], is3:True, act:KeyAct3, mAct:"", count:0}
+        SetTimer ChordMasterTick, 50
+        return
+    }
+
+    ; 2-key chord logic
     if StrCompare(Key1, Key2) < 0
         ChordID := Key1 . Key2
     else
@@ -890,7 +934,7 @@ PerformChord(Key1, Key2, KeyAct, MouseAct) {
         return
     
     ChordAction(KeyAct, MouseAct)
-    ActiveChords[ChordID] := {k1:Key1, k2:Key2, act:KeyAct, mAct:MouseAct, count:0}
+    ActiveChords[ChordID] := {k1:Key1, k2:Key2, k3:"", is3:False, act:KeyAct, mAct:MouseAct, count:0}
     SetTimer ChordMasterTick, 50
 }
 
@@ -904,8 +948,10 @@ ChordMasterTick() {
     for ID, Data in ActiveChords.Clone() {
         vk1 := GetKeyVK(Data.k1)
         vk2 := GetKeyVK(Data.k2)
+        vk3 := Data.k3 != "" ? GetKeyVK(Data.k3) : 0
         
-        if (!KeyTracker[vk1] || !KeyTracker[vk2]) {
+        ; Chord is broken if any of its keys are released
+        if (!KeyTracker[vk1] || !KeyTracker[vk2] || (Data.is3 && !KeyTracker[vk3])) {
             ActiveChords.Delete(ID)
             continue
         }
