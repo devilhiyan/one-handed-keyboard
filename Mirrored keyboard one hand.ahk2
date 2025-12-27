@@ -715,7 +715,7 @@ g::u
 
 z::l
 x::d
-c::c
+c::n
 v::m
 
 ; --- Halmak Chords (Explicitly Defined) ---
@@ -795,7 +795,7 @@ Capslock:: {
 GetRemappedKey(key) {
     ; Optimized for Halmak
     switch key {
-        case "q": return "n"
+        case "q": return "c"
         case "w": return "s"
         case "e": return "t"
         case "r": return "h"

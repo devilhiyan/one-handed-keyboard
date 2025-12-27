@@ -1,48 +1,45 @@
-# 14-Key Left-Hand "Comfort-First" Layout
+# 14-Key Left-Hand Optimized Layout (EAIOU Anchor)
 
-This layout is custom-tuned to pair physical finger comfort with English letter frequency. 
-Spacebar acts as a Layer Switcher (Tap for Space, Hold for Layer 1).
+This layout uses a 14-key grid (Q-T, A-G, Z-V) with the Spacebar as a layer modifier. 
 
 ## 1. Base Layer (Standard Tap)
-*Coverage: ~86% of all English text. Optimized for zero-travel on high-frequency keys.*
+*Mapped by pairing comfort rank with letter frequency.*
 
 | Row | Q (Pinky) | W (Ring) | E (Middle) | R (Index) | T (Index+) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Top** | U | I | N | S | R |
-| **Home** | **O** | **A** | **T** | **E** | **H** |
-| **Bottom**| C | M | D | L | — |
+| **Top** | **L** | **T** | **N** | **S** | **H** |
+| **Home** | **E** | **A** | **I** | **O** | **U** |
+| **Bottom**| **C** | **M** | **R** | **D** | — |
 
 ---
 
 ## 2. Space Layer (Hold Space + Key)
-*Access these letters by holding the Spacebar.*
+*Contains the remaining 12 letters. B and V are prioritized on the index/middle columns.*
 
 | Row | Q (Pinky) | W (Ring) | E (Middle) | R (Index) | T (Index+) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
 | **Top** | G | P | W | Y | F |
 | **Home** | K | J | X | Q | Z |
-| **Bottom**| — | — | **B** | **V** | — |
+| **Bottom**| — | — | B | V | — |
 
 ---
 
-## 3. Top 10 Common Words (Physical Key Paths)
-*How to type the most frequent English words with this layout:*
+## 3. Physical Key Comfort vs. Letter Rank
+This table shows how the most frequent letters align with your comfort zones:
 
-1. **THE:** `D` (Home Mid) → `G` (Home Index+) → `F` (Home Index)
-2. **BE:** `[Space]+C` → `F` (Home Index)
-3. **TO:** `D` (Home Mid) → `A` (Home Pinky)
-4. **OF:** `A` (Home Pinky) → `[Space]+T`
-5. **AND:** `S` (Home Ring) → `E` (Top Mid) → `C` (Bottom Mid)
-6. **A:** `S` (Home Ring)
-7. **IN:** `W` (Top Ring) → `E` (Top Mid)
-8. **THAT:** `D` (Home Mid) → `G` (Home Index+) → `S` (Home Ring) → `D` (Home Mid)
-9. **HAVE:** `G` (Home Index+) → `S` (Home Ring) → `[Space]+V` → `F` (Home Index)
-10. **I:** `W` (Top Ring)
-
----
-
-## 4. Efficiency Metrics
-- **Home Row Usage:** ~43% (E, T, A, O, H)
-- **Base Layer Coverage:** 85.8%
-- **Same-Finger Bigram Penalty:** Extremely Low
-- **Primary Strength:** The Index and Middle fingers handle 'E' and 'T' (21% of all typing) with zero vertical movement.
+| Key | Letter | Frequency Rank | Comfort Rank |
+| :--- | :---: | :---: | :---: |
+| **F** | **O** | Vowel | 1 (Best) |
+| **D** | **I** | Vowel | 2 |
+| **S** | **A** | Vowel | 3 |
+| **A** | **E** | Vowel | 4 |
+| **W** | **T** | Consonant #1 | 5 |
+| **E** | **N** | Consonant #2 | 6 |
+| **R** | **S** | Consonant #3 | 7 |
+| **T** | **H** | Consonant #4 | 8 |
+| **G** | **U** | Vowel | 9 |
+| **C** | **R** | Consonant #5 | 10 |
+| **V** | **D** | Consonant #6 | 11 |
+| **Q** | **L** | Consonant #7 | 12 |
+| **Z** | **C** | Consonant #8 | 13 |
+| **X** | **M** | Consonant #9 | 14 (Least) |
