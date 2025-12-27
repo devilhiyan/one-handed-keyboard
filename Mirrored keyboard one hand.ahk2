@@ -15,7 +15,7 @@ if not A_IsAdmin {
 }
 #SingleInstance Force ; Prevents multiple versions of script running
 #UseHook ; Helps ensure modifier keys don't remain pressed after hotkey ends
-#MaxThreadsBuffer On ; Queue hotkeys during execution to prevent bleeding
+#MaxThreadsBuffer True ; Queue hotkeys during execution to prevent bleeding
 #MaxThreadsPerHotkey 2 ; Allow overlap for rapid repeats
 A_MaxHotkeysPerInterval := 4000 ; Increased for stability during rapid input
 A_MenuMaskKey := "vkE8" ; Prevent Start Menu/Menu bar focus during rapid prefix key use
