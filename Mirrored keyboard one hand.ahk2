@@ -33,13 +33,17 @@ Global BtnMirrorMode := ""
 
 Global StateHook := InputHook("V L0 I1") ; I1 to see keys caught by other hotkeys
 StateHook.KeyOpt("{All}", "N")
-StateHook.OnKeyDown := (ih, vk, sc) => (
-    Critical(), 
-    KeyTracker[vk] := 1,
-    (vk == 0x20) ? (Global MirrorActionOccurred := False) : ""
-)
+StateHook.OnKeyDown := StateHook_KeyDown
 StateHook.OnKeyUp := (ih, vk, sc) => (Critical(), KeyTracker[vk] := 0)
 StateHook.Start()
+
+StateHook_KeyDown(ih, vk, sc) {
+    Critical()
+    KeyTracker[vk] := 1
+    if (vk == 0x20) { ; Spacebar
+        Global MirrorActionOccurred := False
+    }
+}
 SetKeyDelay -1, 0 ; Increases reliability of SendInput by reducing delays
 InstallKeybdHook ; Explicitly install the keyboard hook for reliability
 OnMessage(0x404, Tray_Handler) ; Intercept Tray Icon clicks to prevent menu blocking
