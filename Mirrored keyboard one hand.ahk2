@@ -839,10 +839,14 @@ ChordAction(KeyAction, MouseAction) {
 
 ; --- Chord Loops (Repeat while held) ---
 PerformChord(Key1, Key2, KeyAct, MouseAct) {
-    ; Instant Combo Logic: Any overlapping press is a chord.
-    ChordID := Key1 . Key2
+    ; Normalize ID: Sort keys alphabetically so 'we' and 'ew' share the same timer.
+    if (Key1 < Key2)
+        ChordID := Key1 . Key2
+    else
+        ChordID := Key2 . Key1
+
     if ChordState.Has(ChordID)
-        return ; Already running
+        return ; Already running for this physical pair
     
     ChordAction(KeyAct, MouseAct) ; First action
     
@@ -853,13 +857,15 @@ PerformChord(Key1, Key2, KeyAct, MouseAct) {
 }
 
 ChordTimerCallback(Key1, Key2, KeyAct, MouseAct, ChordID) {
-    if (GetKeyState(Key1, "P") && GetKeyState(Key2, "P")) {
-        ChordAction(KeyAct, MouseAct)
-        SetTimer ChordState[ChordID], 50 ; Repetition rate
-    } else {
+    ; Kill timer immediately if either key is released to prevent ghosting/queueing
+    if (!GetKeyState(Key1, "P") || !GetKeyState(Key2, "P")) {
         SetTimer ChordState[ChordID], 0 ; Stop
         ChordState.Delete(ChordID)
+        return
     }
+
+    ChordAction(KeyAct, MouseAct)
+    SetTimer ChordState[ChordID], 50 ; Repetition rate
 }
 
 ; --- Mappings ---
