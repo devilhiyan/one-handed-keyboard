@@ -24,6 +24,8 @@ ProcessSetPriority "High" ; Ensures the script stays responsive under load
 ; --- Global State ---
 Global MirrorActionOccurred := False ; Track if space was used as a modifier
 Global LastMirrorActionTime := 0     ; Timestamp of last mirror/chord action
+Global SpaceDownTime := 0            ; Millisecond when space was pressed
+Global SpaceTapThreshold := 250      ; Max duration for a "tap" space
 Global KeyTracker := Map()
 KeyTracker.Default := 0
 Global ActiveChords := Map() ; Track active chords for the master timer
@@ -42,6 +44,7 @@ StateHook_KeyDown(ih, vk, sc) {
     KeyTracker[vk] := 1
     if (vk == 0x20) { ; Spacebar
         Global MirrorActionOccurred := False
+        Global SpaceDownTime := A_TickCount
     }
 }
 SetKeyDelay -1, 0 ; Increases reliability of SendInput by reducing delays
@@ -405,7 +408,8 @@ MirrorSend(this_key) {
 
 
 Space Up:: {
-    if (!MirrorActionOccurred && A_TickCount - LastMirrorActionTime > 50) {
+    Duration := A_TickCount - SpaceDownTime
+    if (!MirrorActionOccurred && Duration < SpaceTapThreshold && A_TickCount - LastMirrorActionTime > 50) {
         SendInput("{Space}")
     }
 }
