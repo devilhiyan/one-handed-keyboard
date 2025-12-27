@@ -268,7 +268,7 @@ MoveMouseTick() {
 #HotIf NavMode && MouseMode
 
 ; Shared Keys
-$*Space & Tab::SendInput("{Blind}{Backspace}")
+Space & Tab::SendInput("{Blind}{Backspace}")
 
 ; Capslock (Left Click / Drag)
 $*Capslock:: {
@@ -277,7 +277,7 @@ $*Capslock:: {
     Click "Up"
 }
 ; Space + Capslock (Enter)
-$*Space & Capslock::SendInput("{Enter}")
+Space & Capslock::SendInput("{Enter}")
 
 ; Shift (Right Click)
 $*LShift::Click "Right"
@@ -331,20 +331,20 @@ Space & e::SendInput "{Blind}{End}"
 #HotIf NavMode && !MouseMode
 
 ; Shared Keys
-$*Space & Tab::SendInput("{Blind}{Backspace}")
+Space & Tab::SendInput("{Blind}{Backspace}")
 
 ; Capslock (Enter)
 $*Capslock::SendInput("{Enter}")
 ; Space + Capslock (Left Click / Drag)
-$*Space & Capslock:: {
+Space & Capslock:: {
     Click "Down"
     KeyWait "Capslock"
     Click "Up"
 }
 
 ; Space + Shift (Right Click)
-$*Space & LShift::Click "Right"
-$*Space & RShift::Click "Right"
+Space & LShift::Click "Right"
+Space & RShift::Click "Right"
 
 ; x::Delete (Retained from original)
 $*x::Delete
