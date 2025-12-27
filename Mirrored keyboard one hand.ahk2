@@ -25,7 +25,7 @@ ProcessSetPriority "High" ; Ensures the script stays responsive under load
 Global MirrorActionOccurred := False ; Track if space was used as a modifier
 Global LastMirrorActionTime := 0     ; Timestamp of last mirror/chord action
 Global SpaceDownTime := 0            ; Millisecond when space was pressed
-Global SpaceTapThreshold := 250      ; Max duration for a "tap" space
+Global SpaceTapThreshold := 300      ; Max duration for a "tap" space
 Global KeyTracker := Map()
 KeyTracker.Default := 0
 Global ActiveChords := Map() ; Track active chords for the master timer
@@ -40,11 +40,12 @@ StateHook.OnKeyUp := (ih, vk, sc) => (Critical(), KeyTracker[vk] := 0)
 StateHook.Start()
 
 StateHook_KeyDown(ih, vk, sc) {
+    global MirrorActionOccurred, SpaceDownTime
     Critical()
     KeyTracker[vk] := 1
     if (vk == 0x20) { ; Spacebar
-        Global MirrorActionOccurred := False
-        Global SpaceDownTime := A_TickCount
+        MirrorActionOccurred := False
+        SpaceDownTime := A_TickCount
     }
 }
 SetKeyDelay -1, 0 ; Increases reliability of SendInput by reducing delays
@@ -401,7 +402,9 @@ Space & e::Click "WheelDown"
 ; 			MIRROR KEYS
 ; =========================================================
 MirrorSend(this_key) {
-	Global MirrorActionOccurred := True, LastMirrorActionTime := A_TickCount
+    global MirrorActionOccurred, LastMirrorActionTime
+	MirrorActionOccurred := True
+    LastMirrorActionTime := A_TickCount
 	; Uses SendInput for high performance and stability during rapid key presses.
 	SendInput("{Blind}" . this_key)
 }
@@ -409,7 +412,7 @@ MirrorSend(this_key) {
 
 Space Up:: {
     Duration := A_TickCount - SpaceDownTime
-    if (!MirrorActionOccurred && Duration < SpaceTapThreshold && A_TickCount - LastMirrorActionTime > 50) {
+    if (!MirrorActionOccurred && Duration < SpaceTapThreshold) {
         SendInput("{Space}")
     }
 }
@@ -846,8 +849,10 @@ GetRemappedKey(key) {
 }
 
 ChordAction(KeyAction, MouseAction) {
+    global MirrorActionOccurred, LastMirrorActionTime
     if GetKeyState("Space", "P") {
-        Global MirrorActionOccurred := True, LastMirrorActionTime := A_TickCount
+        MirrorActionOccurred := True
+        LastMirrorActionTime := A_TickCount
         if (MouseAction == "Up")
             MouseMove 0, -20, 0, "R"
         else if (MouseAction == "Down")
