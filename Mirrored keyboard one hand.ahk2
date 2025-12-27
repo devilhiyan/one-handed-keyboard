@@ -419,6 +419,9 @@ Space Up:: {
     if (!MirrorActionOccurred) {
         SendInput("{Space}")
     }
+    ; Safety reset: Ensure state is cleared for the next interaction
+    Global MirrorActionOccurred := False
+    KeyTracker[0x20] := 0
 }
 #HotIf
 
