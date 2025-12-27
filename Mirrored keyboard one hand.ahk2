@@ -746,7 +746,7 @@ r & e::PerformChord("r", "e", "{Blind}{End}", "WheelDown")
 
 
 ; --- Space Layer (Hold Space) ---
-Space & q:: MirrorSend("g")
+Space & q:: MirrorSend("b")
 Space & w:: MirrorSend("p")
 Space & e:: MirrorSend("w")
 Space & r:: MirrorSend("y")
@@ -758,7 +758,7 @@ Space & d:: MirrorSend("x")
 Space & f:: MirrorSend("f")
 Space & g:: MirrorSend("z")
 
-Space & c:: MirrorSend("b")
+Space & c:: MirrorSend("g")
 Space & v:: MirrorSend("v")
 
 ; --- Numbers/Function Keys (Standard Mirror Fallback for now) ---
