@@ -32,7 +32,7 @@ Global stream_fallback := "MirrorKeys-Settings-" A_Username ".ini"
 ; 			NAVIGATION MODE
 ; =========================================================
 Global NavMode := False
-Global MirrorMode := False
+Global MirrorMode := !!Integer(StreamRead("MirrorKeys", "MirrorMode", True))
 Global NavStyle := StreamRead("MirrorKeys", "NavStyle", "New") ; Default to New (ESDF)
 Global MirrorStyle := "Halmak" ; Optimized for Halmak
 Global NavToggleKey := StreamRead("MirrorKeys", "NavToggleKey", "LWin") ; Default to LWin
@@ -156,6 +156,7 @@ ToggleNavStyle(*) {
 ToggleMirrorMode(*) {
 	Global MirrorMode
 	MirrorMode := !MirrorMode
+	StreamWrite("MirrorKeys", "MirrorMode", MirrorMode)
 	
 	if (MirrorMode) {
 		Notify("Mirror Mode: ON")
