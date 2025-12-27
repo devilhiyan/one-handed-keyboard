@@ -416,8 +416,7 @@ MirrorSend(this_key) {
 
 #HotIf MirrorMode || NavMode
 Space Up:: {
-    Duration := A_TickCount - SpaceDownTime
-    if (!MirrorActionOccurred && Duration < SpaceTapThreshold) {
+    if (!MirrorActionOccurred) {
         SendInput("{Space}")
     }
 }
