@@ -760,9 +760,9 @@ Space & g:: MirrorSend("z")
 
 Space & z:: MirrorSend("c")
 Space & x:: MirrorSend("b")
-Space & c:: MirrorSend("c")
+Space & c:: MirrorSend("g")
 Space & v:: MirrorSend("v")
-Space & b:: MirrorSend("b")
+Space & b:: MirrorSend("c")
 
 ; --- Numbers/Function Keys (Standard Mirror Fallback for now) ---
 Space & `:: MirrorSend("-")
