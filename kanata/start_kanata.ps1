@@ -3,7 +3,8 @@ Set-Location $PSScriptRoot
 $ahkScript = Join-Path $PSScriptRoot "kanata_mouse_bridge.ahk"
 
 Write-Host "Starting Mouse Bridge (AutoHotkey)..."
-Start-Process $ahkScript
+# Use cmd /c start to leverage Windows file association
+Start-Process cmd -ArgumentList "/c start """" ""$ahkScript""" -WindowStyle Hidden
 
 Write-Host "Starting Kanata..."
 try {

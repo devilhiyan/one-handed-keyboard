@@ -6,15 +6,17 @@ SetMouseDelay -1
 ; ==============================================================================
 ; Kanata Mouse Bridge
 ; Maps F13-F20 to Mouse Actions + Acceleration + Notification
+; Uses Timers to avoid Key Repeat Stutter/Delay
 ; ==============================================================================
 
 ; Configuration
 MinSpeed := 1
 MaxSpeed := 25
-AccelFactor := 1.15 ; Multiply speed by this factor per loop
+AccelFactor := 1.15 
 ScrollSpeed := 1
+CurrentSpeed := MinSpeed
 
-; Navigation State (Tracked via F24 toggle)
+; Navigation State
 NavMode := false
 
 ; ------------------------------------------------------------------------------
@@ -25,7 +27,7 @@ NavMode := false
     if (NavMode) {
         SoundBeep 1000, 150
         ToolTip "Navigation Mode: ON"
-        SetTimer () => ToolTip(), -1000 ; Hide after 1s
+        SetTimer () => ToolTip(), -1000 
     } else {
         SoundBeep 500, 150
         ToolTip "Navigation Mode: OFF"
@@ -34,30 +36,39 @@ NavMode := false
 }
 
 ; ------------------------------------------------------------------------------
-; Movement Logic with Acceleration
+; Movement Timer Logic
 ; ------------------------------------------------------------------------------
-MoveMouseAccel(xMult, yMult) {
-    CurrentSpeed := MinSpeed
-    While (
-        GetKeyState("F13", "P") || 
-        GetKeyState("F14", "P") || 
-        GetKeyState("F15", "P") || 
-        GetKeyState("F16", "P")
-    ) {
-        ; Calculate movement based on held keys
-        moveX := 0
-        moveY := 0
-        
-        if GetKeyState("F14", "P") ; Left
-            moveX -= 1
-        if GetKeyState("F16", "P") ; Right
-            moveX += 1
-        if GetKeyState("F13", "P") ; Up
-            moveY -= 1
-        if GetKeyState("F15", "P") ; Down
-            moveY += 1
+ProcessMovement() {
+    global CurrentSpeed
+    
+    ; Check which keys are physically held
+    up    := GetKeyState("F13", "P")
+    left  := GetKeyState("F14", "P")
+    down  := GetKeyState("F15", "P")
+    right := GetKeyState("F16", "P")
 
-        ; Apply speed
+    ; If no keys are held, stop timer and reset speed
+    if (!up && !left && !down && !right) {
+        SetTimer ProcessMovement, 0 ; Turn off
+        CurrentSpeed := MinSpeed
+        return
+    }
+
+    ; Calculate Movement
+    moveX := 0
+    moveY := 0
+    
+    if (left)  
+        moveX -= 1
+    if (right) 
+        moveX += 1
+    if (up)    
+        moveY -= 1
+    if (down)  
+        moveY += 1
+
+    ; Apply Movement
+    if (moveX != 0 || moveY != 0) {
         MouseMove(moveX * CurrentSpeed, moveY * CurrentSpeed, 0, "R")
         
         ; Accelerate
@@ -66,40 +77,40 @@ MoveMouseAccel(xMult, yMult) {
             if (CurrentSpeed > MaxSpeed)
                 CurrentSpeed := MaxSpeed
         }
-        
-        Sleep(10)
     }
+}
+
+; Start Timer on Key Down
+StartMove() {
+    SetTimer ProcessMovement, 10 ; Run every 10ms
 }
 
 ; ------------------------------------------------------------------------------
 ; Movement Triggers (F13-F16)
 ; ------------------------------------------------------------------------------
+; keydown starts the timer immediately. 
+; The timer handles the looping, so key repeat is ignored.
 
-; We use a shared handler because multiple keys can be held (diagonal).
-; Any directional key triggers the movement loop if it's not already running.
+*F13::StartMove() ; Up
+*F14::StartMove() ; Left
+*F15::StartMove() ; Down
+*F16::StartMove() ; Right
 
-*F13::MoveMouseAccel(0, -1) ; Up
-*F14::MoveMouseAccel(-1, 0) ; Left
-*F15::MoveMouseAccel(0, 1)  ; Down
-*F16::MoveMouseAccel(1, 0)  ; Right
+; Note: We don't strictly need *Up handlers to stop it because the Timer 
+; checks GetKeyState itself and stops when all are released.
 
 ; ------------------------------------------------------------------------------
 ; Clicks (F17-F18)
 ; ------------------------------------------------------------------------------
-
-; Left Click (F17) - Supports Hold/Drag
 *F17::Click "Down"
 *F17 Up::Click "Up"
 
-; Right Click (F18)
 *F18::Click "Down Right"
 *F18 Up::Click "Up Right"
 
 ; ------------------------------------------------------------------------------
 ; Scroll (F19-F20)
 ; ------------------------------------------------------------------------------
-
-; Scroll Up (F19)
 *F19:: {
     While GetKeyState("F19", "P") {
         Click "WheelUp"
@@ -107,7 +118,6 @@ MoveMouseAccel(xMult, yMult) {
     }
 }
 
-; Scroll Down (F20)
 *F20:: {
     While GetKeyState("F20", "P") {
         Click "WheelDown"
