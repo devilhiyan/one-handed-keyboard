@@ -12,10 +12,14 @@
   ;; Tap for Space, Hold for Mirror Layer
   spc-mir (tap-hold 200 200 spc (layer-toggle mirror))
   
-  ;; Layer Switchers (Toggle via Left Control)
-  to-nav    (layer-switch navigation)
-  to-halmak (layer-switch halmak)
-  to-qwer   (layer-switch qwer)
+  ;; Layer Switchers
+  ;; Left Control: Toggles Navigation (returns to source layer)
+  to-nav-q  (layer-switch nav-q)      ;; Go to Nav from QWERTY
+  to-nav-h  (layer-switch nav-h)      ;; Go to Nav from Halmak
+  
+  ;; Left Windows (Function Key): Toggles Layout
+  to-halmak (layer-switch halmak)     ;; Go to Halmak
+  to-qwer   (layer-switch qwer)       ;; Go to QWERTY
 )
 
 (defchords halmak-chords 50
@@ -29,22 +33,31 @@
   (s f) del
 )
 
+;; --------------------------------------------------------------------------- 
+;; 1. QWERTY LAYER (Default)
+;; --------------------------------------------------------------------------- 
 (deflayer qwer
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   caps a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  @to-halmak lmet lalt     spc            ralt rmet rctl
+  @to-nav-q @to-halmak lalt     spc            ralt rmet rctl
 )
 
+;; --------------------------------------------------------------------------- 
+;; 2. HALMAK LAYER (One-Handed + Chords)
+;; --------------------------------------------------------------------------- 
 (deflayer halmak
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  (chord halmak-chords q) (chord halmak-chords w) (chord halmak-chords e) (chord halmak-chords r) t    y    u    i    o    p    [    ]    \
   caps (chord halmak-chords a) (chord halmak-chords s) (chord halmak-chords d) (chord halmak-chords f) g    h    j    k    l    ;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  @to-nav    lmet lalt     @spc-mir       ralt rmet rctl
+  @to-nav-h @to-qwer   lalt     @spc-mir       ralt rmet rctl
 )
 
+;; --------------------------------------------------------------------------- 
+;; 3. MIRROR LAYER (Activated by holding Space in Halmak)
+;; --------------------------------------------------------------------------- 
 (deflayer mirror
   -    0    9    8    7    6    5    4    3    2    1    =    grv  bspc
   bspc b    p    w    y    q    y    u    i    o    p    [    ]    \
@@ -53,10 +66,24 @@
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
-(deflayer navigation
+;; --------------------------------------------------------------------------- 
+;; 4. NAVIGATION LAYERS (ESDF Movement)
+;; --------------------------------------------------------------------------- 
+
+;; Nav from QWERTY (LCTL returns to QWERTY)
+(deflayer nav-q
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  q    home up   end  t    y    u    i    o    p    [    ]    \
   caps a    left down right g    h    j    k    l    ;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  @to-qwer   lmet lalt     spc            ralt rmet rctl
+  @to-qwer   @to-halmak lalt     spc            ralt rmet rctl
+)
+
+;; Nav from Halmak (LCTL returns to Halmak)
+(deflayer nav-h
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    home up   end  t    y    u    i    o    p    [    ]    \
+  caps a    left down right g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  @to-halmak @to-qwer   lalt     spc            ralt rmet rctl
 )
