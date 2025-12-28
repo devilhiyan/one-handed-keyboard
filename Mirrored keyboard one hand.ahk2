@@ -33,8 +33,7 @@ Global PendingChordKeys := Map() ; Keys collected during the 200ms window
 Global ChordTimerActive := False
 Global ChordWindowStart := 0
 Global ChordMap := Map()
-Global ChordRepeatRate := 40 ; Balanced repeat rate
-Global ProcessingChords := False ; Re-entrancy guard
+Global ChordRepeatRate := 50 ; Standard repeat rate for OS stability
 
 ; Initialize Chord Map (Keys MUST be sorted alphabetically for ID)
 ; We also store VK codes to avoid calling GetKeyVK in the high-frequency repeat loop
@@ -78,6 +77,7 @@ StateHook_KeyUp(ih, vk, sc) {
         for vkChord in CurrentChord.vks {
             if (vkChord == vk) {
                 CurrentChord := ""
+                SetTimer ChordMasterTick, 0
                 break
             }
         }
@@ -1024,12 +1024,9 @@ ChordAction(KeyAction, MouseAction) {
 }
 
 PerformChord(Key1, Key2, KeyAct, MouseAct, Key3 := "", KeyAct3 := "") {
-    Global PendingChordKeys, ChordTimerActive, ChordWindowStart, CurrentChord, ProcessingChords
+    Global PendingChordKeys, ChordTimerActive, ChordWindowStart, CurrentChord
     Critical()
     
-    if (ProcessingChords)
-        return
-
     ; If any of these keys are part of the currently active repeating chord, ignore auto-repeat
     if IsObject(CurrentChord) {
         for k in CurrentChord.keys {
@@ -1052,12 +1049,9 @@ PerformChord(Key1, Key2, KeyAct, MouseAct, Key3 := "", KeyAct3 := "") {
 }
 
 EvaluateChordBuffer() {
-    Global ChordTimerActive, PendingChordKeys, CurrentChord, ChordMap, KeyTracker, ChordRepeatRate, ProcessingChords
+    Global ChordTimerActive, PendingChordKeys, CurrentChord, ChordMap, KeyTracker, ChordRepeatRate
+    SetTimer ChordMasterTick, 0 ; Stop master tick during evaluation
     Critical()
-    
-    if (ProcessingChords)
-        return
-    ProcessingChords := True
     
     ; 1. Refresh buffer with physically held keys
     chordKeys := ["q","w","e","r","a","s","d","f"]
@@ -1074,7 +1068,6 @@ EvaluateChordBuffer() {
     if (keys.Length == 0) {
         ChordTimerActive := False
         PendingChordKeys.Clear()
-        ProcessingChords := False
         return
     }
 
@@ -1099,7 +1092,6 @@ EvaluateChordBuffer() {
         
     if (keyStr != "" && ChordMap.Has(keyStr)) {
         data := ChordMap[keyStr]
-        ChordAction(data.act, data.mAct)
         CurrentChord := {keys: keys, vks: data.vks, act: data.act, mAct: data.mAct}
         resolved := True
     }
@@ -1121,31 +1113,29 @@ EvaluateChordBuffer() {
         }
     }
     
-    if (resolved)
-        SetTimer ChordMasterTick, ChordRepeatRate
-    else
-        CurrentChord := ""
-        
     PendingChordKeys.Clear()
     ChordTimerActive := False
-    ProcessingChords := False
+    
+    if (resolved) {
+        ChordAction(CurrentChord.act, CurrentChord.mAct)
+        SetTimer ChordMasterTick, ChordRepeatRate
+    } else {
+        CurrentChord := ""
+    }
 }
 
 ChordMasterTick() {
-    Global CurrentChord, KeyTracker, ChordRepeatRate, ProcessingChords
-    Critical()
+    Global CurrentChord, KeyTracker, ChordRepeatRate
+    SetTimer EvaluateChordBuffer, 0 ; Stop evaluation window during repetition
     
-    if (ProcessingChords)
-        return
-    ProcessingChords := True
-
+    act := "", mAct := "", allHeld := True
+    
+    Critical()
     if !IsObject(CurrentChord) {
         SetTimer , 0
-        ProcessingChords := False
         return
     }
     
-    allHeld := True
     for vk in CurrentChord.vks {
         if (!KeyTracker[vk]) {
             allHeld := False
@@ -1156,13 +1146,15 @@ ChordMasterTick() {
     if (!allHeld) {
         CurrentChord := ""
         SetTimer , 0
-        ProcessingChords := False
         return
     }
     
+    act := CurrentChord.act
+    mAct := CurrentChord.mAct
+    Critical("Off") ; Exit critical to send action safely
+    
     ; Repeat action
-    ChordAction(CurrentChord.act, CurrentChord.mAct)
-    ProcessingChords := False
+    ChordAction(act, mAct)
 }
 
 ; =========================================================
