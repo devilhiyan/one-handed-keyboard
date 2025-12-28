@@ -812,81 +812,65 @@ $*v::MirrorSend("m")
 ; --- Halmak Chords ---
 ; Up (WE)
 w & e:: {
-    Critical()
     PerformChord("w", "e", "{Blind}{Up}", "Up")
 }
 e & w:: {
-    Critical()
     PerformChord("e", "w", "{Blind}{Up}", "Up")
 }
 
 ; Down (SD)
 s & d:: {
-    Critical()
     PerformChord("s", "d", "{Blind}{Down}", "Down")
 }
 d & s:: {
-    Critical()
     PerformChord("d", "s", "{Blind}{Down}", "Down")
 }
 
 ; Left (AS)
 a & s:: {
-    Critical()
     PerformChord("a", "s", "{Blind}{Left}", "Left")
 }
 s & a:: {
-    Critical()
     PerformChord("s", "a", "{Blind}{Left}", "Left")
 }
 
 ; Right (DF)
 d & f:: {
-    Critical()
     PerformChord("d", "f", "{Blind}{Right}", "Right")
 }
 f & d:: {
-    Critical()
     PerformChord("f", "d", "{Blind}{Right}", "Right")
 }
 
 ; Home / Wheel Up (QW)
 q & w:: {
-    Critical()
     PerformChord("q", "w", "{Blind}{Home}", "WheelUp")
 }
 w & q:: {
-    Critical()
     PerformChord("w", "q", "{Blind}{Home}", "WheelUp")
 }
 
 ; End / Wheel Down (ER)
 e & r:: {
-    Critical()
     PerformChord("e", "r", "{Blind}{End}", "WheelDown")
 }
 r & e:: {
-    Critical()
     PerformChord("r", "e", "{Blind}{End}", "WheelDown")
 }
 
 ; Backspace (EAI / Physical AD)
 a & d:: {
-    Critical()
     PerformChord("a", "d", "{Blind}{Backspace}", "")
 }
 d & a:: {
-    Critical()
     PerformChord("d", "a", "{Blind}{Backspace}", "")
 }
 
 ; Delete (AIO / Physical SF)
 s & f:: {
-    Critical()
     PerformChord("s", "f", "{Blind}{Delete}", "")
 }
 f & s:: {
-    Critical()
     PerformChord("f", "s", "{Blind}{Delete}", "")
 }
 
@@ -933,49 +917,41 @@ $*Capslock:: {
 
 ; --- Typing Restore (Prefix Release) ---
 $*q:: {
-    Critical()
     if (MirrorActionOccurred || ChordTimerActive || IsObject(CurrentChord))
         return
     SendInput "{Blind}" . GetRemappedKey("q")
 }
 $*w:: {
-    Critical()
     if (MirrorActionOccurred || ChordTimerActive || IsObject(CurrentChord))
         return
     SendInput "{Blind}" . GetRemappedKey("w")
 }
 $*e:: {
-    Critical()
     if (MirrorActionOccurred || ChordTimerActive || IsObject(CurrentChord))
         return
     SendInput "{Blind}" . GetRemappedKey("e")
 }
 $*r:: {
-    Critical()
     if (MirrorActionOccurred || ChordTimerActive || IsObject(CurrentChord))
         return
     SendInput "{Blind}" . GetRemappedKey("r")
 }
 $*a:: {
-    Critical()
     if (MirrorActionOccurred || ChordTimerActive || IsObject(CurrentChord))
         return
     SendInput "{Blind}" . GetRemappedKey("a")
 }
 $*s:: {
-    Critical()
     if (MirrorActionOccurred || ChordTimerActive || IsObject(CurrentChord))
         return
     SendInput "{Blind}" . GetRemappedKey("s")
 }
 $*d:: {
-    Critical()
     if (MirrorActionOccurred || ChordTimerActive || IsObject(CurrentChord))
         return
     SendInput "{Blind}" . GetRemappedKey("d")
 }
 $*f:: {
-    Critical()
     if (MirrorActionOccurred || ChordTimerActive || IsObject(CurrentChord))
         return
     SendInput "{Blind}" . GetRemappedKey("f")
@@ -1025,7 +1001,6 @@ ChordAction(KeyAction, MouseAction) {
 
 PerformChord(Key1, Key2, KeyAct, MouseAct, Key3 := "", KeyAct3 := "") {
     Global PendingChordKeys, ChordTimerActive, ChordWindowStart, CurrentChord
-    Critical()
     
     ; If any of these keys are part of the currently active repeating chord, ignore auto-repeat
     if IsObject(CurrentChord) {
@@ -1035,6 +1010,7 @@ PerformChord(Key1, Key2, KeyAct, MouseAct, Key3 := "", KeyAct3 := "") {
         }
     }
 
+    Critical()
     PendingChordKeys[Key1] := 1
     PendingChordKeys[Key2] := 1
     if (Key3 != "") {
@@ -1046,81 +1022,97 @@ PerformChord(Key1, Key2, KeyAct, MouseAct, Key3 := "", KeyAct3 := "") {
         ChordWindowStart := A_TickCount
         SetTimer EvaluateChordBuffer, -200
     }
+    Critical("Off")
 }
 
 EvaluateChordBuffer() {
     Global ChordTimerActive, PendingChordKeys, CurrentChord, ChordMap, KeyTracker, ChordRepeatRate
     SetTimer ChordMasterTick, 0 ; Stop master tick during evaluation
-    Critical()
     
-    ; 1. Refresh buffer with physically held keys
-    chordKeys := ["q","w","e","r","a","s","d","f"]
-    for k in chordKeys {
-        if (KeyTracker[GetKeyVK(k)])
-            PendingChordKeys[k] := 1
-    }
+    try {
+        Critical()
+        
+        ; 1. Refresh buffer with physically held keys
+        chordKeys := ["q","w","e","r","a","s","d","f"]
+        for k in chordKeys {
+            if (KeyTracker[GetKeyVK(k)])
+                PendingChordKeys[k] := 1
+        }
 
-    ; 2. Collect and sort keys
-    keys := []
-    for k, v in PendingChordKeys.Clone()
-        keys.Push(k)
-    
-    if (keys.Length == 0) {
+        ; 2. Collect and sort keys
+        keys := []
+        for k, v in PendingChordKeys.Clone()
+            keys.Push(k)
+        
+        if (keys.Length == 0) {
+            ChordTimerActive := False
+            PendingChordKeys.Clear()
+            Critical("Off")
+            return
+        }
+
+        ; Sort keys
+        Loop keys.Length - 1 {
+            i := A_Index
+            Loop keys.Length - i {
+                j := A_Index + i
+                if (StrCompare(keys[i], keys[j]) > 0) {
+                    tmp := keys[i]
+                    keys[i] := keys[j]
+                    keys[j] := tmp
+                }
+            }
+        }
+        
+        ; 3. Resolution
+        resolved := False
+        keyStr := ""
+        for k in keys
+            keyStr .= k
+            
+        if (keyStr != "" && ChordMap.Has(keyStr)) {
+            data := ChordMap[keyStr]
+            CurrentChord := {keys: keys, vks: data.vks, act: data.act, mAct: data.mAct}
+            resolved := True
+        }
+        
+        ; 4. Fallback Handling
+        if (!resolved) {
+            anyHeld := False
+            for k in keys {
+                if (KeyTracker[GetKeyVK(k)]) {
+                    anyHeld := True
+                    break
+                }
+            }
+            
+            if (!anyHeld) {
+                Critical("Off")
+                for k in keys {
+                    SendInput "{Blind}" . GetRemappedKey(k)
+                }
+                Critical()
+            }
+        }
+        
+        PendingChordKeys.Clear()
+        ChordTimerActive := False
+        
+        if (resolved) {
+            act := CurrentChord.act
+            mAct := CurrentChord.mAct
+            Critical("Off")
+            ChordAction(act, mAct)
+            SetTimer ChordMasterTick, ChordRepeatRate
+        } else {
+            CurrentChord := ""
+            Critical("Off")
+        }
+    } catch Error as err {
         ChordTimerActive := False
         PendingChordKeys.Clear()
-        return
-    }
-
-    ; Sort keys
-    Loop keys.Length - 1 {
-        i := A_Index
-        Loop keys.Length - i {
-            j := A_Index + i
-            if (StrCompare(keys[i], keys[j]) > 0) {
-                tmp := keys[i]
-                keys[i] := keys[j]
-                keys[j] := tmp
-            }
-        }
-    }
-    
-    ; 3. Resolution
-    resolved := False
-    keyStr := ""
-    for k in keys
-        keyStr .= k
-        
-    if (keyStr != "" && ChordMap.Has(keyStr)) {
-        data := ChordMap[keyStr]
-        CurrentChord := {keys: keys, vks: data.vks, act: data.act, mAct: data.mAct}
-        resolved := True
-    }
-    
-    ; 4. Fallback Handling
-    if (!resolved) {
-        anyHeld := False
-        for k in keys {
-            if (KeyTracker[GetKeyVK(k)]) {
-                anyHeld := True
-                break
-            }
-        }
-        
-        if (!anyHeld) {
-            for k in keys {
-                SendInput "{Blind}" . GetRemappedKey(k)
-            }
-        }
-    }
-    
-    PendingChordKeys.Clear()
-    ChordTimerActive := False
-    
-    if (resolved) {
-        ChordAction(CurrentChord.act, CurrentChord.mAct)
-        SetTimer ChordMasterTick, ChordRepeatRate
-    } else {
         CurrentChord := ""
+        Critical("Off")
     }
 }
 
@@ -1128,33 +1120,40 @@ ChordMasterTick() {
     Global CurrentChord, KeyTracker, ChordRepeatRate
     SetTimer EvaluateChordBuffer, 0 ; Stop evaluation window during repetition
     
-    act := "", mAct := "", allHeld := True
-    
-    Critical()
-    if !IsObject(CurrentChord) {
-        SetTimer , 0
-        return
-    }
-    
-    for vk in CurrentChord.vks {
-        if (!KeyTracker[vk]) {
-            allHeld := False
-            break
+    try {
+        Critical()
+        if !IsObject(CurrentChord) {
+            SetTimer ChordMasterTick, 0
+            Critical("Off")
+            return
         }
-    }
-    
-    if (!allHeld) {
+        
+        allHeld := True
+        for vk in CurrentChord.vks {
+            if (!KeyTracker[vk]) {
+                allHeld := False
+                break
+            }
+        }
+        
+        if (!allHeld) {
+            CurrentChord := ""
+            SetTimer ChordMasterTick, 0
+            Critical("Off")
+            return
+        }
+        
+        act := CurrentChord.act
+        mAct := CurrentChord.mAct
+        Critical("Off") ; Exit critical to send action safely
+        
+        ; Repeat action
+        ChordAction(act, mAct)
+    } catch Error as err {
+        SetTimer ChordMasterTick, 0
         CurrentChord := ""
-        SetTimer , 0
-        return
+        Critical("Off")
     }
-    
-    act := CurrentChord.act
-    mAct := CurrentChord.mAct
-    Critical("Off") ; Exit critical to send action safely
-    
-    ; Repeat action
-    ChordAction(act, mAct)
 }
 
 ; =========================================================
