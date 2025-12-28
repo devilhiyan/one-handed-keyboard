@@ -176,7 +176,8 @@ $LWin:: {
     if (A_TickCount - StartTime <= 500) { ; Released within 0.50s (Tap)
         if (A_PriorKey = "LWin") { ; Only if no other key was pressed
             Global NavMode := !NavMode
-            CurrentChord := ""            if (NavMode) {
+            CurrentChord := ""
+            if (NavMode) {
                 Notify("Navigation Mode: ON (" . (MouseMode ? "Permanent" : "Transient") . ")")
                 SoundBeep 1000, 150
             } else {
@@ -193,7 +194,8 @@ $LWin:: {
 	Critical ; Prevents this thread from being interrupted
 	if (A_PriorKey = "LControl" || A_PriorKey = "RControl") {
 		Global NavMode := !NavMode
-        CurrentChord := ""		if (NavMode) {
+        CurrentChord := ""
+		if (NavMode) {
 			Notify("Navigation Mode: ON")
 			SoundBeep 1000, 150
 		} else {
@@ -237,7 +239,8 @@ ToggleNavStyle(*) {
 ToggleMirrorMode(*) {
 	Global MirrorMode, CurrentChord
 	MirrorMode := !MirrorMode
-    CurrentChord := ""	StreamWrite("MirrorKeys", "MirrorMode", MirrorMode)
+    CurrentChord := ""
+	StreamWrite("MirrorKeys", "MirrorMode", MirrorMode)
 	
 	if (MirrorMode) {
 		Notify("Mirror Mode: ON")
