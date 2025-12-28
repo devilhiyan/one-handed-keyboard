@@ -54,8 +54,10 @@
 
 (defchords mouse-chords 50
   (lsft spc) lsft
+  (tab spc)  bspc
   (lsft) f18  ;; Right Click
   (spc)  spc  ;; Normal Space
+  (tab)  tab
 )
 
 (defchords halmak-chords 100
@@ -117,7 +119,7 @@
 ;; ------------------------------------------- 
 (deflayer mouse
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    f19  @mm-u f20  _    _    _    _    _    _    _    _    _    _
+  (chord mouse-chords tab)    f19  @mm-u f20  _    _    _    _    _    _    _    _    _    _
   f17  @mm-l @mm-d @mm-r _    _    _    _    _    _    _    _    _
   (chord mouse-chords lsft)    _    _    _    _    _    _    _    _    _    _    _
   @lctl-exit-nav  @lmet-mod @to-halmak (chord mouse-chords spc)           _    _    _

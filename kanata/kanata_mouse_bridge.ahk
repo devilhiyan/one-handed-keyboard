@@ -12,7 +12,7 @@ SetMouseDelay -1
 ; Configuration
 MinSpeed := 1
 MaxSpeed := 25
-AccelFactor := 1.15 
+AccelFactor := 1.07 
 ScrollSpeed := 1
 CurrentSpeed := MinSpeed
 
