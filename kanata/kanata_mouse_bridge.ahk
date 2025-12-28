@@ -11,7 +11,8 @@ SetMouseDelay -1
 
 ; Configuration
 MinSpeed := 1
-AccelFactor := 1.07 
+MaxSpeed := 35
+AccelFactor := 0.05 ; This is now the "Ease Factor"
 ScrollSpeed := 1
 CurrentSpeed := MinSpeed
 
@@ -70,8 +71,8 @@ ProcessMovement() {
     if (moveX != 0 || moveY != 0) {
         MouseMove(moveX * CurrentSpeed, moveY * CurrentSpeed, 0, "R")
         
-        ; Accelerate
-        CurrentSpeed *= AccelFactor
+        ; Accelerate (Ease-out)
+        CurrentSpeed += (MaxSpeed - CurrentSpeed) * AccelFactor
     }
 }
 
