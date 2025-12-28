@@ -58,5 +58,5 @@
   tab  q    home up   end  t    y    u    i    o    p    [    ]    \
   caps a    left down right g    h    j    k    l    ;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  @to-halmak lmet lalt     spc            ralt rmet rctl
+  @to-qwer   lmet lalt     spc            ralt rmet rctl
 )
