@@ -12,7 +12,7 @@ SetMouseDelay -1
 ; Configuration
 MinSpeed := 1
 MaxSpeed := 35
-AccelFactor := 0.05 ; This is now the "Ease Factor"
+AccelFactor := 0.02 ; This is now the "Ease Factor"
 ScrollSpeed := 1
 CurrentSpeed := MinSpeed
 
