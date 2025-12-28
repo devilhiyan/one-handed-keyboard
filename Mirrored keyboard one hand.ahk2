@@ -33,16 +33,18 @@ Global PendingChordKeys := Map() ; Keys collected during the 200ms window
 Global ChordTimerActive := False
 Global ChordWindowStart := 0
 Global ChordMap := Map()
+Global ChordRepeatRate := 30 ; Faster repeat (ms)
 
-; Initialize Chord Map (Sorted keys for ID)
-ChordMap["ew"] := {act: "{Blind}{Up}", mAct: "Up"}
-ChordMap["ds"] := {act: "{Blind}{Down}", mAct: "Down"}
-ChordMap["as"] := {act: "{Blind}{Left}", mAct: "Left"}
-ChordMap["df"] := {act: "{Blind}{Right}", mAct: "Right"}
-ChordMap["qw"] := {act: "{Blind}{Home}", mAct: "WheelUp"}
-ChordMap["er"] := {act: "{Blind}{End}", mAct: "WheelDown"}
-ChordMap["ads"] := {act: "{Blind}{Backspace}", mAct: ""}
-ChordMap["dfs"] := {act: "{Blind}{Delete}", mAct: ""}
+; Initialize Chord Map (Keys MUST be sorted alphabetically for ID)
+; We also store VK codes to avoid calling GetKeyVK in the high-frequency repeat loop
+ChordMap["ads"] := {act: "{Blind}{Backspace}", mAct: "", vks: [GetKeyVK("a"), GetKeyVK("d"), GetKeyVK("s")]}
+ChordMap["dfs"] := {act: "{Blind}{Delete}", mAct: "", vks: [GetKeyVK("d"), GetKeyVK("f"), GetKeyVK("s")]}
+ChordMap["ew"]  := {act: "{Blind}{Up}", mAct: "Up", vks: [GetKeyVK("e"), GetKeyVK("w")]}
+ChordMap["ds"]  := {act: "{Blind}{Down}", mAct: "Down", vks: [GetKeyVK("d"), GetKeyVK("s")]}
+ChordMap["as"]  := {act: "{Blind}{Left}", mAct: "Left", vks: [GetKeyVK("a"), GetKeyVK("s")]}
+ChordMap["df"]  := {act: "{Blind}{Right}", mAct: "Right", vks: [GetKeyVK("d"), GetKeyVK("f")]}
+ChordMap["qw"]  := {act: "{Blind}{Home}", mAct: "WheelUp", vks: [GetKeyVK("q"), GetKeyVK("w")]}
+ChordMap["er"]  := {act: "{Blind}{End}", mAct: "WheelDown", vks: [GetKeyVK("e"), GetKeyVK("r")]}
 Global CustomMenuGui := ""
 Global BtnNavStyle := ""
 Global BtnMirrorMode := ""
@@ -798,36 +800,84 @@ $*v::MirrorSend("m")
 
 ; --- Halmak Chords ---
 ; Up (WE)
-w & e::PerformChord("w", "e", "{Blind}{Up}", "Up")
-e & w::PerformChord("e", "w", "{Blind}{Up}", "Up")
+w & e:: {
+    Critical()
+    PerformChord("w", "e", "{Blind}{Up}", "Up")
+}
+e & w:: {
+    Critical()
+    PerformChord("e", "w", "{Blind}{Up}", "Up")
+}
 
 ; Down (SD)
-s & d::PerformChord("s", "d", "{Blind}{Down}", "Down")
-d & s::PerformChord("d", "s", "{Blind}{Down}", "Down")
+s & d:: {
+    Critical()
+    PerformChord("s", "d", "{Blind}{Down}", "Down")
+}
+d & s:: {
+    Critical()
+    PerformChord("d", "s", "{Blind}{Down}", "Down")
+}
 
 ; Left (AS)
-a & s::PerformChord("a", "s", "{Blind}{Left}", "Left")
-s & a::PerformChord("s", "a", "{Blind}{Left}", "Left")
+a & s:: {
+    Critical()
+    PerformChord("a", "s", "{Blind}{Left}", "Left")
+}
+s & a:: {
+    Critical()
+    PerformChord("s", "a", "{Blind}{Left}", "Left")
+}
 
 ; Right (DF)
-d & f::PerformChord("d", "f", "{Blind}{Right}", "Right")
-f & d::PerformChord("f", "d", "{Blind}{Right}", "Right")
+d & f:: {
+    Critical()
+    PerformChord("d", "f", "{Blind}{Right}", "Right")
+}
+f & d:: {
+    Critical()
+    PerformChord("f", "d", "{Blind}{Right}", "Right")
+}
 
 ; Home / Wheel Up (QW)
-q & w::PerformChord("q", "w", "{Blind}{Home}", "WheelUp")
-w & q::PerformChord("w", "q", "{Blind}{Home}", "WheelUp")
+q & w:: {
+    Critical()
+    PerformChord("q", "w", "{Blind}{Home}", "WheelUp")
+}
+w & q:: {
+    Critical()
+    PerformChord("w", "q", "{Blind}{Home}", "WheelUp")
+}
 
 ; End / Wheel Down (ER)
-e & r::PerformChord("e", "r", "{Blind}{End}", "WheelDown")
-r & e::PerformChord("r", "e", "{Blind}{End}", "WheelDown")
+e & r:: {
+    Critical()
+    PerformChord("e", "r", "{Blind}{End}", "WheelDown")
+}
+r & e:: {
+    Critical()
+    PerformChord("r", "e", "{Blind}{End}", "WheelDown")
+}
 
 ; Backspace (EAI / Physical AD)
-a & d::PerformChord("a", "d", "{Blind}{Backspace}", "")
-d & a::PerformChord("d", "a", "{Blind}{Backspace}", "")
+a & d:: {
+    Critical()
+    PerformChord("a", "d", "{Blind}{Backspace}", "")
+}
+d & a:: {
+    Critical()
+    PerformChord("d", "a", "{Blind}{Backspace}", "")
+}
 
 ; Delete (AIO / Physical SF)
-s & f::PerformChord("s", "f", "{Blind}{Delete}", "")
-f & s::PerformChord("f", "s", "{Blind}{Delete}", "")
+s & f:: {
+    Critical()
+    PerformChord("s", "f", "{Blind}{Delete}", "")
+}
+f & s:: {
+    Critical()
+    PerformChord("f", "s", "{Blind}{Delete}", "")
+}
 
 ; --- Space Layer (Hold Space) ---
 Space & q:: MirrorSend("b")
@@ -872,41 +922,49 @@ $*Capslock:: {
 
 ; --- Typing Restore (Prefix Release) ---
 $*q:: {
+    Critical()
     if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
         return
     SendInput "{Blind}" . GetRemappedKey("q")
 }
 $*w:: {
+    Critical()
     if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
         return
     SendInput "{Blind}" . GetRemappedKey("w")
 }
 $*e:: {
+    Critical()
     if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
         return
     SendInput "{Blind}" . GetRemappedKey("e")
 }
 $*r:: {
+    Critical()
     if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
         return
     SendInput "{Blind}" . GetRemappedKey("r")
 }
 $*a:: {
+    Critical()
     if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
         return
     SendInput "{Blind}" . GetRemappedKey("a")
 }
 $*s:: {
+    Critical()
     if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
         return
     SendInput "{Blind}" . GetRemappedKey("s")
 }
 $*d:: {
+    Critical()
     if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
         return
     SendInput "{Blind}" . GetRemappedKey("d")
 }
 $*f:: {
+    Critical()
     if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
         return
     SendInput "{Blind}" . GetRemappedKey("f")
@@ -959,12 +1017,14 @@ PerformChord(Key1, Key2, KeyAct, MouseAct, Key3 := "", KeyAct3 := "") {
     Critical()
     
     ; If any of these keys are part of an already active repeating chord, ignore the auto-repeat
-    for ID, Data in ActiveChords {
+    for ID, Data in ActiveChords.Clone() {
         inChord := False
-        for k in Data.keys {
-            if (k == Key1 || k == Key2) {
-                inChord := True
-                break
+        if IsObject(Data) && Data.HasProp("keys") {
+            for k in Data.keys {
+                if (k == Key1 || k == Key2) {
+                    inChord := True
+                    break
+                }
             }
         }
         if (inChord) {
@@ -986,11 +1046,10 @@ PerformChord(Key1, Key2, KeyAct, MouseAct, Key3 := "", KeyAct3 := "") {
 }
 
 EvaluateChordBuffer() {
-    Global ChordTimerActive := False, PendingChordKeys, ActiveChords, ChordMap, KeyTracker
+    Global ChordTimerActive, PendingChordKeys, ActiveChords, ChordMap, KeyTracker, ChordRepeatRate
     Critical()
     
     ; 1. Refresh buffer with physically held keys that are relevant
-    ; This fixes cases where Windows auto-repeat only sends one key of a held chord
     chordKeys := ["q","w","e","r","a","s","d","f"]
     for k in chordKeys {
         if (KeyTracker[GetKeyVK(k)])
@@ -999,9 +1058,15 @@ EvaluateChordBuffer() {
 
     ; 2. Collect and sort keys
     keys := []
-    for k, v in PendingChordKeys
+    for k, v in PendingChordKeys.Clone()
         keys.Push(k)
     
+    if (keys.Length == 0) {
+        ChordTimerActive := False
+        PendingChordKeys.Clear()
+        return
+    }
+
     ; Sort keys
     Loop keys.Length - 1 {
         i := A_Index
@@ -1016,10 +1081,7 @@ EvaluateChordBuffer() {
     }
     
     ; 3. Prioritized Resolution
-    ; We look for the longest match first
     resolved := False
-    
-    ; Try full string first
     keyStr := ""
     for k in keys
         keyStr .= k
@@ -1027,20 +1089,13 @@ EvaluateChordBuffer() {
     if (keyStr != "" && ChordMap.Has(keyStr)) {
         data := ChordMap[keyStr]
         ChordAction(data.act, data.mAct)
-        ActiveChords[keyStr] := {keys: keys, act: data.act, mAct: data.mAct, count: 0}
+        ; Store VKs in ActiveChords to avoid GetKeyVK in ChordMasterTick
+        ActiveChords[keyStr] := {keys: keys, vks: data.vks, act: data.act, mAct: data.mAct}
         resolved := True
-    } else {
-        ; Try sub-combinations (3-key then 2-key) if the full set isn't a chord
-        ; This handles accidental 4th key presses
-        if (!resolved && keys.Length > 2) {
-             ; Logic to find best sub-match could go here if needed
-        }
     }
     
     ; 4. Fallback Handling
     if (!resolved) {
-        ; Only fallback to typing if NO keys are currently held
-        ; This prevents "bleeding" characters while the user is still trying to form a chord
         anyHeld := False
         for k in keys {
             if (KeyTracker[GetKeyVK(k)]) {
@@ -1057,13 +1112,14 @@ EvaluateChordBuffer() {
     }
     
     if (resolved)
-        SetTimer ChordMasterTick, 50
+        SetTimer ChordMasterTick, ChordRepeatRate
         
     PendingChordKeys.Clear()
+    ChordTimerActive := False
 }
 
 ChordMasterTick() {
-    Global ActiveChords
+    Global ActiveChords, KeyTracker, ChordRepeatRate
     Critical()
     if ActiveChords.Count == 0 {
         SetTimer , 0
@@ -1071,13 +1127,16 @@ ChordMasterTick() {
     }
     
     for ID, Data in ActiveChords.Clone() {
-        ; Check if all keys in the chord are still held
         allHeld := True
-        for k in Data.keys {
-            if (!KeyTracker[GetKeyVK(k)]) {
-                allHeld := False
-                break
+        if IsObject(Data) && Data.HasProp("vks") {
+            for vk in Data.vks {
+                if (!KeyTracker[vk]) {
+                    allHeld := False
+                    break
+                }
             }
+        } else {
+            allHeld := False
         }
         
         if (!allHeld) {
@@ -1085,9 +1144,11 @@ ChordMasterTick() {
             continue
         }
         
-        ; Repeat action
         ChordAction(Data.act, Data.mAct)
     }
+    
+    if ActiveChords.Count == 0
+        SetTimer , 0
 }
 
 ; =========================================================
