@@ -12,8 +12,10 @@
   ;; Tap for Space, Hold for Mirror Layer
   spc-mir (tap-hold 200 200 spc (layer-toggle mirror))
   
-  ;; Toggle Navigation Layer
-  nav-tog (layer-switch navigation)
+  ;; Layer Switchers
+  to-nav    (layer-switch navigation)
+  to-halmak (layer-switch halmak)
+  to-qwer   (layer-switch qwer)
 )
 
 (defchords halmak-chords 50
@@ -27,12 +29,20 @@
   (s f) del
 )
 
-(deflayer base
+(deflayer qwer
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  @to-halmak lmet lalt     spc            ralt rmet rctl
+)
+
+(deflayer halmak
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  (chord halmak-chords q) (chord halmak-chords w) (chord halmak-chords e) (chord halmak-chords r) t    y    u    i    o    p    [    ]    \
   caps (chord halmak-chords a) (chord halmak-chords s) (chord halmak-chords d) (chord halmak-chords f) g    h    j    k    l    ;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  @nav-tog lmet lalt       @spc-mir       ralt rmet rctl
+  @to-nav    lmet lalt     @spc-mir       ralt rmet rctl
 )
 
 (deflayer mirror
@@ -48,5 +58,5 @@
   tab  q    home up   end  t    y    u    i    o    p    [    ]    \
   caps a    left down right g    h    j    k    l    ;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  @nav-tog lmet lalt       spc            ralt rmet rctl
+  @to-qwer   lmet lalt     spc            ralt rmet rctl
 )
