@@ -1,0 +1,52 @@
+;; Kanata Configuration for Mirror Keys (Halmak One-Handed)
+
+(defsrc
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+(defalias
+  ;; Tap for Space, Hold for Mirror Layer
+  spc-mir (tap-hold 200 200 spc (layer-toggle mirror))
+  
+  ;; Toggle Navigation Layer
+  nav-tog (layer-switch navigation)
+)
+
+(defchords halmak-chords 50
+  (w e) up
+  (s d) down
+  (a s) left
+  (d f) right
+  (q w) home
+  (e r) end
+  (a d) bspc
+  (s f) del
+)
+
+(deflayer base
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  (chord halmak-chords q) (chord halmak-chords w) (chord halmak-chords e) (chord halmak-chords r) t    y    u    i    o    p    [    ]    \
+  caps (chord halmak-chords a) (chord halmak-chords s) (chord halmak-chords d) (chord halmak-chords f) g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  @nav-tog lmet lalt       @spc-mir       ralt rmet rctl
+)
+
+(deflayer mirror
+  -    0    9    8    7    6    5    4    3    2    1    =    grv  bspc
+  bspc b    p    w    y    q    y    u    i    o    p    [    ]    \
+  '    k    j    x    f    z    h    j    k    l    ;    '    ret
+  lsft c    b    g    v    c    n    m    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+(deflayer navigation
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    home up   end  t    y    u    i    o    p    [    ]    \
+  caps a    left down right g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  @nav-tog lmet lalt       spc            ralt rmet rctl
+)
