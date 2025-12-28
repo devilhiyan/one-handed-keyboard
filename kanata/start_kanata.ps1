@@ -7,7 +7,7 @@ Start-Process $ahkScript
 
 Write-Host "Starting Kanata..."
 try {
-    .\kanata.exe -n
+    .\kanata_windows_gui_wintercept_cmd_allowed_x64.exe -n
 } finally {
     Write-Host "Kanata stopped. Closing Mouse Bridge..."
     $processes = Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -like "*kanata_mouse_bridge.ahk*" }

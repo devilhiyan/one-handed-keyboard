@@ -43,6 +43,19 @@
   mm-l f14
   mm-d f15
   mm-r f16
+
+  ;; ------------------------------------------- 
+  ;; NAVIGATION TOGGLE
+  ;; ------------------------------------------- 
+  ;; Tap LCTL to toggle Mouse Layer + Signal AHK (F24)
+  lctl-enter-nav (tap-hold 200 200 (multi f24 (layer-switch mouse)) lctl)
+  lctl-exit-nav  (tap-hold 200 200 (multi f24 (layer-switch halmak)) lctl)
+)
+
+(defchords mouse-chords 50
+  (lsft spc) lsft
+  (lsft) f18  ;; Right Click
+  (spc)  spc  ;; Normal Space
 )
 
 (defchords halmak-chords 100
@@ -74,7 +87,7 @@
   tab  (chord halmak-chords q) (chord halmak-chords w) (chord halmak-chords e) (chord halmak-chords r) r    y    u    i    o    p    [    ]    \
   ret  (chord halmak-chords a) (chord halmak-chords s) (chord halmak-chords d) (chord halmak-chords f) u    h    j    k    l    ;    '    ret
   lsft l    d    n    m    b    n    m    ,    .    /    rsft
-  @lctl-mod  @lmet-mod @to-mouse     @spc-mir       ralt rmet rctl
+  @lctl-enter-nav  @lmet-mod @to-mouse     @spc-mir       ralt rmet rctl
 )
 
 ;; --------------------------------------------------------------------------- 
@@ -105,9 +118,9 @@
 (deflayer mouse
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    f19  @mm-u f20  _    _    _    _    _    _    _    _    _    _
-  _    @mm-l @mm-d @mm-r f18  _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _
-  @lctl-mouse  @lmet-mod @to-halmak f17           _    _    _
+  f17  @mm-l @mm-d @mm-r _    _    _    _    _    _    _    _
+  (chord mouse-chords lsft)    _    _    _    _    _    _    _    _    _    _    _
+  @lctl-exit-nav  @lmet-mod @to-halmak (chord mouse-chords spc)           _    _    _
 )
 ;; --------------------------------------------------------------------------- 
 ;; 5. HELPER LAYERS (Correct 60-key counts) 
