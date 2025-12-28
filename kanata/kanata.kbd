@@ -12,7 +12,7 @@
   ;; Tap for Space, Hold for Mirror Layer
   spc-mir (tap-hold 200 200 spc (layer-toggle mirror))
   
-  ;; Layer Switchers
+  ;; Layer Switchers (Toggle via Left Control)
   to-nav    (layer-switch navigation)
   to-halmak (layer-switch halmak)
   to-qwer   (layer-switch qwer)
