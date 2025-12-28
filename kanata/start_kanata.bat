@@ -2,7 +2,7 @@
 cd /d "%~dp0"
 
 echo Starting Kanata...
-kanata.exe
+kanata.exe -n
 
 echo.
 echo Kanata has stopped.

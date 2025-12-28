@@ -73,8 +73,8 @@
 (deflayer mirror
   -    0    9    8    7    6    5    4    3    2    1    =    grv  bspc
   bspc b    p    w    y    q    y    u    i    o    p    [    ]    \
-  '    k    j    x    f    z    h    j    k    l    ;    '    ret
-  lsft c    b    g    v    c    n    m    ,    .    /    rsft
+  '    k    j    g    f    z    h    j    k    l    ;    '    ret
+  lsft c    b    x    v    c    n    m    ,    .    /    rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
@@ -94,8 +94,8 @@
 ;; --------------------------------------------------------------------------- 
 (deflayer mouse
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    mlft mwu  movemouse-up   mwd  mmid _    _    _    _    _    _    _    _
-  _    _    movemouse-left movemouse-down movemouse-right mrgt _    _    _    _    _    _    _
+  _    mlft mwu  (movemouse-up 1 1)   mwd  mmid _    _    _    _    _    _    _    _
+  _    _    (movemouse-left 1 1) (movemouse-down 1 1) (movemouse-right 1 1) mrgt _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
   @lctl-mod  @lmet-mod _        mlft           _    _    _
 )
@@ -108,7 +108,7 @@
 (deflayer ctrl-layer
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _
   _    _    _              @tog-mouse     _    _    _
 )
@@ -117,7 +117,7 @@
 (deflayer fn-layer
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _
   _    _    _              @tog-halmak    _    _    _
 )

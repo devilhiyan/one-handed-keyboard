@@ -1,3 +1,3 @@
 Set-Location $PSScriptRoot
 Write-Host "Starting Kanata..."
-.\kanata.exe
+.\kanata.exe -n
