@@ -52,7 +52,7 @@
   lctl-exit-nav  (tap-hold 200 200 (multi f24 (layer-switch halmak)) lctl)
 )
 
-(defchords mouse-chords 50
+(defchords mouse-chords 150
   (lsft spc) lsft
   (tab spc)  bspc
   (lsft) f18  ;; Right Click
