@@ -50,14 +50,9 @@
   ;; Tap LCTL to toggle Mouse Layer + Signal AHK (F24)
   lctl-enter-nav (tap-hold 200 200 (multi f24 (layer-switch mouse)) lctl)
   lctl-exit-nav  (tap-hold 200 200 (multi f24 (layer-switch halmak)) lctl)
-)
 
-(defchords mouse-chords 150
-  (lsft spc) lsft
-  (tab spc)  bspc
-  (lsft) f18  ;; Right Click
-  (spc)  spc  ;; Normal Space
-  (tab)  tab
+  ;; Space as modifier in navigation mode
+  spc-nav-mod (tap-hold 200 200 spc (layer-toggle mouse-spc-mod))
 )
 
 (defchords halmak-chords 100
@@ -119,10 +114,21 @@
 ;; ------------------------------------------- 
 (deflayer mouse
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  (chord mouse-chords tab)    f19  @mm-u f20  _    _    _    _    _    _    _    _    _    _
+  tab  f19  @mm-u f20  _    _    _    _    _    _    _    _    _    _
   f17  @mm-l @mm-d @mm-r _    _    _    _    _    _    _    _    _
-  (chord mouse-chords lsft)    _    _    _    _    _    _    _    _    _    _    _
-  @lctl-exit-nav  @lmet-mod @to-halmak (chord mouse-chords spc)           _    _    _
+  f18  _    _    _    _    _    _    _    _    _    _    _
+  @lctl-exit-nav  @lmet-mod @to-halmak @spc-nav-mod           _    _    _
+)
+
+;; ------------------------------------------- 
+;; 4b. MOUSE SPACE MODIFIER LAYER
+;; ------------------------------------------- 
+(deflayer mouse-spc-mod
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  bspc _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  lsft _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _              _    _    _
 )
 ;; --------------------------------------------------------------------------- 
 ;; 5. HELPER LAYERS (Correct 60-key counts) 
