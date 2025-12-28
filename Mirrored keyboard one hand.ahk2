@@ -960,19 +960,23 @@ PerformChord(Key1, Key2, KeyAct, MouseAct, Key3 := "", KeyAct3 := "") {
     
     ; If any of these keys are part of an already active repeating chord, ignore the auto-repeat
     for ID, Data in ActiveChords {
-        isKey1In := False, isKey2In := False
+        inChord := False
         for k in Data.keys {
-            if (k == Key1) isKey1In := True
-            if (k == Key2) isKey2In := True
+            if (k == Key1 || k == Key2) {
+                inChord := True
+                break
+            }
         }
-        if (isKey1In || isKey2In)
+        if (inChord) {
             return
+        }
     }
 
     PendingChordKeys[Key1] := 1
     PendingChordKeys[Key2] := 1
-    if (Key3 != "")
+    if (Key3 != "") {
         PendingChordKeys[Key3] := 1
+    }
 
     if (!ChordTimerActive) {
         ChordTimerActive := True
