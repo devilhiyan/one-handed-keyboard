@@ -4,6 +4,7 @@
   process-unmapped-keys yes
   ;; Mouse Tuning
   ;; movemouse-smooth-diagonals yes
+  windows-interception-mouse-hwid "0, 0, 0, 0"
 )
 
 (defsrc
