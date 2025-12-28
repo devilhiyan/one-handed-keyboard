@@ -31,31 +31,31 @@
   (a d) bspc
   (s f) del
   
-  ;; Single key fallbacks
-  (q) q
-  (w) w
-  (e) e
-  (r) r
-  (a) a
-  (s) s
-  (d) d
-  (f) f
+  ;; Single key fallbacks (Remapped to Custom/Halmak)
+  (q) c
+  (w) s
+  (e) t
+  (r) h
+  (a) e
+  (s) a
+  (d) i
+  (f) o
 )
 
-;; --------------------------------------------------------------------------- 
+;; ---------------------------------------------------------------------------
 ;; 1. HALMAK LAYER (Permanent Default - One-Handed + Chords)
-;; --------------------------------------------------------------------------- 
+;; ---------------------------------------------------------------------------
 (deflayer halmak
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
-  tab  (chord halmak-chords q) (chord halmak-chords w) (chord halmak-chords e) (chord halmak-chords r) t    y    u    i    o    p    [    ]    \
-  caps (chord halmak-chords a) (chord halmak-chords s) (chord halmak-chords d) (chord halmak-chords f) g    h    j    k    l    ;    '    ret
-  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  tab  (chord halmak-chords q) (chord halmak-chords w) (chord halmak-chords e) (chord halmak-chords r) r    y    u    i    o    p    [    ]    \
+  caps (chord halmak-chords a) (chord halmak-chords s) (chord halmak-chords d) (chord halmak-chords f) u    h    j    k    l    ;    '    ret
+  lsft l    d    n    m    b    n    m    ,    .    /    rsft
   @to-nav    lmet lalt     @spc-mir       ralt rmet rctl
 )
 
-;; --------------------------------------------------------------------------- 
+;; ---------------------------------------------------------------------------
 ;; 2. MIRROR LAYER (Activated by holding Space)
-;; --------------------------------------------------------------------------- 
+;; ---------------------------------------------------------------------------
 (deflayer mirror
   -    0    9    8    7    6    5    4    3    2    1    =    grv  bspc
   bspc b    p    w    y    q    y    u    i    o    p    [    ]    \
@@ -64,9 +64,9 @@
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
-;; --------------------------------------------------------------------------- 
+;; ---------------------------------------------------------------------------
 ;; 3. NAVIGATION LAYER (ESDF Movement)
-;; --------------------------------------------------------------------------- 
+;; ---------------------------------------------------------------------------
 (deflayer navigation
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  q    home up   end  t    y    u    i    o    p    [    ]    \

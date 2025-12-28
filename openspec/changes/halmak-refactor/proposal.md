@@ -1,31 +1,29 @@
-# Proposal: Halmak Refactor & Performance Optimization
+# Halmak Refactor Proposal
 
 ## Goal
-Refactor Mirror Keys to exclusively use the Halmak keyboard layout, remove all other legacy styles (Standard, Overlapping, Hybrid, Dvorak), fix the Space-key combo crash, and optimize script performance.
+Update the Base (Halmak) Layer to match the custom key mapping defined in the original AutoHotkey script, instead of using standard QWERTY.
 
-## Current State
-- Multiple layout styles supported (Standard, Overlapping, Hybrid, Dvorak, Halmak).
-- Complex `#HotIf` logic for switching styles.
-- Reported crash when combining Space with other keys.
-- Duplicate hotkey definitions for Halmak chords and base layers.
+## Context
+The user's AutoHotkey script remapped the left-hand keys to a custom layout (Halmak-based) on the base layer, in addition to the mirroring functionality. The current Kanata config uses QWERTY on the base layer, which is incorrect.
 
-## Proposed Changes
-1.  **Layout Consolidation**:
-    - Remove all logic and hotkeys related to non-Halmak styles.
-    - Set `MirrorStyle` to "Halmak" permanently.
-2.  **Fix Space Combo Crash**:
-    - Optimize the Space prefix handling.
-    - Replace `SendEvent` with `SendInput` for faster, more reliable keystrokes.
-    - Ensure `Space Up` does not conflict with active chords.
-3.  **Performance Optimization**:
-    - Eliminate conditional style checks (`#HotIf MirrorStyle == ...`).
-    - Consolidate Global Chords and Halmak-specific hotkeys to prevent hook recursion and redundant evaluations.
-    - Use `Critical` in time-sensitive chord logic.
-4.  **UI Cleanup**:
-    - Remove style-switching options from the Tray and Context menus.
-    - Update the visual map to reflect the Halmak-only state (if applicable, though map is a static image, I'll update the menu).
+## Changes
+1.  **Remap Base Keys:** Update the `halmak` layer to output the custom characters.
+    *   **Source `q`** -> Output `c`
+    *   **Source `w`** -> Output `s`
+    *   **Source `e`** -> Output `t`
+    *   **Source `r`** -> Output `h`
+    *   **Source `t`** -> Output `r`
+    *   **Source `a`** -> Output `e`
+    *   **Source `s`** -> Output `a`
+    *   **Source `d`** -> Output `i`
+    *   **Source `f`** -> Output `o`
+    *   **Source `g`** -> Output `u`
+    *   **Source `z`** -> Output `l`
+    *   **Source `x`** -> Output `d`
+    *   **Source `c`** -> Output `n`
+    *   **Source `v`** -> Output `m`
+2.  **Update Chords:** The chords (e.g., `w+e` = `Up`) will still trigger on the *physical* keys, but the **single-key fallbacks** inside the chord definition must now output the *new* mapped characters (e.g., pressing `w` alone outputs `s`).
 
-## Expected Outcome
-- A significantly leaner and faster script.
-- Resolution of the "Space + Key" crash.
-- Better responsiveness for Halmak chords and mirroring.
+## Risk
+- **Confusion:** The user must be aware that the physical labels on their keyboard will no longer match the output on the base layer (which is the intended behavior).
+- **Chord Conflicts:** We must ensure that the remapped outputs don't interfere with the chord detection logic (Kanata handles this by separating source triggers from outputs).

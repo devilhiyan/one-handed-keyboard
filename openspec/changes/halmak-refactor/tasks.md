@@ -1,7 +1,8 @@
-# Tasks: Halmak Refactor
+# Tasks
 
-- [ ] Remove legacy style definitions (Standard, Overlapping, Hybrid, Dvorak) [id:1]
-- [ ] Refactor Halmak hotkeys into a single, optimized block [id:2]
-- [ ] Fix Space-key crash by optimizing prefix handling and Send modes [id:3]
-- [ ] Remove style-switching logic from initialization and Tray menus [id:4]
-- [ ] Verify performance and stability of Halmak chords [id:5]
+- [ ] **Update Chord Fallbacks** <!-- id: 0 -->
+    - [ ] Modify `defchords halmak-chords` in `kanata.kbd` to output the custom mapped keys for single presses (e.g., `(q) c`, `(w) s`). <!-- id: 1 -->
+- [ ] **Update Halmak Layer** <!-- id: 2 -->
+    - [ ] Modify `deflayer halmak` in `kanata.kbd` to map the non-chord keys (`t`, `g`, `z`, `x`, `c`, `v`) to their custom values (`r`, `u`, `l`, `d`, `n`, `m`). <!-- id: 3 -->
+- [ ] **Verify** <!-- id: 4 -->
+    - [ ] Restart Kanata and verify single key outputs match the Halmak/Custom layout. <!-- id: 5 -->
