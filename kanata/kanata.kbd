@@ -2,9 +2,8 @@
 
 (defcfg
   process-unmapped-keys yes
-  ;; Fast Key Repeat Tuning
-  key-repeat-delay 200
-  key-repeat-interval 25
+  ;; Mouse Tuning
+  movemouse-smooth-diagonals yes
 )
 
 (defsrc
@@ -110,7 +109,7 @@
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _
   _    _    _              @tog-mouse     _    _    _
 )
 
