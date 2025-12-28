@@ -34,6 +34,14 @@
   to-mouse   (layer-switch mouse)
   to-halmak  (layer-switch halmak)
   tog-qwer   (layer-switch qwer)
+
+  ;; ------------------------------------------- 
+  ;; MOUSE ACTIONS
+  ;; ------------------------------------------- 
+  mm-u (movemouse-up 10 10)
+  mm-l (movemouse-left 10 10)
+  mm-d (movemouse-down 10 10)
+  mm-r (movemouse-right 10 10)
 )
 
 (defchords halmak-chords 100
@@ -95,8 +103,8 @@
 ;; --------------------------------------------------------------------------- 
 (deflayer mouse
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    (movemouse-up 5 10) _    _    _    _    _    _    _    _    _    _    _
-  _    (movemouse-left 5 10) (movemouse-down 5 10) (movemouse-right 5 10) S-m  _    _    _    _    _    _    _    _
+  _    mwu  @mm-u mwd  _    _    _    _    _    _    _    _    _    _
+  _    @mm-l @mm-d @mm-r S-m  _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
   @lctl-mouse  @lmet-mod @to-halmak mlft           _    _    _
 )
