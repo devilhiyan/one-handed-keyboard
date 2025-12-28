@@ -11,7 +11,6 @@ SetMouseDelay -1
 
 ; Configuration
 MinSpeed := 1
-MaxSpeed := 25
 AccelFactor := 1.07 
 ScrollSpeed := 1
 CurrentSpeed := MinSpeed
@@ -72,11 +71,7 @@ ProcessMovement() {
         MouseMove(moveX * CurrentSpeed, moveY * CurrentSpeed, 0, "R")
         
         ; Accelerate
-        if (CurrentSpeed < MaxSpeed) {
-            CurrentSpeed *= AccelFactor
-            if (CurrentSpeed > MaxSpeed)
-                CurrentSpeed := MaxSpeed
-        }
+        CurrentSpeed *= AccelFactor
     }
 }
 
