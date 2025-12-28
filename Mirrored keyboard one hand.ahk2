@@ -28,12 +28,13 @@ Global SpaceDownTime := 0            ; Millisecond when space was pressed
 Global SpaceTapThreshold := 300      ; Max duration for a "tap" space
 Global KeyTracker := Map()
 KeyTracker.Default := 0
-Global ActiveChords := Map() ; Track active chords for the master timer
+Global CurrentChord := "" ; Track a single active repeating chord for stability
 Global PendingChordKeys := Map() ; Keys collected during the 200ms window
 Global ChordTimerActive := False
 Global ChordWindowStart := 0
 Global ChordMap := Map()
-Global ChordRepeatRate := 30 ; Faster repeat (ms)
+Global ChordRepeatRate := 40 ; Balanced repeat rate
+Global ProcessingChords := False ; Re-entrancy guard
 
 ; Initialize Chord Map (Keys MUST be sorted alphabetically for ID)
 ; We also store VK codes to avoid calling GetKeyVK in the high-frequency repeat loop
@@ -68,9 +69,19 @@ StateHook_KeyDown(ih, vk, sc) {
 }
 
 StateHook_KeyUp(ih, vk, sc) {
-    global KeyTracker, ChordTimerActive, PendingChordKeys
+    global KeyTracker, ChordTimerActive, PendingChordKeys, CurrentChord
     Critical()
     KeyTracker[vk] := 0
+    
+    ; If a chord is active, stop it immediately if any of its keys are released
+    if IsObject(CurrentChord) {
+        for vkChord in CurrentChord.vks {
+            if (vkChord == vk) {
+                CurrentChord := ""
+                break
+            }
+        }
+    }
     
     ; If a chord is pending, check if all pending keys are released
     if (ChordTimerActive) {
@@ -165,8 +176,7 @@ $LWin:: {
     if (A_TickCount - StartTime <= 500) { ; Released within 0.50s (Tap)
         if (A_PriorKey = "LWin") { ; Only if no other key was pressed
             Global NavMode := !NavMode
-            ActiveChords.Clear()
-            if (NavMode) {
+            CurrentChord := ""            if (NavMode) {
                 Notify("Navigation Mode: ON (" . (MouseMode ? "Permanent" : "Transient") . ")")
                 SoundBeep 1000, 150
             } else {
@@ -183,8 +193,7 @@ $LWin:: {
 	Critical ; Prevents this thread from being interrupted
 	if (A_PriorKey = "LControl" || A_PriorKey = "RControl") {
 		Global NavMode := !NavMode
-        ActiveChords.Clear()
-		if (NavMode) {
+        CurrentChord := ""		if (NavMode) {
 			Notify("Navigation Mode: ON")
 			SoundBeep 1000, 150
 		} else {
@@ -226,10 +235,9 @@ ToggleNavStyle(*) {
 }
 
 ToggleMirrorMode(*) {
-	Global MirrorMode, ActiveChords
+	Global MirrorMode, CurrentChord
 	MirrorMode := !MirrorMode
-    ActiveChords.Clear()
-	StreamWrite("MirrorKeys", "MirrorMode", MirrorMode)
+    CurrentChord := ""	StreamWrite("MirrorKeys", "MirrorMode", MirrorMode)
 	
 	if (MirrorMode) {
 		Notify("Mirror Mode: ON")
@@ -459,7 +467,7 @@ Space Up:: {
     ; Safety reset: Ensure state is cleared for the next interaction
     Global MirrorActionOccurred := False
     KeyTracker[0x20] := 0
-    ActiveChords.Clear() ; Ensure no lingering chords
+    CurrentChord := "" ; Ensure no lingering chords
 }
 #HotIf
 
@@ -923,49 +931,49 @@ $*Capslock:: {
 ; --- Typing Restore (Prefix Release) ---
 $*q:: {
     Critical()
-    if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
+    if (MirrorActionOccurred || ChordTimerActive || IsObject(CurrentChord))
         return
     SendInput "{Blind}" . GetRemappedKey("q")
 }
 $*w:: {
     Critical()
-    if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
+    if (MirrorActionOccurred || ChordTimerActive || IsObject(CurrentChord))
         return
     SendInput "{Blind}" . GetRemappedKey("w")
 }
 $*e:: {
     Critical()
-    if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
+    if (MirrorActionOccurred || ChordTimerActive || IsObject(CurrentChord))
         return
     SendInput "{Blind}" . GetRemappedKey("e")
 }
 $*r:: {
     Critical()
-    if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
+    if (MirrorActionOccurred || ChordTimerActive || IsObject(CurrentChord))
         return
     SendInput "{Blind}" . GetRemappedKey("r")
 }
 $*a:: {
     Critical()
-    if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
+    if (MirrorActionOccurred || ChordTimerActive || IsObject(CurrentChord))
         return
     SendInput "{Blind}" . GetRemappedKey("a")
 }
 $*s:: {
     Critical()
-    if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
+    if (MirrorActionOccurred || ChordTimerActive || IsObject(CurrentChord))
         return
     SendInput "{Blind}" . GetRemappedKey("s")
 }
 $*d:: {
     Critical()
-    if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
+    if (MirrorActionOccurred || ChordTimerActive || IsObject(CurrentChord))
         return
     SendInput "{Blind}" . GetRemappedKey("d")
 }
 $*f:: {
     Critical()
-    if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
+    if (MirrorActionOccurred || ChordTimerActive || IsObject(CurrentChord))
         return
     SendInput "{Blind}" . GetRemappedKey("f")
 }
@@ -1013,22 +1021,17 @@ ChordAction(KeyAction, MouseAction) {
 }
 
 PerformChord(Key1, Key2, KeyAct, MouseAct, Key3 := "", KeyAct3 := "") {
-    Global PendingChordKeys, ChordTimerActive, ChordWindowStart, ActiveChords
+    Global PendingChordKeys, ChordTimerActive, ChordWindowStart, CurrentChord, ProcessingChords
     Critical()
     
-    ; If any of these keys are part of an already active repeating chord, ignore the auto-repeat
-    for ID, Data in ActiveChords.Clone() {
-        inChord := False
-        if IsObject(Data) && Data.HasProp("keys") {
-            for k in Data.keys {
-                if (k == Key1 || k == Key2) {
-                    inChord := True
-                    break
-                }
-            }
-        }
-        if (inChord) {
-            return
+    if (ProcessingChords)
+        return
+
+    ; If any of these keys are part of the currently active repeating chord, ignore auto-repeat
+    if IsObject(CurrentChord) {
+        for k in CurrentChord.keys {
+            if (k == Key1 || k == Key2)
+                return
         }
     }
 
@@ -1046,10 +1049,14 @@ PerformChord(Key1, Key2, KeyAct, MouseAct, Key3 := "", KeyAct3 := "") {
 }
 
 EvaluateChordBuffer() {
-    Global ChordTimerActive, PendingChordKeys, ActiveChords, ChordMap, KeyTracker, ChordRepeatRate
+    Global ChordTimerActive, PendingChordKeys, CurrentChord, ChordMap, KeyTracker, ChordRepeatRate, ProcessingChords
     Critical()
     
-    ; 1. Refresh buffer with physically held keys that are relevant
+    if (ProcessingChords)
+        return
+    ProcessingChords := True
+    
+    ; 1. Refresh buffer with physically held keys
     chordKeys := ["q","w","e","r","a","s","d","f"]
     for k in chordKeys {
         if (KeyTracker[GetKeyVK(k)])
@@ -1064,6 +1071,7 @@ EvaluateChordBuffer() {
     if (keys.Length == 0) {
         ChordTimerActive := False
         PendingChordKeys.Clear()
+        ProcessingChords := False
         return
     }
 
@@ -1080,7 +1088,7 @@ EvaluateChordBuffer() {
         }
     }
     
-    ; 3. Prioritized Resolution
+    ; 3. Resolution
     resolved := False
     keyStr := ""
     for k in keys
@@ -1089,8 +1097,7 @@ EvaluateChordBuffer() {
     if (keyStr != "" && ChordMap.Has(keyStr)) {
         data := ChordMap[keyStr]
         ChordAction(data.act, data.mAct)
-        ; Store VKs in ActiveChords to avoid GetKeyVK in ChordMasterTick
-        ActiveChords[keyStr] := {keys: keys, vks: data.vks, act: data.act, mAct: data.mAct}
+        CurrentChord := {keys: keys, vks: data.vks, act: data.act, mAct: data.mAct}
         resolved := True
     }
     
@@ -1113,42 +1120,46 @@ EvaluateChordBuffer() {
     
     if (resolved)
         SetTimer ChordMasterTick, ChordRepeatRate
+    else
+        CurrentChord := ""
         
     PendingChordKeys.Clear()
     ChordTimerActive := False
+    ProcessingChords := False
 }
 
 ChordMasterTick() {
-    Global ActiveChords, KeyTracker, ChordRepeatRate
+    Global CurrentChord, KeyTracker, ChordRepeatRate, ProcessingChords
     Critical()
-    if ActiveChords.Count == 0 {
+    
+    if (ProcessingChords)
+        return
+    ProcessingChords := True
+
+    if !IsObject(CurrentChord) {
         SetTimer , 0
+        ProcessingChords := False
         return
     }
     
-    for ID, Data in ActiveChords.Clone() {
-        allHeld := True
-        if IsObject(Data) && Data.HasProp("vks") {
-            for vk in Data.vks {
-                if (!KeyTracker[vk]) {
-                    allHeld := False
-                    break
-                }
-            }
-        } else {
+    allHeld := True
+    for vk in CurrentChord.vks {
+        if (!KeyTracker[vk]) {
             allHeld := False
+            break
         }
-        
-        if (!allHeld) {
-            ActiveChords.Delete(ID)
-            continue
-        }
-        
-        ChordAction(Data.act, Data.mAct)
     }
     
-    if ActiveChords.Count == 0
+    if (!allHeld) {
+        CurrentChord := ""
         SetTimer , 0
+        ProcessingChords := False
+        return
+    }
+    
+    ; Repeat action
+    ChordAction(CurrentChord.act, CurrentChord.mAct)
+    ProcessingChords := False
 }
 
 ; =========================================================
