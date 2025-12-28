@@ -37,12 +37,12 @@
   tog-qwer   (layer-switch qwer)
 
   ;; ------------------------------------------- 
-  ;; MOUSE ACTIONS (Mapped to F-Keys for AHK Bridge)
+  ;; MOUSE ACTIONS
   ;; ------------------------------------------- 
-  mm-u f13
-  mm-l f14
-  mm-d f15
-  mm-r f16
+  mm-u (movemouse-up 10 10)
+  mm-l (movemouse-left 10 10)
+  mm-d (movemouse-down 10 10)
+  mm-r (movemouse-right 10 10)
 )
 
 (defchords halmak-chords 100
@@ -99,16 +99,17 @@
   @lctl-mod  @lmet-mod lalt     spc            ralt rmet rctl
 )
 
-;; ------------------------------------------- 
+;; --------------------------------------------------------------------------- 
 ;; 4. MOUSE MODE (WASD Movement) 
-;; ------------------------------------------- 
+;; --------------------------------------------------------------------------- 
 (deflayer mouse
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    f19  @mm-u f20  _    _    _    _    _    _    _    _    _    _
-  _    @mm-l @mm-d @mm-r f18  _    _    _    _    _    _    _    _
+  _    mwu  @mm-u mwd  _    _    _    _    _    _    _    _    _    _
+  _    @mm-l @mm-d @mm-r S-m  _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
-  @lctl-mouse  @lmet-mod @to-halmak f17           _    _    _
+  @lctl-mouse  @lmet-mod @to-halmak mlft           _    _    _
 )
+
 ;; --------------------------------------------------------------------------- 
 ;; 5. HELPER LAYERS (Correct 60-key counts) 
 ;; --------------------------------------------------------------------------- 
