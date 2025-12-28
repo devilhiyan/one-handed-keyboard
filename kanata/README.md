@@ -16,18 +16,15 @@ This directory contains the [Kanata](https://github.com/jtroo/kanata) configurat
       ```
     - **Reboot your computer** after installation.
 
-2.  **Verify Kanata:**
-    - Ensure `kanata-windows-binaries-x64-v1.10.1` folder is present.
+2.  **Verify Files:**
+    - Ensure `kanata.exe`, `interception.dll`, and `kanata.kbd` are in the same folder.
 
 ## Usage
 
 To start the key remapper:
 
-1.  Run the startup script:
-    ```powershell
-    .\start_kanata.ps1
-    ```
-2.  Keep the window open (or run in background) to maintain the remapping.
+1.  **Simple Launch:** Double-click `kanata.exe`.
+2.  **Debug/Terminal Launch:** Run `start_kanata.bat` (this keeps the window open if there is an error).
 
 ## Layouts
 
