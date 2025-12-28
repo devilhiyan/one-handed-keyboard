@@ -13,24 +13,21 @@
 )
 
 (defalias
-  ;; -------------------------------------------
+  ;; ------------------------------------------- 
   ;; SPACEBAR LOGIC
-  ;; -------------------------------------------
+  ;; ------------------------------------------- 
   ;; Tap for Space, Hold for Mirror Layer
-  spc-mir (tap-hold 200 200 spc (layer-toggle mirror))
+  spc-mir (tap-hold 150 150 spc (layer-toggle mirror))
 
-  ;; -------------------------------------------
-  ;; MODIFIERS AS LAYER SWITCHERS
-  ;; -------------------------------------------
-  ;; Left Control: Hold for Ctrl-Layer (activates Mouse toggle on Space)
-  lctl-mod (tap-hold 200 200 lctl (layer-toggle ctrl-layer))
-  
-  ;; Left Windows (FN): Hold for FN-Layer (activates Layout toggle on Space)
-  lmet-mod (tap-hold 200 200 lmet (layer-toggle fn-layer))
+  ;; ------------------------------------------- 
+  ;; MODIFIERS AS LAYER SWITCHERS (Faster 150ms timeout)
+  ;; ------------------------------------------- 
+  lctl-mod (tap-hold 150 150 lctl (layer-toggle ctrl-layer))
+  lmet-mod (tap-hold 150 150 lmet (layer-toggle fn-layer))
 
-  ;; -------------------------------------------
+  ;; ------------------------------------------- 
   ;; TOGGLES
-  ;; -------------------------------------------
+  ;; ------------------------------------------- 
   tog-mouse  (layer-switch mouse)
   tog-halmak (layer-switch halmak)
   tog-qwer   (layer-switch qwer)
@@ -57,9 +54,9 @@
   (f) o
 )
 
-;; ---------------------------------------------------------------------------
+;; --------------------------------------------------------------------------- 
 ;; 1. HALMAK LAYER (Default - One-Handed + Chords)
-;; ---------------------------------------------------------------------------
+;; --------------------------------------------------------------------------- 
 (deflayer halmak
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  (chord halmak-chords q) (chord halmak-chords w) (chord halmak-chords e) (chord halmak-chords r) r    y    u    i    o    p    [    ]    \
@@ -68,9 +65,9 @@
   @lctl-mod  @lmet-mod lalt     @spc-mir       ralt rmet rctl
 )
 
-;; ---------------------------------------------------------------------------
+;; --------------------------------------------------------------------------- 
 ;; 2. MIRROR LAYER (Activated by holding Space in Halmak)
-;; ---------------------------------------------------------------------------
+;; --------------------------------------------------------------------------- 
 (deflayer mirror
   -    0    9    8    7    6    5    4    3    2    1    =    grv  bspc
   bspc b    p    w    y    q    y    u    i    o    p    [    ]    \
@@ -79,9 +76,9 @@
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
-;; ---------------------------------------------------------------------------
+;; --------------------------------------------------------------------------- 
 ;; 3. QWERTY LAYER (Standard)
-;; ---------------------------------------------------------------------------
+;; --------------------------------------------------------------------------- 
 (deflayer qwer
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
@@ -90,20 +87,20 @@
   @lctl-mod  @lmet-mod lalt     spc            ralt rmet rctl
 )
 
-;; ---------------------------------------------------------------------------
+;; --------------------------------------------------------------------------- 
 ;; 4. MOUSE MODE (ESDF Movement)
-;; ---------------------------------------------------------------------------
+;; --------------------------------------------------------------------------- 
 (deflayer mouse
-  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
-  tab  mlft mwu  mmu  mwd  t    y    u    i    o    p    [    ]    \
-  caps mslt msdn msup msrt g    h    j    k    l    ;    '    ret
-  lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  @lctl-mod  @lmet-mod lalt     mlft           ralt rmet rctl
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    mlft mwu  msup mwd  mmid _    _    _    _    _    _    _    _
+  _    _    mslt msdn msrt mrgt _    _    _    _    _    _    _ 
+  _    _    _    _    _    _    _    _    _    _    _    _ 
+  @lctl-mod  @lmet-mod _        mlft           _    _    _
 )
 
-;; ---------------------------------------------------------------------------
-;; 5. HELPER LAYERS (For Toggles)
-;; ---------------------------------------------------------------------------
+;; --------------------------------------------------------------------------- 
+;; 5. HELPER LAYERS (Correct 60-key counts)
+;; --------------------------------------------------------------------------- 
 
 ;; Activated while holding LCTL
 (deflayer ctrl-layer
