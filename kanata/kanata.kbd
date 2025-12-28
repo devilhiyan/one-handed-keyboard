@@ -3,7 +3,7 @@
 (defcfg
   process-unmapped-keys yes
   ;; Mouse Tuning
-  movemouse-smooth-diagonals yes
+  ;; movemouse-smooth-diagonals yes
 )
 
 (defsrc
@@ -24,14 +24,15 @@
   ;; ------------------------------------------- 
   ;; MODIFIERS AS LAYER SWITCHERS
   ;; ------------------------------------------- 
-  lctl-mod (tap-hold 150 150 lctl (layer-toggle ctrl-layer))
-  lmet-mod (tap-hold 150 150 lmet (layer-toggle fn-layer))
+  lctl-mod   (tap-hold 150 150 lctl (layer-toggle ctrl-layer))
+  lctl-mouse (tap-hold 150 150 lctl (layer-toggle mouse-ctrl-layer))
+  lmet-mod   (tap-hold 150 150 lmet (layer-toggle fn-layer))
 
   ;; ------------------------------------------- 
   ;; TOGGLES
   ;; ------------------------------------------- 
-  tog-mouse  (layer-switch mouse)
-  tog-halmak (layer-switch halmak)
+  to-mouse   (layer-switch mouse)
+  to-halmak  (layer-switch halmak)
   tog-qwer   (layer-switch qwer)
 )
 
@@ -64,7 +65,7 @@
   tab  (chord halmak-chords q) (chord halmak-chords w) (chord halmak-chords e) (chord halmak-chords r) r    y    u    i    o    p    [    ]    \
   ret  (chord halmak-chords a) (chord halmak-chords s) (chord halmak-chords d) (chord halmak-chords f) u    h    j    k    l    ;    '    ret
   lsft l    d    n    m    b    n    m    ,    .    /    rsft
-  @lctl-mod  @lmet-mod lalt     @spc-mir       ralt rmet rctl
+  @lctl-mod  @lmet-mod @to-mouse     @spc-mir       ralt rmet rctl
 )
 
 ;; --------------------------------------------------------------------------- 
@@ -90,34 +91,43 @@
 )
 
 ;; --------------------------------------------------------------------------- 
-;; 4. MOUSE MODE (ESDF Movement) 
+;; 4. MOUSE MODE (WASD Movement) 
 ;; --------------------------------------------------------------------------- 
 (deflayer mouse
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    mlft mwu  (movemouse-up 1 1)   mwd  mmid _    _    _    _    _    _    _    _
-  _    _    (movemouse-left 1 1) (movemouse-down 1 1) (movemouse-right 1 1) mrgt _    _    _    _    _    _    _
+  _    _    (movemouse-up 5 10) _    _    _    _    _    _    _    _    _    _    _
+  _    (movemouse-left 5 10) (movemouse-down 5 10) (movemouse-right 5 10) S-m  _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
-  @lctl-mod  @lmet-mod _        mlft           _    _    _
+  @lctl-mouse  @lmet-mod @to-halmak mlft           _    _    _
 )
 
 ;; --------------------------------------------------------------------------- 
 ;; 5. HELPER LAYERS (Correct 60-key counts) 
 ;; --------------------------------------------------------------------------- 
 
-;; Activated while holding LCTL
+;; Activated while holding LCTL (Standard)
 (deflayer ctrl-layer
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _
-  _    _    _              @tog-mouse     _    _    _
+  _    _    _              @to-mouse      _    _    _
+)
+
+;; Activated while holding LCTL (In Mouse Mode - Allows Exit)
+(deflayer mouse-ctrl-layer
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _              @to-halmak     _    _    _
 )
 
 ;; Activated while holding LMET (FN)
 (deflayer fn-layer
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _
   _    _    _              @tog-qwer      _    _    _
 )
