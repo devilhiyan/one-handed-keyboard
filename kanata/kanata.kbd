@@ -2,6 +2,9 @@
 
 (defcfg
   process-unmapped-keys yes
+  ;; Fast Key Repeat Tuning
+  key-repeat-delay 200
+  key-repeat-interval 25
 )
 
 (defsrc
@@ -20,7 +23,7 @@
   spc-mir (tap-hold 150 150 spc (layer-toggle mirror))
 
   ;; ------------------------------------------- 
-  ;; MODIFIERS AS LAYER SWITCHERS (Faster 150ms timeout)
+  ;; MODIFIERS AS LAYER SWITCHERS
   ;; ------------------------------------------- 
   lctl-mod (tap-hold 150 150 lctl (layer-toggle ctrl-layer))
   lmet-mod (tap-hold 150 150 lmet (layer-toggle fn-layer))
@@ -92,9 +95,9 @@
 ;; --------------------------------------------------------------------------- 
 (deflayer mouse
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    mlft mwu  msup mwd  mmid _    _    _    _    _    _    _    _
-  _    _    mslt msdn msrt mrgt _    _    _    _    _    _    _ 
-  _    _    _    _    _    _    _    _    _    _    _    _ 
+  _    mlft mwu  movemouse-up   mwd  mmid _    _    _    _    _    _    _    _
+  _    _    movemouse-left movemouse-down movemouse-right mrgt _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _
   @lctl-mod  @lmet-mod _        mlft           _    _    _
 )
 
@@ -116,6 +119,6 @@
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _              @tog-qwer      _    _    _
+  _    _    _    _    _    _    _    _    _    _    _
+  _    _    _              @tog-halmak    _    _    _
 )
