@@ -29,6 +29,20 @@ Global SpaceTapThreshold := 300      ; Max duration for a "tap" space
 Global KeyTracker := Map()
 KeyTracker.Default := 0
 Global ActiveChords := Map() ; Track active chords for the master timer
+Global PendingChordKeys := Map() ; Keys collected during the 200ms window
+Global ChordTimerActive := False
+Global ChordWindowStart := 0
+Global ChordMap := Map()
+
+; Initialize Chord Map (Sorted keys for ID)
+ChordMap["ew"] := {act: "{Blind}{Up}", mAct: "Up"}
+ChordMap["ds"] := {act: "{Blind}{Down}", mAct: "Down"}
+ChordMap["as"] := {act: "{Blind}{Left}", mAct: "Left"}
+ChordMap["df"] := {act: "{Blind}{Right}", mAct: "Right"}
+ChordMap["qw"] := {act: "{Blind}{Home}", mAct: "WheelUp"}
+ChordMap["er"] := {act: "{Blind}{End}", mAct: "WheelDown"}
+ChordMap["ads"] := {act: "{Blind}{Backspace}", mAct: ""}
+ChordMap["dfs"] := {act: "{Blind}{Delete}", mAct: ""}
 Global CustomMenuGui := ""
 Global BtnNavStyle := ""
 Global BtnMirrorMode := ""
@@ -36,7 +50,7 @@ Global BtnMirrorMode := ""
 Global StateHook := InputHook("V L0 I1") ; I1 to see keys caught by other hotkeys
 StateHook.KeyOpt("{All}", "N")
 StateHook.OnKeyDown := StateHook_KeyDown
-StateHook.OnKeyUp := (ih, vk, sc) => (Critical(), KeyTracker[vk] := 0)
+StateHook.OnKeyUp := StateHook_KeyUp
 StateHook.Start()
 
 StateHook_KeyDown(ih, vk, sc) {
@@ -49,6 +63,27 @@ StateHook_KeyDown(ih, vk, sc) {
         }
     }
     KeyTracker[vk] := 1
+}
+
+StateHook_KeyUp(ih, vk, sc) {
+    global KeyTracker, ChordTimerActive, PendingChordKeys
+    Critical()
+    KeyTracker[vk] := 0
+    
+    ; If a chord is pending, check if all pending keys are released
+    if (ChordTimerActive) {
+        stillHeld := False
+        for k, v in PendingChordKeys {
+            if (KeyTracker[GetKeyVK(k)]) {
+                stillHeld := True
+                break
+            }
+        }
+        if (!stillHeld) {
+            ; All keys involved in the pending chord were released early
+            SetTimer EvaluateChordBuffer, -1 ; Run almost immediately
+        }
+    }
 }
 SetKeyDelay -1, 0 ; Increases reliability of SendInput by reducing delays
 InstallKeybdHook ; Explicitly install the keyboard hook for reliability
@@ -767,30 +802,16 @@ w & e::PerformChord("w", "e", "{Blind}{Up}", "Up")
 e & w::PerformChord("e", "w", "{Blind}{Up}", "Up")
 
 ; Down (SD)
-s & d:: {
-    if KeyTracker[GetKeyVK("a")]
-        PerformChord("s", "d", "{Blind}{Down}", "Down", "a", "{Blind}{Backspace}")
-    else if KeyTracker[GetKeyVK("f")]
-        PerformChord("s", "d", "{Blind}{Down}", "Down", "f", "{Blind}{Delete}")
-    else
-        PerformChord("s", "d", "{Blind}{Down}", "Down")
-}
-d & s:: {
-    if KeyTracker[GetKeyVK("a")]
-        PerformChord("d", "s", "{Blind}{Down}", "Down", "a", "{Blind}{Backspace}")
-    else if KeyTracker[GetKeyVK("f")]
-        PerformChord("d", "s", "{Blind}{Down}", "Down", "f", "{Blind}{Delete}")
-    else
-        PerformChord("d", "s", "{Blind}{Down}", "Down")
-}
+s & d::PerformChord("s", "d", "{Blind}{Down}", "Down")
+d & s::PerformChord("d", "s", "{Blind}{Down}", "Down")
 
 ; Left (AS)
-a & s::PerformChord("a", "s", "{Blind}{Left}", "Left", "d", "{Blind}{Backspace}")
-s & a::PerformChord("s", "a", "{Blind}{Left}", "Left", "d", "{Blind}{Backspace}")
+a & s::PerformChord("a", "s", "{Blind}{Left}", "Left")
+s & a::PerformChord("s", "a", "{Blind}{Left}", "Left")
 
 ; Right (DF)
-d & f::PerformChord("d", "f", "{Blind}{Right}", "Right", "s", "{Blind}{Delete}")
-f & d::PerformChord("f", "d", "{Blind}{Right}", "Right", "s", "{Blind}{Delete}")
+d & f::PerformChord("d", "f", "{Blind}{Right}", "Right")
+f & d::PerformChord("f", "d", "{Blind}{Right}", "Right")
 
 ; Home / Wheel Up (QW)
 q & w::PerformChord("q", "w", "{Blind}{Home}", "WheelUp")
@@ -801,12 +822,12 @@ e & r::PerformChord("e", "r", "{Blind}{End}", "WheelDown")
 r & e::PerformChord("r", "e", "{Blind}{End}", "WheelDown")
 
 ; Backspace (EAI / Physical AD)
-a & d::PerformChord("a", "d", "{Blind}{Backspace}", "", "s", "{Blind}{Backspace}")
-d & a::PerformChord("d", "a", "{Blind}{Backspace}", "", "s", "{Blind}{Backspace}")
+a & d::PerformChord("a", "d", "{Blind}{Backspace}", "")
+d & a::PerformChord("d", "a", "{Blind}{Backspace}", "")
 
 ; Delete (AIO / Physical SF)
-s & f::PerformChord("s", "f", "{Blind}{Delete}", "", "d", "{Blind}{Delete}")
-f & s::PerformChord("f", "s", "{Blind}{Delete}", "", "d", "{Blind}{Delete}")
+s & f::PerformChord("s", "f", "{Blind}{Delete}", "")
+f & s::PerformChord("f", "s", "{Blind}{Delete}", "")
 
 ; --- Space Layer (Hold Space) ---
 Space & q:: MirrorSend("b")
@@ -850,14 +871,46 @@ $*Capslock:: {
 }
 
 ; --- Typing Restore (Prefix Release) ---
-$*q::SendInput "{Blind}" . GetRemappedKey("q")
-$*w::SendInput "{Blind}" . GetRemappedKey("w")
-$*e::SendInput "{Blind}" . GetRemappedKey("e")
-$*r::SendInput "{Blind}" . GetRemappedKey("r")
-$*a::SendInput "{Blind}" . GetRemappedKey("a")
-$*s::SendInput "{Blind}" . GetRemappedKey("s")
-$*d::SendInput "{Blind}" . GetRemappedKey("d")
-$*f::SendInput "{Blind}" . GetRemappedKey("f")
+$*q:: {
+    if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
+        return
+    SendInput "{Blind}" . GetRemappedKey("q")
+}
+$*w:: {
+    if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
+        return
+    SendInput "{Blind}" . GetRemappedKey("w")
+}
+$*e:: {
+    if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
+        return
+    SendInput "{Blind}" . GetRemappedKey("e")
+}
+$*r:: {
+    if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
+        return
+    SendInput "{Blind}" . GetRemappedKey("r")
+}
+$*a:: {
+    if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
+        return
+    SendInput "{Blind}" . GetRemappedKey("a")
+}
+$*s:: {
+    if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
+        return
+    SendInput "{Blind}" . GetRemappedKey("s")
+}
+$*d:: {
+    if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
+        return
+    SendInput "{Blind}" . GetRemappedKey("d")
+}
+$*f:: {
+    if (MirrorActionOccurred || ChordTimerActive || ActiveChords.Count > 0)
+        return
+    SendInput "{Blind}" . GetRemappedKey("f")
+}
 
 #HotIf
 
@@ -902,55 +955,72 @@ ChordAction(KeyAction, MouseAction) {
 }
 
 PerformChord(Key1, Key2, KeyAct, MouseAct, Key3 := "", KeyAct3 := "") {
+    Global PendingChordKeys, ChordTimerActive, ChordWindowStart
     Critical()
     
-    ; Check for 3-key chord first if Key3 is provided
-    if (Key3 != "" && KeyTracker[GetKeyVK(Key3)]) {
-        ; Use 3rd key logic
-        ; We need a unique ID that includes all 3 keys
-        keys := [Key1, Key2, Key3]
-        ; Sort keys for ID
-        if (StrCompare(keys[1], keys[2]) > 0) {
-            tmp := keys[1]
-            keys[1] := keys[2]
-            keys[2] := tmp
-        }
-        if (StrCompare(keys[2], keys[3]) > 0) {
-            tmp := keys[2]
-            keys[2] := keys[3]
-            keys[3] := tmp
-        }
-        if (StrCompare(keys[1], keys[2]) > 0) {
-            tmp := keys[1]
-            keys[1] := keys[2]
-            keys[2] := tmp
-        }
-        ChordID := keys[1] . keys[2] . keys[3]
+    PendingChordKeys[Key1] := 1
+    PendingChordKeys[Key2] := 1
+    if (Key3 != "")
+        PendingChordKeys[Key3] := 1
 
-        if ActiveChords.Has(ChordID)
-            return
-
-        ChordAction(KeyAct3, "")
-        ActiveChords[ChordID] := {k1:keys[1], k2:keys[2], k3:keys[3], is3:True, act:KeyAct3, mAct:"", count:0}
-        SetTimer ChordMasterTick, 50
-        return
+    if (!ChordTimerActive) {
+        ChordTimerActive := True
+        ChordWindowStart := A_TickCount
+        SetTimer EvaluateChordBuffer, -200
     }
+}
 
-    ; 2-key chord logic
-    if StrCompare(Key1, Key2) < 0
-        ChordID := Key1 . Key2
-    else
-        ChordID := Key2 . Key1
-
-    if ActiveChords.Has(ChordID)
-        return
+EvaluateChordBuffer() {
+    Global ChordTimerActive := False, PendingChordKeys, ActiveChords, ChordMap
+    Critical()
     
-    ChordAction(KeyAct, MouseAct)
-    ActiveChords[ChordID] := {k1:Key1, k2:Key2, k3:"", is3:False, act:KeyAct, mAct:MouseAct, count:0}
-    SetTimer ChordMasterTick, 50
+    ; 1. Collect and sort keys
+    keys := []
+    for k, v in PendingChordKeys
+        keys.Push(k)
+    
+    ; Simple sort (since n is small)
+    Loop keys.Length - 1 {
+        i := A_Index
+        Loop keys.Length - i {
+            j := A_Index + i
+            if (StrCompare(keys[i], keys[j]) > 0) {
+                tmp := keys[i]
+                keys[i] := keys[j]
+                keys[j] := tmp
+            }
+        }
+    }
+    
+    keyStr := ""
+    for k in keys
+        keyStr .= k
+        
+    ; 2. Resolve to action (Prioritize longer matches)
+    ; In this implementation, the keyStr is already the full set.
+    ; If we have "ads", we look for "ads".
+    
+    resolved := False
+    if ChordMap.Has(keyStr) {
+        data := ChordMap[keyStr]
+        ChordAction(data.act, data.mAct)
+        ActiveChords[keyStr] := {keys: keys, act: data.act, mAct: data.mAct, count: 0}
+        resolved := True
+    } else {
+        ; Fallback: Restore typing for the keys in the buffer
+        for k in keys {
+            SendInput "{Blind}" . GetRemappedKey(k)
+        }
+    }
+    
+    if (resolved)
+        SetTimer ChordMasterTick, 50
+        
+    PendingChordKeys.Clear()
 }
 
 ChordMasterTick() {
+    Global ActiveChords
     Critical()
     if ActiveChords.Count == 0 {
         SetTimer , 0
@@ -958,12 +1028,16 @@ ChordMasterTick() {
     }
     
     for ID, Data in ActiveChords.Clone() {
-        vk1 := GetKeyVK(Data.k1)
-        vk2 := GetKeyVK(Data.k2)
-        vk3 := Data.k3 != "" ? GetKeyVK(Data.k3) : 0
+        ; Check if all keys in the chord are still held
+        allHeld := True
+        for k in Data.keys {
+            if (!KeyTracker[GetKeyVK(k)]) {
+                allHeld := False
+                break
+            }
+        }
         
-        ; Chord is broken if any of its keys are released
-        if (!KeyTracker[vk1] || !KeyTracker[vk2] || (Data.is3 && !KeyTracker[vk3])) {
+        if (!allHeld) {
             ActiveChords.Delete(ID)
             continue
         }
