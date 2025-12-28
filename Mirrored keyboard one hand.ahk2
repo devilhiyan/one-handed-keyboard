@@ -955,9 +955,20 @@ ChordAction(KeyAction, MouseAction) {
 }
 
 PerformChord(Key1, Key2, KeyAct, MouseAct, Key3 := "", KeyAct3 := "") {
-    Global PendingChordKeys, ChordTimerActive, ChordWindowStart
+    Global PendingChordKeys, ChordTimerActive, ChordWindowStart, ActiveChords
     Critical()
     
+    ; If any of these keys are part of an already active repeating chord, ignore the auto-repeat
+    for ID, Data in ActiveChords {
+        isKey1In := False, isKey2In := False
+        for k in Data.keys {
+            if (k == Key1) isKey1In := True
+            if (k == Key2) isKey2In := True
+        }
+        if (isKey1In || isKey2In)
+            return
+    }
+
     PendingChordKeys[Key1] := 1
     PendingChordKeys[Key2] := 1
     if (Key3 != "")
@@ -971,15 +982,23 @@ PerformChord(Key1, Key2, KeyAct, MouseAct, Key3 := "", KeyAct3 := "") {
 }
 
 EvaluateChordBuffer() {
-    Global ChordTimerActive := False, PendingChordKeys, ActiveChords, ChordMap
+    Global ChordTimerActive := False, PendingChordKeys, ActiveChords, ChordMap, KeyTracker
     Critical()
     
-    ; 1. Collect and sort keys
+    ; 1. Refresh buffer with physically held keys that are relevant
+    ; This fixes cases where Windows auto-repeat only sends one key of a held chord
+    chordKeys := ["q","w","e","r","a","s","d","f"]
+    for k in chordKeys {
+        if (KeyTracker[GetKeyVK(k)])
+            PendingChordKeys[k] := 1
+    }
+
+    ; 2. Collect and sort keys
     keys := []
     for k, v in PendingChordKeys
         keys.Push(k)
     
-    ; Simple sort (since n is small)
+    ; Sort keys
     Loop keys.Length - 1 {
         i := A_Index
         Loop keys.Length - i {
@@ -992,24 +1011,44 @@ EvaluateChordBuffer() {
         }
     }
     
+    ; 3. Prioritized Resolution
+    ; We look for the longest match first
+    resolved := False
+    
+    ; Try full string first
     keyStr := ""
     for k in keys
         keyStr .= k
         
-    ; 2. Resolve to action (Prioritize longer matches)
-    ; In this implementation, the keyStr is already the full set.
-    ; If we have "ads", we look for "ads".
-    
-    resolved := False
-    if ChordMap.Has(keyStr) {
+    if (keyStr != "" && ChordMap.Has(keyStr)) {
         data := ChordMap[keyStr]
         ChordAction(data.act, data.mAct)
         ActiveChords[keyStr] := {keys: keys, act: data.act, mAct: data.mAct, count: 0}
         resolved := True
     } else {
-        ; Fallback: Restore typing for the keys in the buffer
+        ; Try sub-combinations (3-key then 2-key) if the full set isn't a chord
+        ; This handles accidental 4th key presses
+        if (!resolved && keys.Length > 2) {
+             ; Logic to find best sub-match could go here if needed
+        }
+    }
+    
+    ; 4. Fallback Handling
+    if (!resolved) {
+        ; Only fallback to typing if NO keys are currently held
+        ; This prevents "bleeding" characters while the user is still trying to form a chord
+        anyHeld := False
         for k in keys {
-            SendInput "{Blind}" . GetRemappedKey(k)
+            if (KeyTracker[GetKeyVK(k)]) {
+                anyHeld := True
+                break
+            }
+        }
+        
+        if (!anyHeld) {
+            for k in keys {
+                SendInput "{Blind}" . GetRemappedKey(k)
+            }
         }
     }
     
@@ -1042,10 +1081,8 @@ ChordMasterTick() {
             continue
         }
         
-        Data.count += 1
-        if (Data.count >= 4) {
-            ChordAction(Data.act, Data.mAct)
-        }
+        ; Repeat action
+        ChordAction(Data.act, Data.mAct)
     }
 }
 
