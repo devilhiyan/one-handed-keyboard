@@ -62,18 +62,68 @@
   (d f) right
   (q w) home
   (e r) end
-  (a d) bspc
-  (s f) del
   
+  (s f) bspc
+  (s d f) C-bspc
+  (a d) del
+  (x c) C-j
+  (z x c v) esc
+  (a f) C-c
+  (q r) S-[
+  (s g) S-9
+  (w t) [
+  (w e r) .
+  (r w) ,
+  (f e) ;
+  (q e) S-,
+  (e t) S-.
+  (a w) S-'
+  (s e f) =
+  (f g) S--
+
   ;; Single key fallbacks (Remapped to Custom/Halmak)
   (q) c
   (w) s
   (e) t
   (r) h
+  (t) n
   (a) e
   (s) a
   (d) i
   (f) o
+  (g) r
+  (z) z
+  (x) v
+  (c) d
+  (v) g
+)
+
+(defchords mirror-chords 100
+  (s d f) C-A-bspc
+  (a f) C-v
+  (q r) S-]
+  (s g) S-0
+  (w t) ]
+  (f e) S-;
+  (a w) '
+  (s e f) S-=
+  (f g) -
+
+  ;; Single key fallbacks (Mirrored Layout)
+  (q) b
+  (w) p
+  (e) w
+  (r) y
+  (t) q
+  (a) '
+  (s) k
+  (d) j
+  (f) g
+  (g) f
+  (z) c
+  (x) b
+  (c) x
+  (v) v
 )
 
 ;; --------------------------------------------------------------------------- 
@@ -81,9 +131,9 @@
 ;; --------------------------------------------------------------------------- 
 (deflayer halmak
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
-  tab  (chord halmak-chords q) (chord halmak-chords w) (chord halmak-chords e) (chord halmak-chords r) r    y    u    i    o    p    [    ]    \
-  ret  (chord halmak-chords a) (chord halmak-chords s) (chord halmak-chords d) (chord halmak-chords f) u    h    j    k    l    ;    '    ret
-  lsft l    d    n    m    b    n    m    ,    .    /    rsft
+  tab  (chord halmak-chords q) (chord halmak-chords w) (chord halmak-chords e) (chord halmak-chords r) (chord halmak-chords t)    y    u    i    o    p    [    ]    \
+  ret  (chord halmak-chords a) (chord halmak-chords s) (chord halmak-chords d) (chord halmak-chords f) (chord halmak-chords g)    h    j    k    l    ;    '    ret
+  lsft (chord halmak-chords z) (chord halmak-chords x) (chord halmak-chords c) (chord halmak-chords v) b    n    m    ,    .    /    rsft
   @lctl-enter-nav  @lmet-mod @to-mouse     @spc-mir       ralt rmet rctl
 )
 
@@ -92,9 +142,9 @@
 ;; --------------------------------------------------------------------------- 
 (deflayer mirror
   -    0    9    8    7    6    5    4    3    2    1    =    grv  bspc
-  bspc b    p    w    y    q    y    u    i    o    p    [    ]    \
-  '    k    j    g    f    z    h    j    k    l    ;    '    ret
-  lsft c    b    x    v    c    n    m    ,    .    /    rsft
+  bspc (chord mirror-chords q) (chord mirror-chords w) (chord mirror-chords e) (chord mirror-chords r) (chord mirror-chords t)    y    u    i    o    p    [    ]    \
+  '    (chord mirror-chords a) (chord mirror-chords s) (chord mirror-chords d) (chord mirror-chords f) (chord mirror-chords g)    h    j    k    l    ;    '    ret
+  lsft (chord mirror-chords z) (chord mirror-chords x) (chord mirror-chords c) (chord mirror-chords v) c    n    m    ,    .    /    rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
