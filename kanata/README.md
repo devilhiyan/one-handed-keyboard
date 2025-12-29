@@ -26,6 +26,14 @@ To start the key remapper:
 1.  **Simple Launch:** Double-click `kanata.exe`.
 2.  **Debug/Terminal Launch:** Run `start_kanata.bat` (this keeps the window open if there is an error).
 
+## Documentation
+
+Detailed documentation for the configuration and architecture can be found in the `docs/` directory:
+
+- [**Architecture & Bridge**](docs/ARCHITECTURE.md): Explains how Kanata communicates with AutoHotkey for mouse control.
+- [**Layout Reference**](docs/LAYOUT.md): Details the Halmak, Mirror, and Mouse layers.
+- [**Chord Reference**](docs/CHORDS.md): Lists all chord combinations and their actions.
+
 ## Layouts
 
 ### Base Layer
