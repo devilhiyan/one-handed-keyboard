@@ -88,16 +88,16 @@
   (w) s
   (e) t
   (r) h
-  (t) n
-  (a) e
-  (s) a
+  (t) r
+  (a) a
+  (s) e
   (d) i
   (f) o
-  (g) r
-  (z) z
-  (x) v
-  (c) d
-  (v) g
+  (g) u
+  (z) l
+  (x) d
+  (c) n
+  (v) m
   (l) l
   (n) n
   (m) m
@@ -117,20 +117,20 @@
   (f g) -
 
   ;; Single key fallbacks (Mirrored Layout)
-  (q) b
-  (w) p
-  (e) w
+  (q) z
+  (w) b
+  (e) p
   (r) y
-  (t) q
-  (a) k
-  (s) j
-  (d) g
+  (t) x
+  (a) q
+  (s) g
+  (d) w
   (f) f
   (g) v
   (z) c
   (x) b
-  (c) x
-  (v) z
+  (c) k
+  (v) j
   (l) l
   (n) n
   (m) m
@@ -198,8 +198,8 @@
 (deflayer ctrl-layer
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _
   _    _    _              @to-mouse      _    _    _
 )
 
@@ -207,8 +207,8 @@
 (deflayer mouse-ctrl-layer
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _
   _    _    _              @to-halmak     _    _    _
 )
 
@@ -216,7 +216,7 @@
 (deflayer fn-layer
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _
   _    _    _              @tog-qwer      _    _    _
 )
