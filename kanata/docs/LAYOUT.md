@@ -35,6 +35,7 @@ This layer "mirrors" the keyboard, allowing the left hand to type keys normally 
 | `x` | `b` |
 | `c` | `x` |
 | `v` | `z` |
+| `g` | `v` |
 
 *(Note: The exact mapping is defined in the `deflayer mirror` section of `kanata.kbd`)*
 
