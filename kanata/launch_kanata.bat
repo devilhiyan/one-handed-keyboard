@@ -1,4 +1,4 @@
 @echo off
 cd /d "%~dp0"
-powershell -ExecutionPolicy Bypass -File "start_kanata.ps1"
-pause
+start "" /MIN powershell -WindowStyle Hidden -ExecutionPolicy Bypass -File "start_kanata.ps1"
+exit
