@@ -1,0 +1,3 @@
+- [ ] Modify `kanata/kanata.kbd`: Update `halmak-chords` with Undo/Redo (`z x`, `c v`) and Symbols (`s e`, `g r`, `a g`). <!-- id: 1 -->
+- [ ] Modify `kanata/kanata.kbd`: Update `mirror-chords` with Undo (`z x`) and Symbols (`s e`, `g r`). <!-- id: 2 -->
+- [ ] Remove unused or conflicting chord entries if found (e.g., `l d`, `n m` if they refer to physical keys incorrectly). <!-- id: 3 -->
