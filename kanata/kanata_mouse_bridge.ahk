@@ -60,51 +60,22 @@ Notify(Text, Duration:=2000) {
 #HotIf
 
 ; ------------------------------------------------------------------------------
-; Shared Navigation Keys (Capslock, Tab, Shift)
+; Shared Navigation Keys (Mapped from Kanata F17/F18)
 ; ------------------------------------------------------------------------------
 #HotIf NavMode
 
-; Backspace on Space + Tab (Kanata sends bspc if mapped, but bridge can handle it)
-; Actually Kanata maps q to bspc in spc-mod. Let's stick to what Kanata sends or map specific F keys.
-
-; Capslock / Shift logic based on MouseMode
-$*Capslock:: {
-    SetCapsLockState "Off"
-    if (MouseMode) { ; Mouse Mode -> Click
-        Click "Down"
-        KeyWait "Capslock"
-        Click "Up"
-    } else { ; Keyboard Mode -> Enter
-        SendInput("{Enter}")
-    }
+; F17 = Left Click (Capslock in Kanata)
+*F17:: {
+    Click "Down"
+}
+*F17 Up:: {
+    Click "Up"
 }
 
-Space & Capslock:: {
-    if (MouseMode) {
-        SendInput("{Enter}")
-    } else {
-        Click "Down"
-        KeyWait "Capslock"
-        Click "Up"
-    }
+; F18 = Right Click (Shift in Kanata)
+*F18:: {
+    Click "Right"
 }
-
-; Right Click logic
-$*LShift::
-$*RShift:: {
-    if (MouseMode) {
-        Click "Right"
-    } else {
-        SendInput "{Blind}{LShift Down}"
-        KeyWait A_ThisHotkey
-        SendInput "{Blind}{LShift Up}"
-    }
-}
-
-#HotIf NavMode && !MouseMode
-Space & LShift::
-Space & RShift::Click "Right"
-#HotIf
 
 ; ------------------------------------------------------------------------------
 ; Movement Timer Logic
