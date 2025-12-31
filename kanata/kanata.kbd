@@ -35,7 +35,7 @@
   ;; ------------------------------------------- 
   to-mouse   (multi f24 (layer-switch mouse))
   to-halmak  (multi f23 (layer-switch halmak))
-  tog-qwer   (multi f23 (layer-switch qwer))
+  tog-qwer   (multi f23 f8 (layer-switch qwer))
 
   ;; ------------------------------------------- 
   ;; MOUSE ACTIONS (Mapped to F-Keys for AHK Bridge)
