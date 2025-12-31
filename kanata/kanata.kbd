@@ -69,8 +69,10 @@
   (x c) C-j
   (z x c v) esc
   (a f) C-c
-  (z x) C-z
-  (c v) C-y
+  (z x) C-z  ;; Undo (Left Hand: Output l d)
+  (l d) C-z  ;; Undo (Right/Physical)
+  (c v) C-y  ;; Redo (Left Hand: Output n m)
+  (n m) C-y  ;; Redo (Right/Physical)
   (s e) /
   (g r) S-/
   (a g) S-2
@@ -110,7 +112,9 @@
   (s d f) C-A-bspc
   (a f) C-v
   (z x) C-A-z
+  (l d) C-z  ;; Undo
   (c v) C-y
+  (n m) C-y  ;; Redo
   (s e) \
   (g r) S-\
   (a g) S-2
