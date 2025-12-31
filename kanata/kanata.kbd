@@ -25,16 +25,17 @@
   ;; ------------------------------------------- 
   ;; MODIFIERS AS LAYER SWITCHERS
   ;; ------------------------------------------- 
-  lctl-mod   (tap-hold 150 150 lctl (layer-toggle ctrl-layer))
-  lctl-mouse (tap-hold 150 150 lctl (layer-toggle mouse-ctrl-layer))
-  lmet-mod   (tap-hold 150 150 lmet (layer-toggle fn-layer))
+  lctl-mod-halmak (tap-hold 150 150 (multi f24 (layer-switch mouse)) (multi lctl (layer-toggle ctrl-layer-halmak)))
+  lctl-mod-qwer   (tap-hold 150 150 lctl (multi lctl (layer-toggle ctrl-layer-qwer)))
+  lctl-mouse      (tap-hold 150 150 lctl (layer-toggle mouse-ctrl-layer))
+  lmet-mod        (tap-hold 150 150 lmet (layer-toggle fn-layer))
 
   ;; ------------------------------------------- 
   ;; TOGGLES
   ;; ------------------------------------------- 
   to-mouse   (multi f24 (layer-switch mouse))
   to-halmak  (multi f23 (layer-switch halmak))
-  tog-qwer   (multi f23 (layer-switch qwer))
+  tog-qwer   (multi f9 (layer-switch qwer))
 
   ;; ------------------------------------------- 
   ;; MOUSE ACTIONS (Mapped to F-Keys for AHK Bridge)
@@ -171,7 +172,7 @@
   tab  (chord halmak-chords q) (chord halmak-chords w) (chord halmak-chords e) (chord halmak-chords r) (chord halmak-chords t)    y    u    i    o    p    [    ]    \
   ret  (chord halmak-chords a) (chord halmak-chords s) (chord halmak-chords d) (chord halmak-chords f) (chord halmak-chords g)    h    j    k    (chord halmak-chords l)    ;    '    ret
   lsft (chord halmak-chords z) (chord halmak-chords x) (chord halmak-chords c) (chord halmak-chords v) b    (chord halmak-chords n)    (chord halmak-chords m)    ,    .    /    rsft
-  @lctl-enter-nav  @lmet-mod @to-mouse     @spc-mir       ralt rmet rctl
+  @lctl-mod-halmak  @lmet-mod @to-mouse     @spc-mir       ralt rmet rctl
 )
 
 ;; --------------------------------------------------------------------------- 
@@ -193,7 +194,7 @@
   tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
   caps a    s    d    f    g    h    j    k    l    ;    '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
-  @lctl-mod  @lmet-mod lalt     spc            ralt rmet rctl
+  @lctl-mod-qwer  @lmet-mod lalt     spc            ralt rmet rctl
 )
 
 ;; ------------------------------------------- 
@@ -221,9 +222,18 @@
 ;; 5. HELPER LAYERS (Correct 60-key counts) 
 ;; --------------------------------------------------------------------------- 
 
-;; Activated while holding LCTL (Standard)
-(deflayer ctrl-layer
+;; Activated while holding LCTL (Standard - Halmak)
+(deflayer ctrl-layer-halmak
+  @tog-qwer _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _              @to-mouse      _    _    _
+)
+
+;; Activated while holding LCTL (Standard - QWERTY)
+(deflayer ctrl-layer-qwer
+  @to-halmak _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
