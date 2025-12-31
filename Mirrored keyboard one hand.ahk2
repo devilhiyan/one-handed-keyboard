@@ -114,7 +114,7 @@ Global stream_fallback := "MirrorKeys-Settings-" A_Username ".ini"
 ; =========================================================
 Global NavMode := False
 Global MirrorMode := !!Integer(StreamRead("MirrorKeys", "MirrorMode", True))
-Global NavStyle := StreamRead("MirrorKeys", "NavStyle", "Old") ; Default to Old (WASD)
+Global NavStyle := StreamRead("MirrorKeys", "NavStyle", "New") ; Default to New (ESDF)
 Global MirrorStyle := "Halmak" ; Optimized for Halmak
 Global NavToggleKey := StreamRead("MirrorKeys", "NavToggleKey", "LWin") ; Default to LWin
 Global MouseMode := Integer(StreamRead("MirrorKeys", "MouseMode", 0)) ; Default to Transient (0)
@@ -151,9 +151,9 @@ $LWin:: {
                 Global MouseMode := !MouseMode
                 StreamWrite("MirrorKeys", "MouseMode", MouseMode)
                 if (MouseMode) {
-                    Notify("Mouse Navigation Mode")
+                    Notify("Mouse Mode: PERMANENT")
                 } else {
-                    Notify("Keyboard Navigation Mode")
+                    Notify("Mouse Mode: TRANSIENT")
                 }
                 SpaceTriggered := True
             }
@@ -178,7 +178,7 @@ $LWin:: {
             Global NavMode := !NavMode
             CurrentChord := ""
             if (NavMode) {
-                Notify("Navigation Mode: ON (" . (MouseMode ? "Mouse Nav" : "Keyboard Nav") . ")")
+                Notify("Navigation Mode: ON (" . (MouseMode ? "Permanent" : "Transient") . ")")
                 SoundBeep 1000, 150
             } else {
                 Notify("Navigation Mode: OFF")
@@ -211,9 +211,9 @@ $LWin:: {
     Global MouseMode := !MouseMode
     StreamWrite("MirrorKeys", "MouseMode", MouseMode)
     if (MouseMode) {
-        Notify("Mouse Navigation Mode")
+        Notify("Mouse Mode: PERMANENT")
     } else {
-        Notify("Keyboard Navigation Mode")
+        Notify("Mouse Mode: TRANSIENT")
     }
 }
 #HotIf
@@ -434,10 +434,8 @@ $*w::SendInput "{Blind}{Up}"
 $*a::SendInput "{Blind}{Left}"
 $*s::SendInput "{Blind}{Down}"
 $*d::SendInput "{Blind}{Right}"
-
-; Chords for Home/End
-q & w::SendInput "{Blind}{Home}"
-~w & e::SendInput "{Blind}{End}"
+$*q::SendInput "{Blind}{Home}"
+$*e::SendInput "{Blind}{End}"
 
 ; WASD Mouse (Space + Key)
 Space & w::SetTimer MoveMouseTick, 10

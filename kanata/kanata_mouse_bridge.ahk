@@ -16,24 +16,125 @@ AccelFactor := 0.02 ; This is now the "Ease Factor"
 ScrollSpeed := 1
 CurrentSpeed := MinSpeed
 
+; Navigation Settings
+Global NavStyle := "Old" ; Default to Old (WASD)
+Global MouseMode := 0 ; 0 = Keyboard Nav, 1 = Mouse Nav
+Global NavToggleKey := "LWin"
+
 ; Navigation State
-NavMode := false
+Global NavMode := false
 
 ; ------------------------------------------------------------------------------
-; Notification / State Toggle (F24)
+; Notification / State Toggle
 ; ------------------------------------------------------------------------------
-*F24:: {
-    global NavMode := !NavMode
-    if (NavMode) {
-        SoundBeep 1000, 150
-        ToolTip "Navigation Mode: ON"
-        SetTimer () => ToolTip(), -1000 
-    } else {
-        SoundBeep 500, 150
-        ToolTip "Navigation Mode: OFF"
-        SetTimer () => ToolTip(), -1000
+Notify(Text, Duration:=1000) {
+    ToolTip Text
+    SetTimer () => ToolTip(), -Duration
+}
+
+; Suppress Start Menu on simple press, allowing it only if held
+#HotIf NavToggleKey == "LWin"
+$LWin:: {
+    StartTime := A_TickCount
+    SpaceTriggered := False
+    
+    While GetKeyState("LWin", "P") {
+        if (NavMode && GetKeyState("Space", "P")) { ; Only check for Space combo if NavMode is active
+            if !SpaceTriggered {
+                Global MouseMode := !MouseMode
+                if (MouseMode) {
+                    Notify("Mouse Navigation Mode")
+                } else {
+                    Notify("Keyboard Navigation Mode")
+                }
+                SpaceTriggered := True
+            }
+        }
+        
+        if (A_TickCount - StartTime > 500) { ; Held for more than 0.50s
+            SendInput "{LWin Down}"
+            KeyWait "LWin"
+            SendInput "{LWin Up}"
+            return
+        }
+        Sleep 10
+    }
+    
+    ; Key Released
+    if (SpaceTriggered) {
+        return ; Handled by Space combo
+    }
+    
+    if (A_TickCount - StartTime <= 500) { ; Released within 0.50s (Tap)
+        if (A_PriorKey = "LWin") { ; Only if no other key was pressed
+            Global NavMode := !NavMode
+            if (NavMode) {
+                Notify("Navigation Mode: ON (" . (MouseMode ? "Mouse Nav" : "Keyboard Nav") . ")")
+                SoundBeep 1000, 150
+            } else {
+                Notify("Navigation Mode: OFF")
+                SoundBeep 500, 150
+            }
+        }
     }
 }
+#HotIf
+
+#HotIf NavMode
+^Space:: {
+    Global MouseMode := !MouseMode
+    if (MouseMode) {
+        Notify("Mouse Navigation Mode")
+    } else {
+        Notify("Keyboard Navigation Mode")
+    }
+}
+#HotIf
+
+; ------------------------------------------------------------------------------
+; Shared Navigation Keys (Shift, Capslock, Tab)
+; ------------------------------------------------------------------------------
+
+#HotIf NavMode
+
+; Shared Backspace
+Space & Tab::SendInput("{Blind}{Backspace}")
+
+#HotIf NavMode && !MouseMode ; Keyboard Navigation Mode
+
+; Capslock (Enter)
+$*Capslock:: {
+    SetCapsLockState "Off"
+    SendInput("{Enter}")
+}
+; Space + Capslock (Left Click / Drag)
+Space & Capslock:: {
+    Click "Down"
+    KeyWait "Capslock"
+    Click "Up"
+}
+
+; Space + Shift (Right Click)
+Space & LShift::Click "Right"
+Space & RShift::Click "Right"
+
+#HotIf NavMode && MouseMode ; Mouse Navigation Mode
+
+; Capslock (Left Click / Drag)
+$*Capslock:: {
+    SetCapsLockState "Off"
+    Click "Down"
+    KeyWait "Capslock"
+    Click "Up"
+}
+; Space + Capslock (Enter)
+Space & Capslock::SendInput("{Enter}")
+
+; Shift (Right Click)
+$*LShift::Click "Right"
+$*RShift::Click "Right"
+
+#HotIf
 
 ; ------------------------------------------------------------------------------
 ; Movement Timer Logic
@@ -42,10 +143,11 @@ ProcessMovement() {
     global CurrentSpeed
     
     ; Check which keys are physically held
-    up    := GetKeyState("F13", "P")
-    left  := GetKeyState("F14", "P")
-    down  := GetKeyState("F15", "P")
-    right := GetKeyState("F16", "P")
+    ; Allow both WASD and ESDF based on style (implementing WASD for now as requested)
+    up    := GetKeyState("w", "P")
+    left  := GetKeyState("a", "P")
+    down  := GetKeyState("s", "P")
+    right := GetKeyState("d", "P")
 
     ; If no keys are held, stop timer and reset speed
     if (!up && !left && !down && !right) {
@@ -82,18 +184,54 @@ StartMove() {
 }
 
 ; ------------------------------------------------------------------------------
-; Movement Triggers (F13-F16)
+; Navigation Mode Key Mappings
 ; ------------------------------------------------------------------------------
-; keydown starts the timer immediately. 
-; The timer handles the looping, so key repeat is ignored.
 
-*F13::StartMove() ; Up
-*F14::StartMove() ; Left
-*F15::StartMove() ; Down
-*F16::StartMove() ; Right
+#HotIf NavMode && !MouseMode ; Keyboard Navigation Mode (WASD = Arrows)
 
-; Note: We don't strictly need *Up handlers to stop it because the Timer 
-; checks GetKeyState itself and stops when all are released.
+; Direct Keys -> Arrows
+$*w::SendInput "{Blind}{Up}"
+$*a::SendInput "{Blind}{Left}"
+$*s::SendInput "{Blind}{Down}"
+$*d::SendInput "{Blind}{Right}"
+
+; Chords
+q & w::SendInput "{Blind}{Home}"
+~w & e::SendInput "{Blind}{End}"
+
+; Space + Keys -> Mouse
+Space & w::StartMove()
+Space & a::StartMove()
+Space & s::StartMove()
+Space & d::StartMove()
+
+; Wheel
+Space & q::Click "WheelUp"
+Space & e::Click "WheelDown"
+
+#HotIf
+
+#HotIf NavMode && MouseMode ; Mouse Navigation Mode (WASD = Mouse)
+
+; Direct Keys -> Mouse
+*w::StartMove()
+*a::StartMove()
+*s::StartMove()
+*d::StartMove()
+
+; Wheel
+*q::Click "WheelUp"
+*e::Click "WheelDown"
+
+; Space + Keys -> Arrows
+Space & w::SendInput "{Blind}{Up}"
+Space & a::SendInput "{Blind}{Left}"
+Space & s::SendInput "{Blind}{Down}"
+Space & d::SendInput "{Blind}{Right}"
+Space & q::SendInput "{Blind}{Home}"
+Space & e::SendInput "{Blind}{End}"
+
+#HotIf
 
 ; ------------------------------------------------------------------------------
 ; Clicks (F17-F18)
