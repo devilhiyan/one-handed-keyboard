@@ -20,6 +20,7 @@ Global MouseMode := 0 ; 0 = Keyboard Nav (Arrows), 1 = Mouse Nav (Movement)
 
 ; Navigation State
 Global NavMode := false
+Global MoveState := {up: 0, down: 0, left: 0, right: 0}
 
 ; ------------------------------------------------------------------------------
 ; Notification Helper
@@ -108,20 +109,13 @@ Space & RShift::Click "Right"
 ; Movement Timer Logic
 ; ------------------------------------------------------------------------------
 ProcessMovement() {
-    global CurrentSpeed, MouseMode
+    global CurrentSpeed, MoveState
     
-    ; Determine which keys to check based on Mode
-    if (MouseMode == 1) { ; Mouse Navigation Mode: WASD (F13-F16) moves mouse
-        up    := GetKeyState("F13")
-        left  := GetKeyState("F14")
-        down  := GetKeyState("F15")
-        right := GetKeyState("F16")
-    } else { ; Keyboard Navigation Mode: Space+WASD (Arrows) moves mouse
-        up    := GetKeyState("Up")
-        left  := GetKeyState("Left")
-        down  := GetKeyState("Down")
-        right := GetKeyState("Right")
-    }
+    ; Check held state from our tracking object
+    up    := MoveState.up
+    left  := MoveState.left
+    down  := MoveState.down
+    right := MoveState.right
 
     if (!up && !left && !down && !right) {
         SetTimer ProcessMovement, 0
@@ -161,55 +155,99 @@ StartMove() {
 *F15::SendInput "{Blind}{Down}"
 *F16::SendInput "{Blind}{Right}"
 
-*Up::StartMove()
-*Left::StartMove()
-*Down::StartMove()
-*Right::StartMove()
+*Up:: {
+    MoveState.up := 1
+    StartMove()
+}
+*Up Up::MoveState.up := 0
+
+*Left:: {
+    MoveState.left := 1
+    StartMove()
+}
+*Left Up::MoveState.left := 0
+
+*Down:: {
+    MoveState.down := 1
+    StartMove()
+}
+*Down Up::MoveState.down := 0
+
+*Right:: {
+    MoveState.right := 1
+    StartMove()
+}
+*Right Up::MoveState.right := 0
 
 ; Wheels / Chords
 *F19:: {
-    if (MouseMode == 1) { ; Mouse Mode -> Wheel Up
-        While GetKeyState("F19") {
-            Click "WheelUp"
-            Sleep(50)
-        }
-    } else { ; Keyboard Mode -> Home
+    While GetKeyState("F19", "P") {
         SendInput "{Blind}{Home}"
+        Sleep(50)
     }
 }
-
 *F20:: {
-    if (MouseMode == 1) { ; Mouse Mode -> Wheel Down
-        While GetKeyState("F20") {
-            Click "WheelDown"
-            Sleep(50)
-        }
-    } else { ; Keyboard Mode -> End
+    While GetKeyState("F20", "P") {
         SendInput "{Blind}{End}"
+        Sleep(50)
     }
 }
-
 *F21::SendInput "{Blind}{Home}"
 *F22::SendInput "{Blind}{End}"
 
-*Home:: {
-    if (MouseMode == 0) { ; Keyboard Mode -> Wheel Up
-        While GetKeyState("Home") {
-            Click "WheelUp"
-            Sleep(50)
-        }
-    } else { ; Mouse Mode -> Home
-        SendInput "{Blind}{Home}"
-    }
-}
+*Home::Click "WheelUp"
+*End::Click "WheelDown"
+#HotIf
 
-*End:: {
-    if (MouseMode == 0) { ; Keyboard Mode -> Wheel Down
-        While GetKeyState("End") {
-            Click "WheelDown"
-            Sleep(50)
-        }
-    } else { ; Mouse Mode -> End
-        SendInput "{Blind}{End}"
+; Mouse Navigation Mode (MouseMode = 1)
+; WASD (F13-F16) -> Mouse
+; Space+WASD (Arrows) -> Arrows
+#HotIf NavMode && MouseMode
+*F13:: {
+    MoveState.up := 1
+    StartMove()
+}
+*F13 Up::MoveState.up := 0
+
+*F14:: {
+    MoveState.left := 1
+    StartMove()
+}
+*F14 Up::MoveState.left := 0
+
+*F15:: {
+    MoveState.down := 1
+    StartMove()
+}
+*F15 Up::MoveState.down := 0
+
+*F16:: {
+    MoveState.right := 1
+    StartMove()
+}
+*F16 Up::MoveState.right := 0
+
+*Up::SendInput "{Blind}{Up}"
+*Left::SendInput "{Blind}{Left}"
+*Down::SendInput "{Blind}{Down}"
+*Right::SendInput "{Blind}{Right}"
+
+; Wheels / Chords
+*F19:: {
+    While GetKeyState("F19", "P") {
+        Click "WheelUp"
+        Sleep(50)
     }
 }
+*F20:: {
+    While GetKeyState("F20", "P") {
+        Click "WheelDown"
+        Sleep(50)
+    }
+}
+*F21::SendInput "{Blind}{Home}"
+*F22::SendInput "{Blind}{End}"
+
+*Home::SendInput "{Blind}{Home}"
+*End::SendInput "{Blind}{End}"
+#HotIf
