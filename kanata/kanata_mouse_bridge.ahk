@@ -132,7 +132,7 @@ ProcessMovement() {
     if (down)  moveY += 1
 
     if (moveX != 0 || moveY != 0) {
-        DllCall("mouse_event", "UInt", 0x0001, "Int", moveX * CurrentSpeed, "Int", moveY * CurrentSpeed, "UInt", 0, "UPtr", 0)
+        DllCall("mouse_event", "UInt", 0x0001, "Int", Integer(moveX * CurrentSpeed), "Int", Integer(moveY * CurrentSpeed), "UInt", 0, "UPtr", 0)
         CurrentSpeed += (MaxSpeed - CurrentSpeed) * AccelFactor
     }
 }
@@ -205,35 +205,51 @@ StartMove() {
 ; Space+WASD (Arrows) -> Arrows
 #HotIf NavMode && MouseMode
 *F13:: {
-    Global MoveUpVar := 1
+    global MoveUpVar
+    ToolTip "Up"
+    MoveUpVar := 1
     StartMove()
 }
 *F13 Up:: {
-    Global MoveUpVar := 0
+    global MoveUpVar
+    MoveUpVar := 0
+    ToolTip
 }
 
 *F14:: {
-    Global MoveLeftVar := 1
+    global MoveLeftVar
+    ToolTip "Left"
+    MoveLeftVar := 1
     StartMove()
 }
 *F14 Up:: {
-    Global MoveLeftVar := 0
+    global MoveLeftVar
+    MoveLeftVar := 0
+    ToolTip
 }
 
 *F15:: {
-    Global MoveDownVar := 1
+    global MoveDownVar
+    ToolTip "Down"
+    MoveDownVar := 1
     StartMove()
 }
 *F15 Up:: {
-    Global MoveDownVar := 0
+    global MoveDownVar
+    MoveDownVar := 0
+    ToolTip
 }
 
 *F16:: {
-    Global MoveRightVar := 1
+    global MoveRightVar
+    ToolTip "Right"
+    MoveRightVar := 1
     StartMove()
 }
 *F16 Up:: {
-    Global MoveRightVar := 0
+    global MoveRightVar
+    MoveRightVar := 0
+    ToolTip
 }
 
 *Up::SendInput "{Blind}{Up}"
