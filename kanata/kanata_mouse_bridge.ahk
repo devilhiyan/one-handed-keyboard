@@ -4,7 +4,7 @@
 SetMouseDelay -1 
 
 ; ==============================================================================
-; Kanata Mouse Bridge (Fixed)
+; Kanata Mouse Bridge
 ; Maps F13-F20 and Arrow Keys to Mouse/Keyboard Actions based on Mode
 ; ==============================================================================
 
@@ -20,12 +20,12 @@ Global MouseMode := 0 ; 0 = Keyboard Nav (Arrows), 1 = Mouse Nav (Movement)
 
 ; Navigation State
 Global NavMode := false
-Global MoveState := {up: 0, down: 0, left: 0, right: 0}
+Global MoveUpVar := 0, MoveDownVar := 0, MoveLeftVar := 0, MoveRightVar := 0
 
 ; ------------------------------------------------------------------------------
 ; Notification Helper
 ; ------------------------------------------------------------------------------
-Notify(Text, Duration:=1000) {
+Notify(Text, Duration:=2000) {
     ToolTip Text
     SetTimer () => ToolTip(), -Duration
 }
@@ -109,13 +109,13 @@ Space & RShift::Click "Right"
 ; Movement Timer Logic
 ; ------------------------------------------------------------------------------
 ProcessMovement() {
-    global CurrentSpeed, MoveState
+    global CurrentSpeed, MoveUpVar, MoveDownVar, MoveLeftVar, MoveRightVar
     
-    ; Check held state from our tracking object
-    up    := MoveState.up
-    left  := MoveState.left
-    down  := MoveState.down
-    right := MoveState.right
+    ; Check held state
+    up    := MoveUpVar
+    left  := MoveLeftVar
+    down  := MoveDownVar
+    right := MoveRightVar
 
     if (!up && !left && !down && !right) {
         SetTimer ProcessMovement, 0
@@ -156,38 +156,38 @@ StartMove() {
 *F16::SendInput "{Blind}{Right}"
 
 *Up:: {
-    MoveState.up := 1
+    Global MoveUpVar := 1
     StartMove()
 }
-*Up Up::MoveState.up := 0
+*Up Up::Global MoveUpVar := 0
 
 *Left:: {
-    MoveState.left := 1
+    Global MoveLeftVar := 1
     StartMove()
 }
-*Left Up::MoveState.left := 0
+*Left Up::Global MoveLeftVar := 0
 
 *Down:: {
-    MoveState.down := 1
+    Global MoveDownVar := 1
     StartMove()
 }
-*Down Up::MoveState.down := 0
+*Down Up::Global MoveDownVar := 0
 
 *Right:: {
-    MoveState.right := 1
+    Global MoveRightVar := 1
     StartMove()
 }
-*Right Up::MoveState.right := 0
+*Right Up::Global MoveRightVar := 0
 
 ; Wheels / Chords
 *F19:: {
-    While GetKeyState("F19", "P") {
+    While GetKeyState("F19") {
         SendInput "{Blind}{Home}"
         Sleep(50)
     }
 }
 *F20:: {
-    While GetKeyState("F20", "P") {
+    While GetKeyState("F20") {
         SendInput "{Blind}{End}"
         Sleep(50)
     }
@@ -204,28 +204,28 @@ StartMove() {
 ; Space+WASD (Arrows) -> Arrows
 #HotIf NavMode && MouseMode
 *F13:: {
-    MoveState.up := 1
+    Global MoveUpVar := 1
     StartMove()
 }
-*F13 Up::MoveState.up := 0
+*F13 Up::Global MoveUpVar := 0
 
 *F14:: {
-    MoveState.left := 1
+    Global MoveLeftVar := 1
     StartMove()
 }
-*F14 Up::MoveState.left := 0
+*F14 Up::Global MoveLeftVar := 0
 
 *F15:: {
-    MoveState.down := 1
+    Global MoveDownVar := 1
     StartMove()
 }
-*F15 Up::MoveState.down := 0
+*F15 Up::Global MoveDownVar := 0
 
 *F16:: {
-    MoveState.right := 1
+    Global MoveRightVar := 1
     StartMove()
 }
-*F16 Up::MoveState.right := 0
+*F16 Up::Global MoveRightVar := 0
 
 *Up::SendInput "{Blind}{Up}"
 *Left::SendInput "{Blind}{Left}"
@@ -234,13 +234,13 @@ StartMove() {
 
 ; Wheels / Chords
 *F19:: {
-    While GetKeyState("F19", "P") {
+    While GetKeyState("F19") {
         Click "WheelUp"
         Sleep(50)
     }
 }
 *F20:: {
-    While GetKeyState("F20", "P") {
+    While GetKeyState("F20") {
         Click "WheelDown"
         Sleep(50)
     }
