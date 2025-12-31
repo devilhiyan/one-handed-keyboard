@@ -32,9 +32,9 @@
   ;; ------------------------------------------- 
   ;; TOGGLES
   ;; ------------------------------------------- 
-  to-mouse   (layer-switch mouse)
-  to-halmak  (layer-switch halmak)
-  tog-qwer   (layer-switch qwer)
+  to-mouse   (multi f24 (layer-switch mouse))
+  to-halmak  (multi f23 (layer-switch halmak))
+  tog-qwer   (multi f23 (layer-switch qwer))
 
   ;; ------------------------------------------- 
   ;; MOUSE ACTIONS (Mapped to F-Keys for AHK Bridge)
@@ -47,9 +47,9 @@
   ;; ------------------------------------------- 
   ;; NAVIGATION TOGGLE
   ;; ------------------------------------------- 
-  ;; Tap LCTL to toggle Mouse Layer + Signal AHK (F24)
+  ;; Tap LCTL to toggle Mouse Layer + Signal AHK (F24=On, F23=Off)
   lctl-enter-nav (tap-hold 150 150 (multi f24 (layer-switch mouse)) lctl)
-  lctl-exit-nav  (tap-hold 150 150 (multi f24 (layer-switch halmak)) lctl)
+  lctl-exit-nav  (tap-hold 150 150 (multi f23 (layer-switch halmak)) lctl)
 
   ;; Space as modifier in navigation mode
   spc-nav-mod (tap-hold 150 150 spc (layer-toggle mouse-spc-mod))

@@ -31,17 +31,18 @@ Notify(Text, Duration:=2000) {
 }
 
 ; ------------------------------------------------------------------------------
-; Navigation Mode Toggle (F24 - Sent by Kanata on Ctrl Tap)
+; Navigation Mode Control (F24 = ON, F23 = OFF)
 ; ------------------------------------------------------------------------------
 *F24:: {
-    global NavMode := !NavMode
-    if (NavMode) {
-        Notify("Navigation Mode: ON (" . (MouseMode ? "Mouse Nav" : "Keyboard Nav") . ")")
-        SoundBeep 1000, 150
-    } else {
-        Notify("Navigation Mode: OFF")
-        SoundBeep 500, 150
-    }
+    global NavMode := true
+    Notify("Navigation Mode: ON (" . (MouseMode ? "Mouse Nav" : "Keyboard Nav") . ")")
+    SoundBeep 1000, 150
+}
+
+*F23:: {
+    global NavMode := false
+    Notify("Navigation Mode: OFF")
+    SoundBeep 500, 150
 }
 
 ; ------------------------------------------------------------------------------
