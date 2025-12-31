@@ -19,7 +19,7 @@ CurrentSpeed := MinSpeed
 ; Navigation Settings
 Global NavStyle := "Old" ; Default to Old (WASD)
 Global MouseMode := 0 ; 0 = Keyboard Nav, 1 = Mouse Nav
-Global NavToggleKey := "LWin"
+Global NavToggleKey := "Ctrl"
 
 ; Navigation State
 Global NavMode := false
@@ -80,7 +80,23 @@ $LWin:: {
 }
 #HotIf
 
-#HotIf NavMode
+#HotIf NavToggleKey == "Ctrl"
+~Ctrl Up:: {
+	Critical ; Prevents this thread from being interrupted
+	if (A_PriorKey = "LControl" || A_PriorKey = "RControl") {
+		Global NavMode := !NavMode
+		if (NavMode) {
+			Notify("Navigation Mode: ON (" . (MouseMode ? "Mouse Nav" : "Keyboard Nav") . ")")
+			SoundBeep 1000, 150
+		} else {
+			Notify("Navigation Mode: OFF")
+			SoundBeep 500, 150
+		}
+	}
+}
+#HotIf
+
+#HotIf NavMode && NavToggleKey == "Ctrl"
 ^Space:: {
     Global MouseMode := !MouseMode
     if (MouseMode) {
