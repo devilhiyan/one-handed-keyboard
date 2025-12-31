@@ -56,8 +56,8 @@
 )
 
 (defchords mouse-nav-chords 50
-  (q w) f21 ; CS (Home)
-  (w e) f22 ; ST (End)
+  (q w) f21
+  (w e) f22
   
   ;; Single keys
   (q) f19
