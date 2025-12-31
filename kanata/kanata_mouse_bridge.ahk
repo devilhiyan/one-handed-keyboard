@@ -4,99 +4,49 @@
 SetMouseDelay -1 
 
 ; ==============================================================================
-; Kanata Mouse Bridge
-; Maps F13-F20 to Mouse Actions + Acceleration + Notification
-; Uses Timers to avoid Key Repeat Stutter/Delay
+; Kanata Mouse Bridge (Fixed)
+; Maps F13-F20 and Arrow Keys to Mouse/Keyboard Actions based on Mode
 ; ==============================================================================
 
 ; Configuration
 MinSpeed := 1
 MaxSpeed := 35
-AccelFactor := 0.02 ; This is now the "Ease Factor"
+AccelFactor := 0.02
 ScrollSpeed := 1
 CurrentSpeed := MinSpeed
 
 ; Navigation Settings
-Global NavStyle := "Old" ; Default to Old (WASD)
-Global MouseMode := 0 ; 0 = Keyboard Nav, 1 = Mouse Nav
-Global NavToggleKey := "Ctrl"
+Global MouseMode := 0 ; 0 = Keyboard Nav (Arrows), 1 = Mouse Nav (Movement)
 
 ; Navigation State
 Global NavMode := false
 
 ; ------------------------------------------------------------------------------
-; Notification / State Toggle
+; Notification Helper
 ; ------------------------------------------------------------------------------
 Notify(Text, Duration:=1000) {
     ToolTip Text
     SetTimer () => ToolTip(), -Duration
 }
 
-; Suppress Start Menu on simple press, allowing it only if held
-#HotIf NavToggleKey == "LWin"
-$LWin:: {
-    StartTime := A_TickCount
-    SpaceTriggered := False
-    
-    While GetKeyState("LWin", "P") {
-        if (NavMode && GetKeyState("Space", "P")) { ; Only check for Space combo if NavMode is active
-            if !SpaceTriggered {
-                Global MouseMode := !MouseMode
-                if (MouseMode) {
-                    Notify("Mouse Navigation Mode")
-                } else {
-                    Notify("Keyboard Navigation Mode")
-                }
-                SpaceTriggered := True
-            }
-        }
-        
-        if (A_TickCount - StartTime > 500) { ; Held for more than 0.50s
-            SendInput "{LWin Down}"
-            KeyWait "LWin"
-            SendInput "{LWin Up}"
-            return
-        }
-        Sleep 10
-    }
-    
-    ; Key Released
-    if (SpaceTriggered) {
-        return ; Handled by Space combo
-    }
-    
-    if (A_TickCount - StartTime <= 500) { ; Released within 0.50s (Tap)
-        if (A_PriorKey = "LWin") { ; Only if no other key was pressed
-            Global NavMode := !NavMode
-            if (NavMode) {
-                Notify("Navigation Mode: ON (" . (MouseMode ? "Mouse Nav" : "Keyboard Nav") . ")")
-                SoundBeep 1000, 150
-            } else {
-                Notify("Navigation Mode: OFF")
-                SoundBeep 500, 150
-            }
-        }
+; ------------------------------------------------------------------------------
+; Navigation Mode Toggle (F24 - Sent by Kanata on Ctrl Tap)
+; ------------------------------------------------------------------------------
+*F24:: {
+    global NavMode := !NavMode
+    if (NavMode) {
+        Notify("Navigation Mode: ON (" . (MouseMode ? "Mouse Nav" : "Keyboard Nav") . ")")
+        SoundBeep 1000, 150
+    } else {
+        Notify("Navigation Mode: OFF")
+        SoundBeep 500, 150
     }
 }
-#HotIf
 
-#HotIf NavToggleKey == "Ctrl"
-~Ctrl Up:: {
-	Critical ; Prevents this thread from being interrupted
-	if (A_PriorKey = "LControl" || A_PriorKey = "RControl") {
-		Global NavMode := !NavMode
-		if (NavMode) {
-			Notify("Navigation Mode: ON (" . (MouseMode ? "Mouse Nav" : "Keyboard Nav") . ")")
-			SoundBeep 1000, 150
-		} else {
-			Notify("Navigation Mode: OFF")
-			SoundBeep 500, 150
-		}
-	}
-}
-#HotIf
-
-#HotIf NavMode && NavToggleKey == "Ctrl"
+; ------------------------------------------------------------------------------
+; Mouse Mode Toggle (^Space - Toggle Keyboard vs Mouse Priority)
+; ------------------------------------------------------------------------------
+#HotIf NavMode
 ^Space:: {
     Global MouseMode := !MouseMode
     if (MouseMode) {
@@ -108,169 +58,158 @@ $LWin:: {
 #HotIf
 
 ; ------------------------------------------------------------------------------
-; Shared Navigation Keys (Shift, Capslock, Tab)
+; Shared Navigation Keys (Capslock, Tab, Shift)
 ; ------------------------------------------------------------------------------
-
 #HotIf NavMode
 
-; Shared Backspace
-Space & Tab::SendInput("{Blind}{Backspace}")
+; Backspace on Space + Tab (Kanata sends bspc if mapped, but bridge can handle it)
+; Actually Kanata maps q to bspc in spc-mod. Let's stick to what Kanata sends or map specific F keys.
 
-#HotIf NavMode && !MouseMode ; Keyboard Navigation Mode
-
-; Capslock (Enter)
+; Capslock / Shift logic based on MouseMode
 $*Capslock:: {
     SetCapsLockState "Off"
-    SendInput("{Enter}")
+    if (MouseMode) { ; Mouse Mode -> Click
+        Click "Down"
+        KeyWait "Capslock"
+        Click "Up"
+    } else { ; Keyboard Mode -> Enter
+        SendInput("{Enter}")
+    }
 }
-; Space + Capslock (Left Click / Drag)
+
 Space & Capslock:: {
-    Click "Down"
-    KeyWait "Capslock"
-    Click "Up"
+    if (MouseMode) {
+        SendInput("{Enter}")
+    } else {
+        Click "Down"
+        KeyWait "Capslock"
+        Click "Up"
+    }
 }
 
-; Space + Shift (Right Click)
-Space & LShift::Click "Right"
+; Right Click logic
+$*LShift::
+$*RShift:: {
+    if (MouseMode) {
+        Click "Right"
+    } else {
+        SendInput "{Blind}{LShift Down}"
+        KeyWait A_ThisHotkey
+        SendInput "{Blind}{LShift Up}"
+    }
+}
+
+#HotIf NavMode && !MouseMode
+Space & LShift::
 Space & RShift::Click "Right"
-
-#HotIf NavMode && MouseMode ; Mouse Navigation Mode
-
-; Capslock (Left Click / Drag)
-$*Capslock:: {
-    SetCapsLockState "Off"
-    Click "Down"
-    KeyWait "Capslock"
-    Click "Up"
-}
-; Space + Capslock (Enter)
-Space & Capslock::SendInput("{Enter}")
-
-; Shift (Right Click)
-$*LShift::Click "Right"
-$*RShift::Click "Right"
-
 #HotIf
 
 ; ------------------------------------------------------------------------------
 ; Movement Timer Logic
 ; ------------------------------------------------------------------------------
 ProcessMovement() {
-    global CurrentSpeed
+    global CurrentSpeed, MouseMode
     
-    ; Check which keys are physically held
-    ; Allow both WASD and ESDF based on style (implementing WASD for now as requested)
-    up    := GetKeyState("w", "P")
-    left  := GetKeyState("a", "P")
-    down  := GetKeyState("s", "P")
-    right := GetKeyState("d", "P")
+    ; Determine which keys to check based on Mode
+    if (MouseMode == 1) { ; Mouse Navigation Mode: WASD (F13-F16) moves mouse
+        up    := GetKeyState("F13")
+        left  := GetKeyState("F14")
+        down  := GetKeyState("F15")
+        right := GetKeyState("F16")
+    } else { ; Keyboard Navigation Mode: Space+WASD (Arrows) moves mouse
+        up    := GetKeyState("Up")
+        left  := GetKeyState("Left")
+        down  := GetKeyState("Down")
+        right := GetKeyState("Right")
+    }
 
-    ; If no keys are held, stop timer and reset speed
     if (!up && !left && !down && !right) {
-        SetTimer ProcessMovement, 0 ; Turn off
+        SetTimer ProcessMovement, 0
         CurrentSpeed := MinSpeed
         return
     }
 
-    ; Calculate Movement
     moveX := 0
     moveY := 0
-    
-    if (left)  
-        moveX -= 1
-    if (right) 
-        moveX += 1
-    if (up)    
-        moveY -= 1
-    if (down)  
-        moveY += 1
+    if (left)  moveX -= 1
+    if (right) moveX += 1
+    if (up)    moveY -= 1
+    if (down)  moveY += 1
 
-    ; Apply Movement
     if (moveX != 0 || moveY != 0) {
         MouseMove(moveX * CurrentSpeed, moveY * CurrentSpeed, 0, "R")
-        
-        ; Accelerate (Ease-out)
         CurrentSpeed += (MaxSpeed - CurrentSpeed) * AccelFactor
     }
 }
 
-; Start Timer on Key Down
 StartMove() {
-    SetTimer ProcessMovement, 10 ; Run every 10ms
+    SetTimer ProcessMovement, 10
 }
 
 ; ------------------------------------------------------------------------------
-; Navigation Mode Key Mappings
+; Key Mappings (Catching keys from Kanata)
 ; ------------------------------------------------------------------------------
 
-#HotIf NavMode && !MouseMode ; Keyboard Navigation Mode (WASD = Arrows)
+#HotIf NavMode
 
-; Direct Keys -> Arrows
-$*w::SendInput "{Blind}{Up}"
-$*a::SendInput "{Blind}{Left}"
-$*s::SendInput "{Blind}{Down}"
-$*d::SendInput "{Blind}{Right}"
+; Keyboard Navigation Mode (MouseMode = 0)
+; WASD (F13-F16) -> Arrows
+; Space+WASD (Arrows) -> Mouse
+#HotIf NavMode && !MouseMode
+*F13::SendInput "{Blind}{Up}"
+*F14::SendInput "{Blind}{Left}"
+*F15::SendInput "{Blind}{Down}"
+*F16::SendInput "{Blind}{Right}"
 
-; Chords
-q & w::SendInput "{Blind}{Home}"
-~w & e::SendInput "{Blind}{End}"
+*Up::StartMove()
+*Left::StartMove()
+*Down::StartMove()
+*Right::StartMove()
 
-; Space + Keys -> Mouse
-Space & w::StartMove()
-Space & a::StartMove()
-Space & s::StartMove()
-Space & d::StartMove()
-
-; Wheel
-Space & q::Click "WheelUp"
-Space & e::Click "WheelDown"
-
-#HotIf
-
-#HotIf NavMode && MouseMode ; Mouse Navigation Mode (WASD = Mouse)
-
-; Direct Keys -> Mouse
-*w::StartMove()
-*a::StartMove()
-*s::StartMove()
-*d::StartMove()
-
-; Wheel
-*q::Click "WheelUp"
-*e::Click "WheelDown"
-
-; Space + Keys -> Arrows
-Space & w::SendInput "{Blind}{Up}"
-Space & a::SendInput "{Blind}{Left}"
-Space & s::SendInput "{Blind}{Down}"
-Space & d::SendInput "{Blind}{Right}"
-Space & q::SendInput "{Blind}{Home}"
-Space & e::SendInput "{Blind}{End}"
-
-#HotIf
-
-; ------------------------------------------------------------------------------
-; Clicks (F17-F18)
-; ------------------------------------------------------------------------------
-*F17::Click "Down"
-*F17 Up::Click "Up"
-
-*F18::Click "Down Right"
-*F18 Up::Click "Up Right"
-
-; ------------------------------------------------------------------------------
-; Scroll (F19-F20)
-; ------------------------------------------------------------------------------
+; Wheels / Chords
 *F19:: {
-    While GetKeyState("F19", "P") {
-        Click "WheelUp"
-        Sleep(50)
+    if (MouseMode == 1) { ; Mouse Mode -> Wheel Up
+        While GetKeyState("F19") {
+            Click "WheelUp"
+            Sleep(50)
+        }
+    } else { ; Keyboard Mode -> Home
+        SendInput "{Blind}{Home}"
     }
 }
 
 *F20:: {
-    While GetKeyState("F20", "P") {
-        Click "WheelDown"
-        Sleep(50)
+    if (MouseMode == 1) { ; Mouse Mode -> Wheel Down
+        While GetKeyState("F20") {
+            Click "WheelDown"
+            Sleep(50)
+        }
+    } else { ; Keyboard Mode -> End
+        SendInput "{Blind}{End}"
+    }
+}
+
+*F21::SendInput "{Blind}{Home}"
+*F22::SendInput "{Blind}{End}"
+
+*Home:: {
+    if (MouseMode == 0) { ; Keyboard Mode -> Wheel Up
+        While GetKeyState("Home") {
+            Click "WheelUp"
+            Sleep(50)
+        }
+    } else { ; Mouse Mode -> Home
+        SendInput "{Blind}{Home}"
+    }
+}
+
+*End:: {
+    if (MouseMode == 0) { ; Keyboard Mode -> Wheel Down
+        While GetKeyState("End") {
+            Click "WheelDown"
+            Sleep(50)
+        }
+    } else { ; Mouse Mode -> End
+        SendInput "{Blind}{End}"
     }
 }
