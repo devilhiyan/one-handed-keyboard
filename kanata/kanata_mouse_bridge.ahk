@@ -31,7 +31,7 @@ Notify(Text, Duration:=2000) {
 }
 
 ; ------------------------------------------------------------------------------
-; Navigation Mode Control (F24 = ON, F23/F9 = OFF/Layout Switch)
+; Navigation Mode Control (F24 = ON, F23 = OFF)
 ; ------------------------------------------------------------------------------
 *F24:: {
     global NavMode := true
@@ -41,13 +41,7 @@ Notify(Text, Duration:=2000) {
 
 *F23:: {
     global NavMode := false
-    Notify("Layout: Halmak")
-    SoundBeep 500, 150
-}
-
-*F9:: {
-    global NavMode := false
-    Notify("Layout: QWERTY")
+    Notify("Navigation Mode: OFF")
     SoundBeep 500, 150
 }
 

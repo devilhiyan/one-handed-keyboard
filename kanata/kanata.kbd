@@ -26,7 +26,7 @@
   ;; MODIFIERS AS LAYER SWITCHERS
   ;; ------------------------------------------- 
   lctl-mod-halmak (tap-hold 150 150 (multi f24 (layer-switch mouse)) (multi lctl (layer-toggle ctrl-layer-halmak)))
-  lctl-mod-qwer   (tap-hold 150 150 lctl (multi lctl (layer-toggle ctrl-layer-qwer)))
+  lctl-mod-qwer   (tap-hold 150 150 (multi f24 (layer-switch mouse)) (multi lctl (layer-toggle ctrl-layer-qwer)))
   lctl-mouse      (tap-hold 150 150 lctl (layer-toggle mouse-ctrl-layer))
   lmet-mod        (tap-hold 150 150 lmet (layer-toggle fn-layer))
 
@@ -35,7 +35,7 @@
   ;; ------------------------------------------- 
   to-mouse   (multi f24 (layer-switch mouse))
   to-halmak  (multi f23 (layer-switch halmak))
-  tog-qwer   (multi f9 (layer-switch qwer))
+  tog-qwer   (multi f23 (layer-switch qwer))
 
   ;; ------------------------------------------- 
   ;; MOUSE ACTIONS (Mapped to F-Keys for AHK Bridge)
