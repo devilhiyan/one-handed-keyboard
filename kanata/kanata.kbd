@@ -86,6 +86,8 @@
   (l d) C-z  ;; Undo (Right/Physical)
   (c v) C-y  ;; Redo (Left Hand: Output n m)
   (n m) C-y  ;; Redo (Right/Physical)
+  (a r) volu ;; Volume Increase (Output a h)
+  (q f) vold ;; Volume Decrease (Output c o)
   (s e) /
   (g r) S-/
   (a g) S-2
@@ -128,6 +130,8 @@
   (l d) C-z  ;; Undo
   (c v) C-y
   (n m) C-y  ;; Redo
+  (a r) brup ;; Brightness Increase (Output a h)
+  (q f) brdn ;; Brightness Decrease (Output c o)
   (s e) \
   (g r) S-\
   (a g) S-2
