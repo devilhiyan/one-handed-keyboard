@@ -89,6 +89,33 @@ Notify(Text, Duration:=2000) {
 ; Space + Shift (Handled via F12 from Kanata)
 *F12::Click "Right"
 
+; ------------------------------------------------------------------------------
+; Mouse Wheel & Chords (Mapped from Kanata F19-F22)
+; ------------------------------------------------------------------------------
+#HotIf NavMode
+
+; F19 = Q (Wheel Up in Mouse Mode)
+*F19:: {
+    if (MouseMode) {
+        Click "WheelUp"
+        Sleep 50 ; Debounce/Repeat control
+    }
+}
+
+; F20 = E (Wheel Down in Mouse Mode)
+*F20:: {
+    if (MouseMode) {
+        Click "WheelDown"
+        Sleep 50
+    }
+}
+
+; F21 = Q+W Chord (Home in Keyboard Mode)
+*F21::SendInput "{Blind}{Home}"
+
+; F22 = W+E Chord (End in Keyboard Mode)
+*F22::SendInput "{Blind}{End}"
+
 #HotIf
 
 ; ------------------------------------------------------------------------------
@@ -170,24 +197,6 @@ StartMove() {
 }
 *Right Up::Global MoveRightVar := 0
 
-; Wheels / Chords
-*F19:: {
-    While GetKeyState("F19") {
-        SendInput "{Blind}{Home}"
-        Sleep(50)
-    }
-}
-*F20:: {
-    While GetKeyState("F20") {
-        SendInput "{Blind}{End}"
-        Sleep(50)
-    }
-}
-*F21::SendInput "{Blind}{Home}"
-*F22::SendInput "{Blind}{End}"
-
-*Home::Click "WheelUp"
-*End::Click "WheelDown"
 #HotIf
 
 ; Mouse Navigation Mode (MouseMode = 1)
@@ -247,22 +256,4 @@ StartMove() {
 *Down::SendInput "{Blind}{Down}"
 *Right::SendInput "{Blind}{Right}"
 
-; Wheels / Chords
-*F19:: {
-    While GetKeyState("F19") {
-        Click "WheelUp"
-        Sleep(50)
-    }
-}
-*F20:: {
-    While GetKeyState("F20") {
-        Click "WheelDown"
-        Sleep(50)
-    }
-}
-*F21::SendInput "{Blind}{Home}"
-*F22::SendInput "{Blind}{End}"
-
-*Home::SendInput "{Blind}{Home}"
-*End::SendInput "{Blind}{End}"
 #HotIf
