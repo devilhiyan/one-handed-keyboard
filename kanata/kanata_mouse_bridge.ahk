@@ -110,7 +110,7 @@ Space & RShift::Click "Right"
 ; Movement Timer Logic
 ; ------------------------------------------------------------------------------
 ProcessMovement() {
-    global CurrentSpeed, MoveUpVar, MoveDownVar, MoveLeftVar, MoveRightVar
+    global ; Assume global scope for everything
     
     ; Check held state
     up    := MoveUpVar
@@ -121,19 +121,29 @@ ProcessMovement() {
     if (!up && !left && !down && !right) {
         SetTimer ProcessMovement, 0
         CurrentSpeed := MinSpeed
+        ToolTip ; Hide tooltip when stopped
         return
     }
 
     moveX := 0
     moveY := 0
-    if (left)  moveX -= 1
-    if (right) moveX += 1
-    if (up)    moveY -= 1
-    if (down)  moveY += 1
+    if (left)
+        moveX -= 1
+    if (right)
+        moveX += 1
+    if (up) {
+        ; ToolTip "UP DETECTED"
+        moveY -= 1
+    }
+    if (down)
+        moveY += 1
 
     if (moveX != 0 || moveY != 0) {
+        ToolTip "Move: " . moveX . "," . moveY
         DllCall("mouse_event", "UInt", 0x0001, "Int", Integer(moveX * CurrentSpeed), "Int", Integer(moveY * CurrentSpeed), "UInt", 0, "UPtr", 0)
         CurrentSpeed += (MaxSpeed - CurrentSpeed) * AccelFactor
+    } else {
+        ToolTip "No Move: " . up . "|" . moveY
     }
 }
 
@@ -206,50 +216,50 @@ StartMove() {
 #HotIf NavMode && MouseMode
 *F13:: {
     global MoveUpVar
-    ToolTip "Up"
+    ; ToolTip "Up"
     MoveUpVar := 1
     StartMove()
 }
 *F13 Up:: {
     global MoveUpVar
     MoveUpVar := 0
-    ToolTip
+    ; ToolTip
 }
 
 *F14:: {
     global MoveLeftVar
-    ToolTip "Left"
+    ; ToolTip "Left"
     MoveLeftVar := 1
     StartMove()
 }
 *F14 Up:: {
     global MoveLeftVar
     MoveLeftVar := 0
-    ToolTip
+    ; ToolTip
 }
 
 *F15:: {
     global MoveDownVar
-    ToolTip "Down"
+    ; ToolTip "Down"
     MoveDownVar := 1
     StartMove()
 }
 *F15 Up:: {
     global MoveDownVar
     MoveDownVar := 0
-    ToolTip
+    ; ToolTip
 }
 
 *F16:: {
     global MoveRightVar
-    ToolTip "Right"
+    ; ToolTip "Right"
     MoveRightVar := 1
     StartMove()
 }
 *F16 Up:: {
     global MoveRightVar
     MoveRightVar := 0
-    ToolTip
+    ; ToolTip
 }
 
 *Up::SendInput "{Blind}{Up}"
