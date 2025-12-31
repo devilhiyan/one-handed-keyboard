@@ -14,6 +14,12 @@ These chords provide access to navigation keys and common editing actions withou
 | `d` + `f` | `Right Arrow` | |
 | `q` + `w` | `Home` | |
 | `e` + `r` | `End` | |
+| `z` + `x` | `Undo` (Ctrl + Z) | `ld` |
+| `l` + `d` | `Undo` (Physical) | |
+| `c` + `v` | `Redo` (Ctrl + Y) | `nm` |
+| `n` + `m` | `Redo` (Physical) | |
+| `a` + `r` | `Volume Up` | `ah` |
+| `q` + `f` | `Volume Down` | `co` |
 | `s` + `f` | `Backspace` | `ao` |
 | `s` + `d` + `f` | `Ctrl + Backspace` | `aio` |
 | `a` + `d` | `Delete` | `ei` |
@@ -38,6 +44,12 @@ These chords are active while holding the Spacebar.
 
 | Chord Keys (Physical) | Output / Action | Mnemonic/Logic |
 | :--- | :--- | :--- |
+| `z` + `x` | `Alt + Ctrl + Z` | |
+| `l` + `d` | `Undo` (Ctrl + Z) | |
+| `c` + `v` | `Redo` (Ctrl + Y) | |
+| `n` + `m` | `Redo` (Ctrl + Y) | |
+| `a` + `r` | `Brightness Up` | `ah` |
+| `q` + `f` | `Brightness Down` | `co` |
 | `s` + `d` + `f` | `Ctrl + Alt + Backspace` | `space aio` |
 | `a` + `f` | `Ctrl + V` (Paste) | `space eo` |
 | `q` + `r` | `}` (Shift + ]) | `space ch` |
@@ -47,6 +59,15 @@ These chords are active while holding the Spacebar.
 | `a` + `w` | `'` (Single Quote) | `space es` |
 | `s` + `e` + `f` | `+` (Shift + =) | `space ato` |
 | `f` + `g` | `-` | `space ou` |
+
+## Navigation Mode Chords (Dedicated Group)
+
+These chords are active only when Navigation Mode is ON.
+
+| Chord Keys (Physical) | Output / Action | Mode |
+| :--- | :--- | :--- |
+| `q` + `w` | `Home` | Keyboard Mode |
+| `w` + `e` | `End` | Keyboard Mode |
 
 ## Single Key Fallbacks
 

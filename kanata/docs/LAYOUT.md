@@ -42,20 +42,33 @@ This layer "mirrors" the keyboard, allowing the left hand to type keys normally 
 ## 3. Mouse / Navigation Layer
 
 **Activation:** Toggle by tapping `L-Ctrl` (configured as `@lctl-enter-nav`).
-**Indication:** A tooltip "Navigation Mode: ON" appears (via AHK).
+**Indication:** A tooltip "Navigation Mode: ON" appears.
 
-This layer transforms the keyboard into a navigation cluster.
+This layer has two sub-modes, toggled via **Ctrl + Space**.
+
+### A. Mouse Mode (Default Permanent)
+*Focus: Precision pointer control.*
 
 | Key | Action |
 | :--- | :--- |
-| `e` (Middle Finger Top) | Move Mouse Up |
-| `s` (Ring Finger Home) | Move Mouse Left |
-| `d` (Middle Finger Home) | Move Mouse Down |
-| `f` (Index Finger Home) | Move Mouse Right |
-| `q` | Left Click |
-| `w` | Right Click |
-| `r` | Scroll Up |
-| `a` | Scroll Down |
+| `w/a/s/d` | Move Mouse Up/Left/Down/Right (Accelerating) |
+| `q / e` | Mouse Wheel Up / Down |
+| `Capslock` | Left Click (Hold to Drag) |
+| `Shift` | Right Click |
+| `Space + Capslock` | Enter |
+
+### B. Keyboard Mode (Transient)
+*Focus: Rapid text navigation.*
+
+| Key | Action |
+| :--- | :--- |
+| `w/a/s/d` | Arrow Keys Up/Left/Down/Right |
+| `q + w` | Home |
+| `w + e` | End |
+| `Capslock` | Enter |
+| `Space + Capslock` | Left Click (Hold to Drag) |
+| `Shift` | Shift |
+| `Space + Shift` | Right Click |
 
 **Exiting:** Tap `L-Ctrl` again to return to Halmak layer.
 

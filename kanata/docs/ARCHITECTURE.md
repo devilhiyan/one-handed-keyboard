@@ -20,15 +20,18 @@ Communication is one-way: **Kanata -> AutoHotkey**. This is achieved by mapping 
 
 | Physical Action | Kanata Layer | Output (Virtual Key) | AHK Action | Description |
 | :--- | :--- | :--- | :--- | :--- |
-| **Mouse Move Up** | `mouse` | `F13` | `StartMove()` | Starts the acceleration timer. |
-| **Mouse Move Left** | `mouse` | `F14` | `StartMove()` | Starts the acceleration timer. |
-| **Mouse Move Down** | `mouse` | `F15` | `StartMove()` | Starts the acceleration timer. |
-| **Mouse Move Right** | `mouse` | `F16` | `StartMove()` | Starts the acceleration timer. |
-| **Left Click** | `mouse` | `F17` | `Click "Down"` | Passthrough click. |
-| **Right Click** | `mouse` | `F18` | `Click "Down Right"` | Passthrough right click. |
-| **Scroll Up** | `mouse` | `F19` | `Click "WheelUp"` | Continuous scroll loop. |
-| **Scroll Down** | `mouse` | `F20` | `Click "WheelDown"` | Continuous scroll loop. |
-| **Nav Toggle** | `halmak` | `F24` | `NavMode := !NavMode` | Toggles on-screen notification state. |
+| **Mouse Move Up** | `mouse` | `F13` | `StartMove()` | Movement loop (using `DllCall`). |
+| **Mouse Move Left** | `mouse` | `F14` | `StartMove()` | Movement loop (using `DllCall`). |
+| **Mouse Move Down** | `mouse` | `F15` | `StartMove()` | Movement loop (using `DllCall`). |
+| **Mouse Move Right** | `mouse` | `F16` | `StartMove()` | Movement loop (using `DllCall`). |
+| **CapsLock** | `mouse` | `F17` | `Context Click` | Left Click (MouseMode) or Enter (KeyMode). |
+| **Shift** | `mouse` | `F18` | `Context Click` | Right Click (MouseMode) or Shift (KeyMode). |
+| **Space+Shift** | `mouse-spc-mod` | `F12` | `Right Click` | Fixed Right Click. |
+| **Space+CapsLock**| `mouse-spc-mod` | `F11` | `Context Click` | Enter (MouseMode) or Left Click (KeyMode). |
+| **Q / E** | `mouse` | `F19 / F20` | `Wheel Up / Down`| Scroller (MouseMode only). |
+| **Q+W / W+E** | `mouse` | `F21 / F22` | `Home / End` | Navigation Shortcuts. |
+| **Nav Toggle ON** | `halmak` | `F24` | `NavMode := true` | Explicit Enable signal. |
+| **Nav Toggle OFF**| `mouse` | `F23` | `NavMode := false`| Explicit Disable signal. |
 
 ## 3. Mouse Logic Implementation
 
@@ -36,9 +39,9 @@ Communication is one-way: **Kanata -> AutoHotkey**. This is achieved by mapping 
 Kanata supports basic mouse movement, but it typically relies on static speeds or simple stepping. To achieve a "buttery smooth" cursor feel that rivals a physical mouse, we need **Ease-Out Acceleration**.
 
 ### The AHK Acceleration Algorithm
-The `ProcessMovement` function in `kanata_mouse_bridge.ahk` runs on a 10ms timer:
+The `ProcessMovement` function in `kanata_mouse_bridge.ahk` runs on a 10ms timer and uses **Low-Level Windows APIs** (`DllCall("mouse_event")`) for maximum reliability across different applications.
 
-1.  **Poll State:** Checks `GetKeyState` for F13-F16.
+1.  **Poll State:** Checks internal direction variables updated by F13-F16 hooks.
 2.  **Calculate Vector:** Determines the raw X/Y direction (-1, 0, 1).
 3.  **Apply Acceleration:** 
     ```autohotkey

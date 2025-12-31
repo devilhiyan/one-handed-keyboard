@@ -4,20 +4,40 @@ This document tracks all unique key combinations (chords) and their assigned act
 
 ## 1. Action Mappings
 
-| Chord | Normal Action (Keyboard) | Mirror Action (Space + Chord) |
+| Chord (Physical) | Normal Action (Keyboard) | Mirror Action (Space + Chord) |
 | :--- | :--- | :--- |
-| **we** | `Up` | `Mouse Move Up` |
-| **sd** | `Down` | `Mouse Move Down` |
-| **as** | `Left` | `Mouse Move Left` |
-| **df** | `Right` | `Mouse Move Right` |
-| **asd** | `Backspace` | - |
-| **sdf** | `Delete` | - |
+| **we** | `Up` | - |
+| **sd** | `Down` | - |
+| **as** | `Left` | - |
+| **df** | `Right` | - |
+| **qw** | `Home` | - |
+| **er** | `End` | - |
+| **zx** | `Undo` (Ctrl + Z) | `Alt + Ctrl + Z` |
+| **ld** | `Undo` (Ctrl + Z) | `Undo` (Ctrl + Z) |
+| **cv** | `Redo` (Ctrl + Y) | `Redo` (Ctrl + Y) |
+| **nm** | `Redo` (Ctrl + Y) | `Redo` (Ctrl + Y) |
+| **ar** | `Volume Up` | `Brightness Up` |
+| **qf** | `Volume Down` | `Brightness Down` |
+| **sf** | `Backspace` | - |
+| **ad** | `Delete` | - |
+
+## 2. Navigation Mode Specific (Active when Mode ON)
+
+| Chord (Physical) | Keyboard Nav Mode | Mouse Nav Mode |
+| :--- | :--- | :--- |
 | **qw** | `Home` | `Mouse Wheel Up` |
-| **er** | `End` | `Mouse Wheel Down` |
+| **we** | `End` | `Mouse Wheel Down` |
+| **q** | - | `Mouse Wheel Up` |
+| **e** | - | `Mouse Wheel Down` |
+| **w/a/s/d** | `Arrows` | `Mouse Move` |
+| **Caps** | `Enter` | `Left Click` |
+| **Space+Caps** | `Left Click` | `Enter` |
+| **Shift** | `Shift` | `Right Click` |
+| **Space+Shift** | `Right Click` | - |
 
 ---
 
-## 2. Identified Unique Combinations (Unassigned)
+## 3. Identified Unique Combinations (Unassigned)
 
 The following combinations are reserved for future action mapping:
 

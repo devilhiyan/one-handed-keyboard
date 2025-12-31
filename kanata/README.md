@@ -3,9 +3,11 @@
 This directory contains the [Kanata](https://github.com/jtroo/kanata) configuration to replicate the "Mirror Keys" one-handed keyboard functionality.
 
 ## Features
-- **Mirror Mode:** Hold **Spacebar** to access the mirrored half of the keyboard. The layout is optimized for Halmak but mirrors standard QWERTY keys in the configuration.
-- **Chords:** Press two keys simultaneously to trigger navigation/editing actions (e.g., `w`+`e` = Up).
-- **Navigation Mode:** Press the dedicated toggle key (default `lctl` or `lmet` based on config, currently mapped to `Nav Toggle`) to enter Navigation Layer (ESDF movement).
+- **Mirror Mode:** Hold **Spacebar** to access the mirrored half of the keyboard. The layout is optimized for Halmak.
+- **Advanced Chords:** Extensive multi-key chords for navigation, editing, system volume, and brightness.
+- **Dual Navigation Mode:** Toggle via **Left Ctrl** to enter a powerful navigation layer.
+    - **Keyboard Navigation (Transient):** Fast arrow keys, Home/End, and Enter.
+    - **Mouse Navigation (Permanent):** Accelerating mouse movement, clicking, and scrolling.
 
 ## Installation
 
@@ -21,47 +23,43 @@ This directory contains the [Kanata](https://github.com/jtroo/kanata) configurat
 
 ## Usage
 
-To start the key remapper:
+To start the system:
 
-1.  **Simple Launch:** Double-click `kanata.exe`.
-2.  **Debug/Terminal Launch:** Run `start_kanata.bat` (this keeps the window open if there is an error).
+1.  **Launch:** Run `start_kanata.ps1` (or use the `launch_kanata.bat` shortcut). This starts both Kanata and the AutoHotkey mouse bridge.
 
 ## Documentation
 
 Detailed documentation for the configuration and architecture can be found in the `docs/` directory:
 
-- [**Architecture & Bridge**](docs/ARCHITECTURE.md): Explains how Kanata communicates with AutoHotkey for mouse control.
+- [**Architecture & Bridge**](docs/ARCHITECTURE.md): The technical protocol between Kanata and AHK.
 - [**Layout Reference**](docs/LAYOUT.md): Details the Halmak, Mirror, and Mouse layers.
 - [**Chord Reference**](docs/CHORDS.md): Lists all chord combinations and their actions.
 
 ## Layouts
 
-### Base Layer
-Standard QWERTY.
+### Base Layer (Halmak One-Handed)
 - **Space:** Tap for Space, Hold for Mirror Layer.
-- **Chords:**
+- **Key Chords (Examples):**
   - `w` + `e`: Up
   - `s` + `d`: Down
-  - `a` + `s`: Left
-  - `d` + `f`: Right
-  - `q` + `w`: Home
-  - `e` + `r`: End
-  - `a` + `d`: Backspace
-  - `s` + `f`: Delete
-
-### Mirror Layer (Hold Space)
-Mirrors the left hand to the right hand (and vice versa).
-- `q` -> `b`
-- `w` -> `p`
-- `e` -> `w`
-- ... (See `kanata.kbd` for full mapping)
+  - `a` + `r`: Volume Up
+  - `q` + `f`: Volume Down
 
 ### Navigation Layer
-Toggle via `lmet` (Windows Key) in the base layer (mapped to `@nav-tog`).
-- `e`: Up
-- `s`: Left
-- `d`: Down
-- `f`: Right
-- `w`: Home
-- `r`: End
-- `Space`: Normal Space (does not trigger mirror).
+Toggled via **Left Ctrl**. Supports two sub-modes (switched via `Ctrl+Space`):
+
+**1. Mouse Navigation (Default):**
+- `w/a/s/d`: Mouse Movement.
+- `q/e`: Mouse Wheel Up/Down.
+- `Capslock`: Left Click.
+- `Shift`: Right Click.
+- `Space + Capslock`: Enter.
+
+**2. Keyboard Navigation:**
+- `w/a/s/d`: Up/Left/Down/Right Arrows.
+- `q + w`: Home.
+- `w + e`: End.
+- `Capslock`: Enter.
+- `Space + Capslock`: Left Click.
+- `Shift`: Shift.
+- `Space + Shift`: Right Click.
