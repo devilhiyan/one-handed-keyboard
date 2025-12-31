@@ -132,7 +132,7 @@ ProcessMovement() {
     if (down)  moveY += 1
 
     if (moveX != 0 || moveY != 0) {
-        MouseMove(moveX * CurrentSpeed, moveY * CurrentSpeed, 0, "R")
+        DllCall("mouse_event", "UInt", 0x0001, "Int", moveX * CurrentSpeed, "Int", moveY * CurrentSpeed, "UInt", 0, "UPtr", 0)
         CurrentSpeed += (MaxSpeed - CurrentSpeed) * AccelFactor
     }
 }
@@ -208,25 +208,33 @@ StartMove() {
     Global MoveUpVar := 1
     StartMove()
 }
-*F13 Up::Global MoveUpVar := 0
+*F13 Up:: {
+    Global MoveUpVar := 0
+}
 
 *F14:: {
     Global MoveLeftVar := 1
     StartMove()
 }
-*F14 Up::Global MoveLeftVar := 0
+*F14 Up:: {
+    Global MoveLeftVar := 0
+}
 
 *F15:: {
     Global MoveDownVar := 1
     StartMove()
 }
-*F15 Up::Global MoveDownVar := 0
+*F15 Up:: {
+    Global MoveDownVar := 0
+}
 
 *F16:: {
     Global MoveRightVar := 1
     StartMove()
 }
-*F16 Up::Global MoveRightVar := 0
+*F16 Up:: {
+    Global MoveRightVar := 0
+}
 
 *Up::SendInput "{Blind}{Up}"
 *Left::SendInput "{Blind}{Left}"

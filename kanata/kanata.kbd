@@ -55,19 +55,6 @@
   spc-nav-mod (tap-hold 150 150 spc (layer-toggle mouse-spc-mod))
 )
 
-(defchords mouse-nav-chords 50
-  (q w) f21
-  (w e) f22
-  
-  ;; Single keys
-  (q) f19
-  (w) f13
-  (e) f20
-  (a) f14
-  (s) f15
-  (d) f16
-)
-
 (defchords halmak-chords 50
   (w e) up
   (s d) down
@@ -193,8 +180,8 @@
 ;; ------------------------------------------- 
 (deflayer mouse
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  tab  (chord mouse-nav-chords q) (chord mouse-nav-chords w) (chord mouse-nav-chords e) _    _    _    _    _    _    _    _    _    _
-  f17  (chord mouse-nav-chords a) (chord mouse-nav-chords s) (chord mouse-nav-chords d) _    _    _    _    _    _    _    _    _
+  tab  f19  f13  f20  _    _    _    _    _    _    _    _    _    _
+  f17  f14  f15  f16  _    _    _    _    _    _    _    _    _
   f18  _    _    _    _    _    _    _    _    _    _    _
   @lctl-exit-nav  @lmet-mod @to-halmak @spc-nav-mod           _    _    _
 )
