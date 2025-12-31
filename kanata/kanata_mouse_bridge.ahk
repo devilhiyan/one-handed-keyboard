@@ -72,10 +72,24 @@ Notify(Text, Duration:=2000) {
     Click "Up"
 }
 
-; F18 = Right Click (Shift in Kanata)
+; F18 = Shift (Physical Shift in Kanata)
 *F18:: {
-    Click "Right"
+    if (MouseMode) { ; Mouse Mode -> Right Click
+        Click "Right"
+    } else { ; Keyboard Mode -> Shift
+        SendInput "{Blind}{LShift Down}"
+    }
 }
+*F18 Up:: {
+    if (!MouseMode) {
+        SendInput "{Blind}{LShift Up}"
+    }
+}
+
+; Space + Shift (Handled via F12 from Kanata)
+*F12::Click "Right"
+
+#HotIf
 
 ; ------------------------------------------------------------------------------
 ; Movement Timer Logic
@@ -92,7 +106,6 @@ ProcessMovement() {
     if (!up && !left && !down && !right) {
         SetTimer ProcessMovement, 0
         CurrentSpeed := MinSpeed
-        ToolTip ; Hide tooltip when stopped
         return
     }
 
@@ -103,18 +116,14 @@ ProcessMovement() {
     if (right)
         moveX += 1
     if (up) {
-        ; ToolTip "UP DETECTED"
         moveY -= 1
     }
     if (down)
         moveY += 1
 
     if (moveX != 0 || moveY != 0) {
-        ToolTip "Move: " . moveX . "," . moveY
         DllCall("mouse_event", "UInt", 0x0001, "Int", Integer(moveX * CurrentSpeed), "Int", Integer(moveY * CurrentSpeed), "UInt", 0, "UPtr", 0)
         CurrentSpeed += (MaxSpeed - CurrentSpeed) * AccelFactor
-    } else {
-        ToolTip "No Move: " . up . "|" . moveY
     }
 }
 
