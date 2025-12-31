@@ -16,7 +16,7 @@ ScrollSpeed := 1
 CurrentSpeed := MinSpeed
 
 ; Navigation Settings
-Global MouseMode := 0 ; 0 = Keyboard Nav (Arrows), 1 = Mouse Nav (Movement)
+Global MouseMode := 1 ; 0 = Keyboard Nav (Arrows), 1 = Mouse Nav (Movement)
 
 ; Navigation State
 Global NavMode := false
