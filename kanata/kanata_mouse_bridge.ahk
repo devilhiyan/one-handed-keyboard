@@ -64,12 +64,32 @@ Notify(Text, Duration:=2000) {
 ; ------------------------------------------------------------------------------
 #HotIf NavMode
 
-; F17 = Left Click (Capslock in Kanata)
+; F17 = CapsLock (Mapped from Kanata)
 *F17:: {
-    Click "Down"
+    if (MouseMode) { ; Mouse Mode -> Left Click
+        Click "Down"
+    } else { ; Keyboard Mode -> Enter
+        SendInput "{Enter}"
+    }
 }
 *F17 Up:: {
-    Click "Up"
+    if (MouseMode) {
+        Click "Up"
+    }
+}
+
+; F11 = Space + CapsLock (Mapped from Kanata)
+*F11:: {
+    if (MouseMode) { ; Mouse Mode -> Enter
+        SendInput "{Enter}"
+    } else { ; Keyboard Mode -> Left Click
+        Click "Down"
+    }
+}
+*F11 Up:: {
+    if (!MouseMode) {
+        Click "Up"
+    }
 }
 
 ; F18 = Shift (Physical Shift in Kanata)
