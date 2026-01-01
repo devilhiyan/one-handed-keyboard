@@ -172,7 +172,7 @@
   tab  (chord halmak-chords q) (chord halmak-chords w) (chord halmak-chords e) (chord halmak-chords r) (chord halmak-chords t)    y    u    i    o    p    [    ]    \
   ret  (chord halmak-chords a) (chord halmak-chords s) (chord halmak-chords d) (chord halmak-chords f) (chord halmak-chords g)    h    j    k    (chord halmak-chords l)    ;    '    ret
   lsft (chord halmak-chords z) (chord halmak-chords x) (chord halmak-chords c) (chord halmak-chords v) b    (chord halmak-chords n)    (chord halmak-chords m)    ,    .    /    rsft
-  @lctl-mod-halmak  @lmet-mod @to-mouse     @spc-mir       ralt rmet rctl
+  @lctl-mod-halmak  @lmet-mod lalt     @spc-mir       ralt rmet rctl
 )
 
 ;; --------------------------------------------------------------------------- 
