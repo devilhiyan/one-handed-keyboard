@@ -3,6 +3,12 @@
 #MaxThreadsPerHotkey 2
 SetMouseDelay -1 
 
+; Debug Logging
+; FileAppend "AHK Script Started at " A_Now "`n", "ahk_debug.log"
+; OnExit((ExitReason, ExitCode) => FileAppend("AHK Script Exiting: " ExitReason " Code: " ExitCode " at " A_Now "`n", "ahk_debug.log"))
+
+; FileAppend "Initializing configuration...`n", "ahk_debug.log"
+
 ; ==============================================================================
 ; Kanata Mouse Bridge
 ; Maps F13-F20 and Arrow Keys to Mouse/Keyboard Actions based on Mode
@@ -22,6 +28,8 @@ Global MouseMode := 1 ; 0 = Keyboard Nav (Arrows), 1 = Mouse Nav (Movement)
 Global NavMode := false
 Global IsHalmak := true
 Global MoveUpVar := 0, MoveDownVar := 0, MoveLeftVar := 0, MoveRightVar := 0
+
+; FileAppend "Configuration initialized. Setting up functions...`n", "ahk_debug.log"
 
 ; ------------------------------------------------------------------------------
 ; Notification Helper
@@ -187,6 +195,8 @@ ProcessMovement() {
 StartMove() {
     SetTimer ProcessMovement, 10
 }
+
+; FileAppend "Script initialized and ready. Entering idle state.`n", "ahk_debug.log"
 
 ; ------------------------------------------------------------------------------
 ; Key Mappings (Catching keys from Kanata)
