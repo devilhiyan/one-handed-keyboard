@@ -20,6 +20,7 @@ These chords provide access to navigation keys and common editing actions withou
 | `n` + `m` | `Redo` (Physical) | |
 | `a` + `r` | `Volume Up` | `ah` |
 | `q` + `f` | `Volume Down` | `co` |
+| `g` + `t` | `Play/Pause` | `ur` |
 | `s` + `f` | `Backspace` | `ao` |
 | `s` + `d` + `f` | `Ctrl + Backspace` | `aio` |
 | `a` + `d` | `Delete` | `ei` |

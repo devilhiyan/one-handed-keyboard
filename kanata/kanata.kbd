@@ -89,6 +89,7 @@
   (n m) C-y  ;; Redo (Right/Physical)
   (a r) volu ;; Volume Increase (Output a h)
   (q f) vold ;; Volume Decrease (Output c o)
+  (g t) pp   ;; Play/Pause (Output u r)
   (s e) /
   (g r) S-/
   (a g) S-2

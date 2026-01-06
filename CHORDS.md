@@ -18,6 +18,7 @@ This document tracks all unique key combinations (chords) and their assigned act
 | **nm** | `Redo` (Ctrl + Y) | `Redo` (Ctrl + Y) |
 | **ar** | `Volume Up` | `Brightness Up` |
 | **qf** | `Volume Down` | `Brightness Down` |
+| **gt** | `Play/Pause` | - |
 | **sf** | `Backspace` | - |
 | **ad** | `Delete` | - |
 
