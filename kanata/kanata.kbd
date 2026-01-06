@@ -81,7 +81,7 @@
   (s d f) C-bspc
   (a d) del
   (x c) C-j
-  (z x c v) esc
+  (z x c v) f10
   (a f) C-c
   (z x) C-z  ;; Undo (Left Hand: Output l d)
   (l d) C-z  ;; Undo (Right/Physical)

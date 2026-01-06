@@ -20,6 +20,7 @@ Global MouseMode := 1 ; 0 = Keyboard Nav (Arrows), 1 = Mouse Nav (Movement)
 
 ; Navigation State
 Global NavMode := false
+Global IsHalmak := true
 Global MoveUpVar := 0, MoveDownVar := 0, MoveLeftVar := 0, MoveRightVar := 0
 
 ; ------------------------------------------------------------------------------
@@ -41,12 +42,14 @@ Notify(Text, Duration:=2000) {
 
 *F23:: {
     global NavMode := false
+    global IsHalmak := true
     ; Debounce Halmak notification to see if F8 follows (QWERTY switch)
     SetTimer () => Notify("Layout: Halmak"), -100
     SoundBeep 500, 150
 }
 
 *F8:: {
+    global IsHalmak := false
     ; Cancel Halmak notification and show QWERTY
     SetTimer () => Notify("Layout: Halmak"), 0
     Notify("Layout: QWERTY")
@@ -284,3 +287,11 @@ StartMove() {
 *Right::SendInput "{Blind}{Right}"
 
 #HotIf
+; ------------------------------------------------------------------------------
+; Halmak Specific Mappings
+; ------------------------------------------------------------------------------
+#HotIf IsHalmak && !NavMode
+$Esc::LWin
+*F10::Send "{Esc}"
+#HotIf
+
