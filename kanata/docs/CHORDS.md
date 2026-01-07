@@ -21,6 +21,7 @@ These chords provide access to navigation keys and common editing actions withou
 | `a` + `r` | `Volume Up` | `ah` |
 | `q` + `f` | `Volume Down` | `co` |
 | `g` + `t` | `Play/Pause` | `ur` |
+| `q` + `t` | `Screen Capture` | `cr` |
 | `s` + `f` | `Backspace` | `ao` |
 | `s` + `d` + `f` | `Ctrl + Backspace` | `aio` |
 | `a` + `d` | `Delete` | `ei` |

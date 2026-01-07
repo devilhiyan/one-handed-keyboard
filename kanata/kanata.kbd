@@ -90,6 +90,7 @@
   (a r) volu ;; Volume Increase (Output a h)
   (q f) vold ;; Volume Decrease (Output c o)
   (g t) pp   ;; Play/Pause (Output u r)
+  (q t) prtsc ;; Screen Capture (Output c r)
   (s e) /
   (g r) S-/
   (a g) S-2
@@ -182,7 +183,7 @@
 (deflayer mirror
   -    0    9    8    7    6    5    4    3    2    1    =    grv  bspc
   bspc (chord mirror-chords q) (chord mirror-chords w) (chord mirror-chords e) (chord mirror-chords r) (chord mirror-chords t)    y    u    i    o    p    [    ]    \
-  '    (chord mirror-chords a) (chord mirror-chords s) (chord mirror-chords d) (chord mirror-chords f) (chord mirror-chords g)    h    j    k    (chord mirror-chords l)    ;    '    ret
+  caps (chord mirror-chords a) (chord mirror-chords s) (chord mirror-chords d) (chord mirror-chords f) (chord mirror-chords g)    h    j    k    (chord mirror-chords l)    ;    '    ret
   lsft (chord mirror-chords z) (chord mirror-chords x) (chord mirror-chords c) (chord mirror-chords v) c    (chord mirror-chords n)    (chord mirror-chords m)    ,    .    /    rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )

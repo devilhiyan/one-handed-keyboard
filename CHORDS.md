@@ -19,6 +19,7 @@ This document tracks all unique key combinations (chords) and their assigned act
 | **ar** | `Volume Up` | `Brightness Up` |
 | **qf** | `Volume Down` | `Brightness Down` |
 | **gt** | `Play/Pause` | - |
+| **qt** | `Screen Capture` | - |
 | **sf** | `Backspace` | - |
 | **ad** | `Delete` | - |
 
