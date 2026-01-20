@@ -44,7 +44,7 @@ Notify(Text, Duration:=2000) {
 ; ------------------------------------------------------------------------------
 *F24:: {
     if GetKeyState("Ctrl") {
-        ChangeBrightness(-10) ; Down
+        ChangeBrightness(-5) ; Down
         return
     }
     global NavMode := true
@@ -54,7 +54,7 @@ Notify(Text, Duration:=2000) {
 
 *F23:: {
     if GetKeyState("Ctrl") {
-        ChangeBrightness(10) ; Up
+        ChangeBrightness(5) ; Up
         return
     }
     global NavMode := false
