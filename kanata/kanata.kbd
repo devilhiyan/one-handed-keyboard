@@ -91,6 +91,10 @@
   (q f) vold ;; Volume Decrease (Output c o)
   (g t) pp   ;; Play/Pause (Output u r)
   (q t) prtsc ;; Screen Capture (Output c r)
+  (g e) right  ;; Media Seek Forward (5s)
+  (g w) left   ;; Media Seek Rewind (5s)
+  (a t) C-f23  ;; Brightness Up (AHK WMI)
+  (q g) C-f24  ;; Brightness Down (AHK WMI)
   (s e) /
   (g r) S-/
   (a g) S-2
@@ -133,8 +137,6 @@
   (l d) C-z  ;; Undo
   (c v) C-y
   (n m) C-y  ;; Redo
-  (a r) brup ;; Brightness Increase (Output a h)
-  (q f) brdn ;; Brightness Decrease (Output c o)
   (s e) \
   (g r) S-\
   (a g) S-2

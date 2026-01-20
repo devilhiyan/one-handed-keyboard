@@ -43,12 +43,20 @@ Notify(Text, Duration:=2000) {
 ; Navigation Mode Control (F24 = ON, F23/F8 = OFF/Layout Switch)
 ; ------------------------------------------------------------------------------
 *F24:: {
+    if GetKeyState("Ctrl") {
+        ChangeBrightness(-10) ; Down
+        return
+    }
     global NavMode := true
     Notify("Navigation Mode: ON (" . (MouseMode ? "Mouse Nav" : "Keyboard Nav") . ")")
     SoundBeep 1000, 150
 }
 
 *F23:: {
+    if GetKeyState("Ctrl") {
+        ChangeBrightness(10) ; Up
+        return
+    }
     global NavMode := false
     global IsHalmak := true
     ; Debounce Halmak notification to see if F8 follows (QWERTY switch)
@@ -304,4 +312,32 @@ StartMove() {
 $Esc::LWin
 *F10::Send "{Esc}"
 #HotIf
+
+
+; ------------------------------------------------------------------------------
+; Brightness Control (WMI)
+; ------------------------------------------------------------------------------
+ChangeBrightness(Amount) {
+    try {
+        ; Get current brightness
+        CurrentBrightness := 0
+        For Mon in ComObjGet("winmgmts:\\.\root\wmi").ExecQuery("Select * from WmiMonitorBrightness") {
+            CurrentBrightness := Mon.CurrentBrightness
+            break
+        }
+
+        ; Calculate new
+        NewBrightness := CurrentBrightness + Amount
+        NewBrightness := Max(0, Min(NewBrightness, 100))
+
+        ; Apply
+        For Mon in ComObjGet("winmgmts:\\.\root\wmi").ExecQuery("Select * from WmiMonitorBrightnessMethods") {
+            Mon.WmiSetBrightness(1, NewBrightness)
+            break
+        }
+        Notify("Brightness: " . NewBrightness . "%", 1000)
+    } catch as e {
+        Notify("Brightness Error (WMI)", 2000)
+    }
+}
 
