@@ -43,7 +43,7 @@ Notify(Text, Duration:=2000) {
 ; Navigation Mode Control (F24 = ON, F23/F8 = OFF/Layout Switch)
 ; ------------------------------------------------------------------------------
 *F24:: {
-    if GetKeyState("Ctrl") {
+    if GetKeyState("Ctrl") && GetKeyState("Shift") {
         ChangeBrightness(-5) ; Down
         return
     }
@@ -53,7 +53,7 @@ Notify(Text, Duration:=2000) {
 }
 
 *F23:: {
-    if GetKeyState("Ctrl") {
+    if GetKeyState("Ctrl") && GetKeyState("Shift") {
         ChangeBrightness(5) ; Up
         return
     }

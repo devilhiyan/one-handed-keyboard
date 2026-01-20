@@ -139,5 +139,5 @@ Activates when `Space` is held. Maps keys to the opposite side of the keyboard.
 | Key | Action |
 | :--- | :--- |
 | **F8** | Switch to QWERTY |
-| **F23** | Switch to Halmak (Nav OFF) / `Ctrl+F23`: **Brightness Up** |
-| **F24** | Switch to Navigation Mode (Nav ON) / `Ctrl+F24`: **Brightness Down** |
+| **F23** | Switch to Halmak (Nav OFF) / `Ctrl+Shift+F23`: **Brightness Up** |
+| **F24** | Switch to Navigation Mode (Nav ON) / `Ctrl+Shift+F24`: **Brightness Down** |

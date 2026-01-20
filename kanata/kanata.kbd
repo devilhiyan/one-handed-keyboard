@@ -93,8 +93,8 @@
   (q t) prtsc ;; Screen Capture (Output c r)
   (g e) right  ;; Media Seek Forward (5s)
   (g w) left   ;; Media Seek Rewind (5s)
-  (a t) C-f23  ;; Brightness Up (AHK WMI)
-  (q g) C-f24  ;; Brightness Down (AHK WMI)
+  (a t) C-S-f23  ;; Brightness Up (AHK WMI: Ctrl+Shift+F23)
+  (q g) C-S-f24  ;; Brightness Down (AHK WMI: Ctrl+Shift+F24)
   (s e) /
   (g r) S-/
   (a g) S-2
