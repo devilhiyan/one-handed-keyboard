@@ -25,6 +25,12 @@
 *   **Context:** User preference for specific physical key locations.
 *   **Consequences:** Removed legacy brightness controls from the Mirror layer to avoid duplication.
 
+## 2024-05-20 Bridge Protocol Refinement (Virtual F26)
+*   **Decision:** Use `Ctrl + Shift + F23/F24` for Brightness signals.
+*   **Status:** Accepted
+*   **Context:** `Ctrl + F23` was already in use by Layout Switch (`Ctrl + Grave`), causing a conflict. Windows limits F-keys to F24, so we cannot use F26/F27.
+*   **Consequences:** AHK Bridge logic updated to require explicit `Shift` modifier checks.
+
 ## 2024-03-24 Halmak Layout Base
 *   **Decision:** Use **Halmak** as the primary one-handed layout base.
 *   **Status:** Accepted
