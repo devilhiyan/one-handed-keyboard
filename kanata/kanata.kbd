@@ -54,6 +54,13 @@
 
   ;; Space as modifier in navigation mode
   spc-nav-mod (tap-hold 150 150 spc (layer-toggle mouse-spc-mod))
+
+  ;; -------------------------------------------
+  ;; CTRL LAYER SPACE SPECIAL
+  ;; -------------------------------------------
+  ;; Tap Control+Space -> Mouse Mode
+  ;; Hold Control+Space -> Mirror Layer (Allows Ctrl+Space+Key -> Ctrl+MirrorKey)
+  spc-ctl-layer (tap-hold 150 150 @to-mouse (layer-toggle mirror))
 )
 
 (defchords mouse-nav-chords 50
@@ -232,7 +239,7 @@
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _              @to-mouse      _    _    _
+  _    _    _              @spc-ctl-layer      _    _    _
 )
 
 ;; Activated while holding LCTL (Standard - QWERTY)

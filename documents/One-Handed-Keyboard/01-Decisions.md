@@ -40,3 +40,13 @@
 *   **Decision:** Use `Spacebar` as the primary "Mirror Modifier".
 *   **Status:** Accepted
 *   **Context:** The spacebar is the easiest key to hold with the thumb while typing with other fingers, enabling rapid access to the "other half" of the keyboard without moving the hand.
+
+## 2026-01-23 Ctrl+Space Chord Handling
+*   **Decision:** Change `Ctrl + Space` in the Control layer to a **Tap-Hold** key:
+    *   **Tap:** Toggle Mouse Mode.
+    *   **Hold:** Activate `Mirror` Layer.
+*   **Status:** Accepted
+*   **Context:**
+    *   User required shortcuts like `Ctrl + Space + Key` to function as shortcuts (e.g., `Ctrl + MirrorKey`).
+    *   Previously, any `Ctrl + Space` press triggered Mouse Mode instantly.
+*   **Consequences:** `Ctrl + Space` shortcuts now work by holding Space. Mouse mode requires a clean "Tap" of Space while holding Control.

@@ -141,3 +141,11 @@ Activates when `Space` is held. Maps keys to the opposite side of the keyboard.
 | **F8** | Switch to QWERTY |
 | **F23** | Switch to Halmak (Nav OFF) / `Ctrl+Shift+F23`: **Brightness Up** |
 | **F24** | Switch to Navigation Mode (Nav ON) / `Ctrl+Shift+F24`: **Brightness Down** |
+
+### 5. Control Layer & Shortcuts
+Holding `Left Control` activates a temporary layer with special functions:
+*   **Tap LCtrl**: Toggles Mouse Mode.
+*   **Ctrl + Space (Tap)**: Toggles Mouse Mode.
+*   **Ctrl + Space (Hold)**: Activates **Mirror Layer**.
+    *   *Usage*: Allows `Ctrl` + `Space` + `Key` chords.
+    *   *Example*: `Ctrl` + `Space` + `D` (Physical) -> `Ctrl` + `W` (Output).
