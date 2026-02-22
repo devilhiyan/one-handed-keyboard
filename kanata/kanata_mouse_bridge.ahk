@@ -66,7 +66,7 @@ Notify(Text, Duration:=2000) {
     SoundBeep 750, 150
 }
 
-*F22:: {
+^!F22:: {
     global NavMode := false
     global IsHalmak := false
     Notify("Layout: QWERTY")
