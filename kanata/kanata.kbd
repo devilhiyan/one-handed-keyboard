@@ -25,15 +25,16 @@
   ;; ------------------------------------------- 
   ;; MODIFIERS AS LAYER SWITCHERS
   ;; ------------------------------------------- 
-  lctl-mod-halmak (tap-hold 150 150 (multi f24 (layer-switch mouse)) (multi lctl (layer-toggle ctrl-layer-halmak)))
-  lctl-mod-qwer   (tap-hold 150 150 (multi f24 (layer-switch mouse)) (multi lctl (layer-toggle ctrl-layer-qwer)))
-  lctl-mouse      (tap-hold 150 150 lctl (layer-toggle mouse-ctrl-layer))
+  lctl-mod-halmak (tap-hold 150 150 @to-mouse (multi lctl (layer-toggle ctrl-layer-halmak)))
+  lctl-mod-qwer   (tap-hold 150 150 @to-halmak (multi lctl (layer-toggle ctrl-layer-qwer)))
+  lctl-mouse      (tap-hold 150 150 @to-qwer (layer-toggle mouse-ctrl-layer))
   lmet-mod        (tap-hold 150 150 lmet (layer-toggle fn-layer))
 
   ;; ------------------------------------------- 
   ;; TOGGLES
   ;; ------------------------------------------- 
   to-mouse   (multi f24 (layer-switch mouse))
+  to-qwer    (multi f22 (layer-switch qwer))
   to-halmak  (multi f23 (layer-switch halmak))
   tog-qwer   (multi f23 f8 (layer-switch qwer))
 
@@ -49,8 +50,8 @@
   ;; NAVIGATION TOGGLE
   ;; ------------------------------------------- 
   ;; Tap LCTL to toggle Mouse Layer + Signal AHK (F24=On, F23=Off)
-  lctl-enter-nav (tap-hold 150 150 (multi f24 (layer-switch mouse)) lctl)
-  lctl-exit-nav  (tap-hold 150 150 (multi f23 (layer-switch halmak)) lctl)
+  lctl-enter-nav (tap-hold 150 150 @to-mouse lctl)
+  lctl-exit-nav  (tap-hold 150 150 @to-qwer lctl)
 
   ;; Space as modifier in navigation mode
   spc-nav-mod (tap-hold 150 150 spc (layer-toggle mouse-spc-mod))

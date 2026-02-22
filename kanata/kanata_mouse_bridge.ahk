@@ -40,7 +40,7 @@ Notify(Text, Duration:=2000) {
 }
 
 ; ------------------------------------------------------------------------------
-; Navigation Mode Control (F24 = ON, F23/F8 = OFF/Layout Switch)
+; Navigation Mode Control (F24 = ON, F23 = Halmak, F22 = QWERTY)
 ; ------------------------------------------------------------------------------
 *F24:: {
     if GetKeyState("Ctrl") && GetKeyState("Shift") {
@@ -48,8 +48,10 @@ Notify(Text, Duration:=2000) {
         return
     }
     global NavMode := true
+    global IsHalmak := false
     Notify("Navigation Mode: ON (" . (MouseMode ? "Mouse Nav" : "Keyboard Nav") . ")")
-    SoundBeep 1000, 150
+    ; Distinct sound for Navigation Mode (High pitch beep)
+    SoundBeep 1200, 150
 }
 
 *F23:: {
@@ -59,16 +61,17 @@ Notify(Text, Duration:=2000) {
     }
     global NavMode := false
     global IsHalmak := true
-    ; Debounce Halmak notification to see if F8 follows (QWERTY switch)
-    SetTimer () => Notify("Layout: Halmak"), -100
-    SoundBeep 500, 150
+    Notify("Layout: Halmak")
+    ; Distinct sound for Halmak Mode (Medium pitch beep)
+    SoundBeep 750, 150
 }
 
-*F8:: {
+*F22:: {
+    global NavMode := false
     global IsHalmak := false
-    ; Cancel Halmak notification and show QWERTY
-    SetTimer () => Notify("Layout: Halmak"), 0
     Notify("Layout: QWERTY")
+    ; Distinct sound for QWERTY Mode (Low pitch beep)
+    SoundBeep 400, 150
 }
 
 ; ------------------------------------------------------------------------------
