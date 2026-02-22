@@ -50,8 +50,11 @@ Notify(Text, Duration:=2000) {
     global NavMode := true
     global IsHalmak := false
     Notify("Navigation Mode: ON (" . (MouseMode ? "Mouse Nav" : "Keyboard Nav") . ")")
-    ; Distinct sound for Navigation Mode (High pitch beep)
-    SoundBeep 1200, 150
+    ; Distinct sound for Navigation Mode (High pitch beep, 2 beeps)
+    Loop 2 {
+        SoundBeep 1200, 150
+        Sleep 50
+    }
 }
 
 *F23:: {
@@ -62,7 +65,7 @@ Notify(Text, Duration:=2000) {
     global NavMode := false
     global IsHalmak := true
     Notify("Layout: Halmak")
-    ; Distinct sound for Halmak Mode (Medium pitch beep)
+    ; Distinct sound for Halmak Mode (Medium pitch beep, 1 beep)
     SoundBeep 750, 150
 }
 
@@ -70,8 +73,11 @@ Notify(Text, Duration:=2000) {
     global NavMode := false
     global IsHalmak := false
     Notify("Layout: QWERTY")
-    ; Distinct sound for QWERTY Mode (Low pitch beep)
-    SoundBeep 400, 150
+    ; Distinct sound for QWERTY Mode (Low pitch beep, 3 beeps)
+    Loop 3 {
+        SoundBeep 400, 150
+        Sleep 50
+    }
 }
 
 ; ------------------------------------------------------------------------------
