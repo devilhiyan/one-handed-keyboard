@@ -23,20 +23,20 @@
   spc-mir (tap-hold 150 150 spc (layer-toggle mirror))
 
   ;; ------------------------------------------- 
-  ;; MODIFIERS AS LAYER SWITCHERS
-  ;; ------------------------------------------- 
-  lctl-mod-halmak (tap-hold 150 150 @to-mouse (multi lctl (layer-toggle ctrl-layer-halmak)))
-  lctl-mod-qwer   (tap-hold 150 150 @to-halmak (multi lctl (layer-toggle ctrl-layer-qwer)))
-  lctl-mouse      (tap-hold 150 150 @to-qwer (layer-toggle mouse-ctrl-layer))
-  lmet-mod        (tap-hold 150 150 lmet (layer-toggle fn-layer))
-
-  ;; ------------------------------------------- 
   ;; TOGGLES
   ;; ------------------------------------------- 
   to-mouse   (multi f24 (layer-switch mouse))
   to-qwer    (multi f22 (layer-switch qwer))
   to-halmak  (multi f23 (layer-switch halmak))
   tog-qwer   (multi f23 f8 (layer-switch qwer))
+
+  ;; ------------------------------------------- 
+  ;; MODIFIERS AS LAYER SWITCHERS
+  ;; ------------------------------------------- 
+  lctl-mod-halmak (tap-hold 150 150 @to-mouse (multi lctl (layer-toggle ctrl-layer-halmak)))
+  lctl-mod-qwer   (tap-hold 150 150 @to-halmak (multi lctl (layer-toggle ctrl-layer-qwer)))
+  lctl-mouse      (tap-hold 150 150 @to-qwer (layer-toggle mouse-ctrl-layer))
+  lmet-mod        (tap-hold 150 150 lmet (layer-toggle fn-layer))
 
   ;; ------------------------------------------- 
   ;; MOUSE ACTIONS (Mapped to F-Keys for AHK Bridge)
