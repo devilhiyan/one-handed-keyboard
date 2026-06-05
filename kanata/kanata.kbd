@@ -1,4 +1,4 @@
-;; Kanata Configuration for Mirror Keys (Halmak One-Handed)
+;; Kanata Configuration for Mirror Keys (hyn One-Handed)
 
 (defcfg
   process-unmapped-keys yes
@@ -17,6 +17,11 @@
 
 (defalias
   ;; ------------------------------------------- 
+  ;; WINDOWS DICTATION
+  ;; ------------------------------------------- 
+  win-h (multi lmet h)
+
+  ;; ------------------------------------------- 
   ;; SPACEBAR LOGIC
   ;; ------------------------------------------- 
   ;; Tap for Space, Hold for Mirror Layer
@@ -27,14 +32,14 @@
   ;; ------------------------------------------- 
   to-mouse   (multi f24 (layer-switch mouse))
   to-qwer    (multi lctl lalt f22 (layer-switch qwer))
-  to-halmak  (multi f23 (layer-switch halmak))
+  to-hyn  (multi f23 (layer-switch hyn))
   tog-qwer   (multi f23 f8 (layer-switch qwer))
 
   ;; ------------------------------------------- 
   ;; MODIFIERS AS LAYER SWITCHERS
   ;; ------------------------------------------- 
-  lctl-mod-halmak (tap-hold 150 150 @to-mouse (multi lctl (layer-toggle ctrl-layer-halmak)))
-  lctl-mod-qwer   (tap-hold 150 150 @to-halmak (multi lctl (layer-toggle ctrl-layer-qwer)))
+  lctl-mod-hyn (tap-hold 150 150 @to-mouse (multi lctl (layer-toggle ctrl-layer-hyn)))
+  lctl-mod-qwer   (tap-hold 150 150 @to-hyn (multi lctl (layer-toggle ctrl-layer-qwer)))
   lctl-mouse      (tap-hold 150 150 @to-qwer (layer-toggle mouse-ctrl-layer))
   lmet-mod        (tap-hold 150 150 lmet (layer-toggle fn-layer))
 
@@ -77,7 +82,7 @@
   (d) f16    ;; Move Right / Arrow Right
 )
 
-(defchords halmak-chords 50
+(defchords hyn-chords 50
   (w e) up
   (s d) down
   (a s) left
@@ -118,7 +123,7 @@
   (s e f) =
   (f g) S--
 
-  ;; Single key fallbacks (Remapped to Custom/Halmak)
+  ;; Single key fallbacks (Remapped to Custom/hyn)
   (q) c
   (w) s
   (e) t
@@ -177,18 +182,18 @@
 )
 
 ;; --------------------------------------------------------------------------- 
-;; 1. HALMAK LAYER (Default - One-Handed + Chords) 
+;; 1. hyn LAYER (Default - One-Handed + Chords) 
 ;; --------------------------------------------------------------------------- 
-(deflayer halmak
+(deflayer hyn
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
-  tab  (chord halmak-chords q) (chord halmak-chords w) (chord halmak-chords e) (chord halmak-chords r) (chord halmak-chords t)    y    u    i    o    p    [    ]    \
-  ret  (chord halmak-chords a) (chord halmak-chords s) (chord halmak-chords d) (chord halmak-chords f) (chord halmak-chords g)    h    j    k    (chord halmak-chords l)    ;    '    ret
-  lsft (chord halmak-chords z) (chord halmak-chords x) (chord halmak-chords c) (chord halmak-chords v) b    (chord halmak-chords n)    (chord halmak-chords m)    ,    .    /    rsft
-  @lctl-mod-halmak  @lmet-mod lalt     @spc-mir       ralt rmet rctl
+  tab  (chord hyn-chords q) (chord hyn-chords w) (chord hyn-chords e) (chord hyn-chords r) (chord hyn-chords t)    y    u    i    o    p    [    ]    \
+  ret  (chord hyn-chords a) (chord hyn-chords s) (chord hyn-chords d) (chord hyn-chords f) (chord hyn-chords g)    h    j    k    (chord hyn-chords l)    ;    '    ret
+  lsft (chord hyn-chords z) (chord hyn-chords x) (chord hyn-chords c) (chord hyn-chords v) @win-h    (chord hyn-chords n)    (chord hyn-chords m)    ,    .    /    rsft
+  @lctl-mod-hyn  @lmet-mod lalt     @spc-mir       ralt rmet rctl
 )
 
 ;; --------------------------------------------------------------------------- 
-;; 2. MIRROR LAYER (Activated by holding Space in Halmak) 
+;; 2. MIRROR LAYER (Activated by holding Space in hyn) 
 ;; --------------------------------------------------------------------------- 
 (deflayer mirror
   -    0    9    8    7    6    5    4    3    2    1    =    grv  bspc
@@ -217,7 +222,7 @@
   tab  (chord mouse-nav-chords q) (chord mouse-nav-chords w) (chord mouse-nav-chords e) _    _    _    _    _    _    _    _    _    _
   f17  (chord mouse-nav-chords a) (chord mouse-nav-chords s) (chord mouse-nav-chords d) _    _    _    _    _    _    _    _    _
   f18  _    _    _    _    _    _    _    _    _    _    _
-  @lctl-exit-nav  @lmet-mod @to-halmak @spc-nav-mod           _    _    _
+  @lctl-exit-nav  @lmet-mod @to-hyn @spc-nav-mod           _    _    _
 )
 
 ;; ------------------------------------------- 
@@ -234,8 +239,8 @@
 ;; 5. HELPER LAYERS (Correct 60-key counts) 
 ;; --------------------------------------------------------------------------- 
 
-;; Activated while holding LCTL (Standard - Halmak)
-(deflayer ctrl-layer-halmak
+;; Activated while holding LCTL (Standard - hyn)
+(deflayer ctrl-layer-hyn
   @tog-qwer _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
@@ -245,7 +250,7 @@
 
 ;; Activated while holding LCTL (Standard - QWERTY)
 (deflayer ctrl-layer-qwer
-  @to-halmak _    _    _    _    _    _    _    _    _    _    _    _    _
+  @to-hyn _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
@@ -258,7 +263,7 @@
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _              @to-halmak     _    _    _
+  _    _    _              @to-hyn     _    _    _
 )
 
 ;; Activated while holding LMET (FN)

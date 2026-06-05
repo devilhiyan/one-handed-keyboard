@@ -1,4 +1,4 @@
-;; Kanata Configuration for Mirror Keys (Halmak One-Handed)
+;; Kanata Configuration for Mirror Keys (hyn One-Handed)
 
 (defcfg
   process-unmapped-keys yes
@@ -17,6 +17,11 @@
 
 (defalias
   ;; ------------------------------------------- 
+  ;; WINDOWS DICTATION
+  ;; ------------------------------------------- 
+  win-h (multi lmet h)
+
+  ;; ------------------------------------------- 
   ;; SPACEBAR LOGIC
   ;; ------------------------------------------- 
   ;; Tap for Space, Hold for Mirror Layer
@@ -33,7 +38,7 @@
   ;; TOGGLES
   ;; ------------------------------------------- 
   to-mouse   (layer-switch mouse)
-  to-halmak  (layer-switch halmak)
+  to-hyn  (layer-switch hyn)
   tog-qwer   (layer-switch qwer)
 
   ;; ------------------------------------------- 
@@ -45,7 +50,7 @@
   mm-r (movemouse-right 10 10)
 )
 
-(defchords halmak-chords 100
+(defchords hyn-chords 100
   (w e) up
   (s d) down
   (a s) left
@@ -55,7 +60,7 @@
   (a d) bspc
   (s f) del
   
-  ;; Single key fallbacks (Remapped to Custom/Halmak)
+  ;; Single key fallbacks (Remapped to Custom/hyn)
   (q) c
   (w) s
   (e) t
@@ -67,18 +72,18 @@
 )
 
 ;; --------------------------------------------------------------------------- 
-;; 1. HALMAK LAYER (Default - One-Handed + Chords) 
+;; 1. hyn LAYER (Default - One-Handed + Chords) 
 ;; --------------------------------------------------------------------------- 
-(deflayer halmak
+(deflayer hyn
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
-  tab  (chord halmak-chords q) (chord halmak-chords w) (chord halmak-chords e) (chord halmak-chords r) r    y    u    i    o    p    [    ]    \
-  ret  (chord halmak-chords a) (chord halmak-chords s) (chord halmak-chords d) (chord halmak-chords f) u    h    j    k    l    ;    '    ret
-  lsft l    d    n    m    b    n    m    ,    .    /    rsft
+  tab  (chord hyn-chords q) (chord hyn-chords w) (chord hyn-chords e) (chord hyn-chords r) r    y    u    i    o    p    [    ]    \
+  ret  (chord hyn-chords a) (chord hyn-chords s) (chord hyn-chords d) (chord hyn-chords f) u    h    j    k    l    ;    '    ret
+  lsft l    d    n    m    @win-h    n    m    ,    .    /    rsft
   @lctl-mod  @lmet-mod @to-mouse     @spc-mir       ralt rmet rctl
 )
 
 ;; --------------------------------------------------------------------------- 
-;; 2. MIRROR LAYER (Activated by holding Space in Halmak) 
+;; 2. MIRROR LAYER (Activated by holding Space in hyn) 
 ;; --------------------------------------------------------------------------- 
 (deflayer mirror
   -    0    9    8    7    6    5    4    3    2    1    =    grv  bspc
@@ -107,7 +112,7 @@
   _    mwu  @mm-u mwd  _    _    _    _    _    _    _    _    _    _
   _    @mm-l @mm-d @mm-r S-m  _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
-  @lctl-mouse  @lmet-mod @to-halmak mlft           _    _    _
+  @lctl-mouse  @lmet-mod @to-hyn mlft           _    _    _
 )
 
 ;; --------------------------------------------------------------------------- 
@@ -129,7 +134,7 @@
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _              @to-halmak     _    _    _
+  _    _    _              @to-hyn     _    _    _
 )
 
 ;; Activated while holding LMET (FN)

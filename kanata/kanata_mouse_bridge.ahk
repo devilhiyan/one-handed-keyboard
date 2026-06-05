@@ -26,7 +26,7 @@ Global MouseMode := 1 ; 0 = Keyboard Nav (Arrows), 1 = Mouse Nav (Movement)
 
 ; Navigation State
 Global NavMode := false
-Global IsHalmak := true
+Global Ishyn := true
 Global MoveUpVar := 0, MoveDownVar := 0, MoveLeftVar := 0, MoveRightVar := 0
 
 ; FileAppend "Configuration initialized. Setting up functions...`n", "ahk_debug.log"
@@ -40,7 +40,7 @@ Notify(Text, Duration:=2000) {
 }
 
 ; ------------------------------------------------------------------------------
-; Navigation Mode Control (F24 = ON, F23 = Halmak, F22 = QWERTY)
+; Navigation Mode Control (F24 = ON, F23 = hyn, F22 = QWERTY)
 ; ------------------------------------------------------------------------------
 *F24:: {
     if GetKeyState("Ctrl") && GetKeyState("Shift") {
@@ -48,7 +48,7 @@ Notify(Text, Duration:=2000) {
         return
     }
     global NavMode := true
-    global IsHalmak := false
+    global Ishyn := false
     Notify("Navigation Mode: ON (" . (MouseMode ? "Mouse Nav" : "Keyboard Nav") . ")")
     ; Distinct sound for Navigation Mode (High pitch beep, 2 beeps)
     Loop 2 {
@@ -63,15 +63,15 @@ Notify(Text, Duration:=2000) {
         return
     }
     global NavMode := false
-    global IsHalmak := true
-    Notify("Layout: Halmak")
-    ; Distinct sound for Halmak Mode (Medium pitch beep, 1 beep)
+    global Ishyn := true
+    Notify("Layout: hyn")
+    ; Distinct sound for hyn Mode (Medium pitch beep, 1 beep)
     SoundBeep 750, 150
 }
 
 ^!F22:: {
     global NavMode := false
-    global IsHalmak := false
+    global Ishyn := false
     Notify("Layout: QWERTY")
     ; Distinct sound for QWERTY Mode (Low pitch beep, 3 beeps)
     Loop 3 {
@@ -315,9 +315,9 @@ StartMove() {
 
 #HotIf
 ; ------------------------------------------------------------------------------
-; Halmak Specific Mappings
+; hyn Specific Mappings
 ; ------------------------------------------------------------------------------
-#HotIf IsHalmak && !NavMode
+#HotIf Ishyn && !NavMode
 $Esc::LWin
 *F10::Send "{Esc}"
 #HotIf
