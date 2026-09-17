@@ -467,7 +467,7 @@ ZoomCheatSheet(factor) {
     v := Max(0.0, Min(1.0, v))
 
     newZoom := CurZoom * factor
-    newZoom := Max(1.0, Min(4.5, newZoom))
+    newZoom := Max(1.0, Min(6.0, newZoom))
 
     ; If zoomed back to normal 1.0x, snap cleanly back to base fit
     if (newZoom <= 1.01) {
@@ -511,6 +511,60 @@ ZoomCheatSheet(factor) {
 
     CheatPic.Move(CurPicX, CurPicY, CurPicW, CurPicH)
     CheatPic.Redraw()
+}
+
+; ------------------------------------------------------------------------------
+; Panning Handler (Hold and Drag Middle Mouse Button to Pan Zoomed Cheat Sheet)
+; ------------------------------------------------------------------------------
+PanCheatSheetStart() {
+    Global CheatSheetGui, CheatPic
+    Global CurPicX, CurPicY, CurPicW, CurPicH
+    Global CurZoom
+
+    if (CheatSheetGui == "" || CheatPic == "")
+        return
+
+    CheatSheetGui.GetPos(&guiX, &guiY, &guiW, &guiH)
+
+    ; If image fits completely within the window, nothing to pan
+    if (CurPicW <= guiW && CurPicH <= guiH)
+        return
+
+    CoordMode "Mouse", "Screen"
+    MouseGetPos &startMouseX, &startMouseY
+    startPicX := CurPicX
+    startPicY := CurPicY
+
+    ; Drag loop while Middle Mouse Button is held down
+    while GetKeyState("MButton", "P") {
+        MouseGetPos &currentMouseX, &currentMouseY
+        dx := currentMouseX - startMouseX
+        dy := currentMouseY - startMouseY
+
+        newX := startPicX + dx
+        newY := startPicY + dy
+
+        ; Clamp boundaries so image remains within viewable screen area
+        if (CurPicW > guiW) {
+            newX := Min(0, Max(newX, guiW - CurPicW))
+        } else {
+            newX := (guiW - CurPicW) // 2
+        }
+
+        if (CurPicH > guiH) {
+            newY := Min(0, Max(newY, guiH - CurPicH))
+        } else {
+            newY := (guiH - CurPicH) // 2
+        }
+
+        if (newX != CurPicX || newY != CurPicY) {
+            CurPicX := newX
+            CurPicY := newY
+            CheatPic.Move(CurPicX, CurPicY, CurPicW, CurPicH)
+            CheatPic.Redraw()
+        }
+        Sleep 10 ; Smooth ~100 FPS polling with low CPU
+    }
 }
 
 ToggleCheatSheet() {
@@ -655,14 +709,15 @@ ToggleNVDA() {
 }
 
 ; Context-sensitive hotkeys when the Cheat Sheet overlay is active:
-; - Mouse wheel zooms in/out anchored at the cursor
-; - Any mouse click (left, right, middle) or Esc immediately dismisses the overlay
+; - Mouse wheel zooms in/out anchored at the cursor (up to 6X)
+; - Middle mouse button hold & drag pans the zoomed image
+; - Left click, right click, or Esc immediately dismisses the overlay
 #HotIf CheatSheetActive()
 *WheelUp::ZoomCheatSheet(1.25)
 *WheelDown::ZoomCheatSheet(0.8)
 *LButton::CloseCheatSheet()
 *RButton::CloseCheatSheet()
-*MButton::CloseCheatSheet()
+*MButton::PanCheatSheetStart()
 *Esc::CloseCheatSheet()
 #HotIf
 

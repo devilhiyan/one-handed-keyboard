@@ -243,8 +243,8 @@ def main():
     # -------------------------------------------------------------
     draw.rounded_rectangle([S(40), S(945), W - S(40), S(995)], radius=S(10), fill=(30, 30, 46), outline=(137, 180, 250), width=S(2))
     font_footer = get_font(15, bold=True)
-    footer_text = "CHEAT SHEET CONTROLS: Toggle: [ Tab + Q ] in Hyn Mode  |  Zoom: Mouse Wheel In/Out at Cursor  |  Close: Click (L/R) or Press Any Key"
-    draw.text((S(70), S(960)), footer_text, fill=(249, 226, 175), font=font_footer)
+    footer_text = "CONTROLS: Toggle: [ Tab + Q ]  |  Zoom: Mouse Wheel (up to 6X)  |  Pan: Hold Middle Mouse Button & Drag  |  Close: Left/Right Click or Any Key"
+    draw.text((S(60), S(960)), footer_text, fill=(249, 226, 175), font=font_footer)
 
     # Save PNG (lossless Super-Resolution)
     output_png = os.path.join(os.path.dirname(__file__), "layout_cheatsheet.png")

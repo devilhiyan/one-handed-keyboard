@@ -86,6 +86,7 @@ A standard passthrough layer for gaming or when others use the keyboard.
 *   **Trigger:** Press physical `Tab + Q` together in **Hyn mode** (sends bridge key `F9`).
 *   **Restriction:** Exclusively accessible in Hyn mode (disabled in Mouse and QWERTY modes).
 *   **Multi-Monitor Support:** Automatically detects the active monitor (under the mouse cursor or focused window) and scales to fit the work area like a maximized window.
-*   **Mouse Wheel Zoom:** Scroll the mouse wheel (`WheelUp` / `WheelDown`) to zoom in or out (up to 4.5x) directly anchored at the current mouse cursor location.
-*   **Instant Dismissal:** Pressing either **Left-Click**, **Right-Click**, **Middle-Click**, or **ANY keyboard key** (as well as `Tab + Q` or `Escape`) closes the cheat sheet immediately.
+*   **Mouse Wheel Zoom:** Scroll the mouse wheel (`WheelUp` / `WheelDown`) to zoom in or out (up to 6.0x) directly anchored at the current mouse cursor location.
+*   **Middle-Mouse Drag Panning:** Hold and drag the **Middle Mouse Button** (`MButton`) to pan across the magnified sheet with boundary clamping.
+*   **Instant Dismissal:** Pressing either **Left-Click**, **Right-Click**, or **ANY keyboard key** (as well as `Tab + Q` or `Escape`) closes the cheat sheet immediately.
 *   **Assets:** Generated from [kanata/generate_cheatsheet.py](../generate_cheatsheet.py) to [kanata/layout_cheatsheet.png](../layout_cheatsheet.png) (3200x2040 Super-Resolution) and [kanata/layout_cheatsheet.pdf](../layout_cheatsheet.pdf) (vector-rasterized PDF for offline reading/printing).

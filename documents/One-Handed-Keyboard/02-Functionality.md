@@ -160,8 +160,9 @@ Holding `Left Control` activates a temporary layer with special functions:
 ### 6. Layout Cheat Sheet Overlay
 *   **Activation:** Press physical `Tab + Q` together while in **Hyn mode** (Kanata sends bridge key `F9`).
 *   **Active Monitor Fit:** Automatically detects which screen has active focus or the mouse cursor, and fits the cheat sheet to that monitor's work area like a maximized window.
-*   **Mouse Wheel Zooming:** Scroll wheel up or down (`WheelUp` / `WheelDown`) to zoom smoothly at the mouse cursor location (1.0x to 4.5x).
-*   **Instant Close:** Left-click, right-click, middle-click, or pressing ANY keyboard key immediately closes the overlay.
+*   **Mouse Wheel Zooming:** Scroll wheel up or down (`WheelUp` / `WheelDown`) to zoom smoothly at the mouse cursor location (1.0x to 6.0x).
+*   **Middle-Mouse Drag Panning:** Click and drag with the **Middle Mouse Button** (`MButton`) to pan around smoothly when zoomed in, with boundary clamping.
+*   **Instant Close:** Left-click, right-click, or pressing ANY keyboard key immediately closes the overlay.
 *   **Super-Resolution & PDF Assets:** Generated at 3200x2040 Ultra-HD resolution (`layout_cheatsheet.png`) for razor-sharp zoom, alongside a vector-rasterized PDF (`layout_cheatsheet.pdf`) for offline reading and printing.
 
 
