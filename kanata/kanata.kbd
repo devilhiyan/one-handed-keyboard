@@ -17,7 +17,8 @@
 
 (defalias
   ;; ------------------------------------------- 
-  ;; WINDOWS DICTATION
+  ;; WINDOWS DICTATION (VOICE TYPING)
+  ;; Sends Windows key + H to open voice dictation.
   ;; ------------------------------------------- 
   win-h (multi lmet h)
 
@@ -122,8 +123,10 @@
   (a w) S-'
   (s e f) =
   (f g) S--
+  (tab q) f9  ;; Layout Cheat Sheet Overlay (AHK Bridge)
 
   ;; Single key fallbacks (Remapped to Custom/hyn)
+  (tab) tab
   (q) c
   (w) s
   (e) t
@@ -186,9 +189,9 @@
 ;; --------------------------------------------------------------------------- 
 (deflayer hyn
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
-  tab  (chord hyn-chords q) (chord hyn-chords w) (chord hyn-chords e) (chord hyn-chords r) (chord hyn-chords t)    y    u    i    o    p    [    ]    \
+  (chord hyn-chords tab)  (chord hyn-chords q) (chord hyn-chords w) (chord hyn-chords e) (chord hyn-chords r) (chord hyn-chords t)    y    u    i    o    p    [    ]    \
   ret  (chord hyn-chords a) (chord hyn-chords s) (chord hyn-chords d) (chord hyn-chords f) (chord hyn-chords g)    h    j    k    (chord hyn-chords l)    ;    '    ret
-  lsft (chord hyn-chords z) (chord hyn-chords x) (chord hyn-chords c) (chord hyn-chords v) @win-h    (chord hyn-chords n)    (chord hyn-chords m)    ,    .    /    rsft
+  lsft (chord hyn-chords z) (chord hyn-chords x) (chord hyn-chords c) (chord hyn-chords v) f7     (chord hyn-chords n)    (chord hyn-chords m)    ,    .    /    rsft
   @lctl-mod-hyn  @lmet-mod lalt     @spc-mir       ralt rmet rctl
 )
 
@@ -199,7 +202,7 @@
   -    0    9    8    7    6    5    4    3    2    1    =    grv  bspc
   bspc (chord mirror-chords q) (chord mirror-chords w) (chord mirror-chords e) (chord mirror-chords r) (chord mirror-chords t)    y    u    i    o    p    [    ]    \
   caps (chord mirror-chords a) (chord mirror-chords s) (chord mirror-chords d) (chord mirror-chords f) (chord mirror-chords g)    h    j    k    (chord mirror-chords l)    ;    '    ret
-  lsft (chord mirror-chords z) (chord mirror-chords x) (chord mirror-chords c) (chord mirror-chords v) c    (chord mirror-chords n)    (chord mirror-chords m)    ,    .    /    rsft
+  lsft (chord mirror-chords z) (chord mirror-chords x) (chord mirror-chords c) (chord mirror-chords v) @win-h    (chord mirror-chords n)    (chord mirror-chords m)    ,    .    /    rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 

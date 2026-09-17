@@ -17,7 +17,8 @@
 
 (defalias
   ;; ------------------------------------------- 
-  ;; WINDOWS DICTATION
+  ;; WINDOWS DICTATION (VOICE TYPING)
+  ;; Sends Windows key + H to open voice dictation.
   ;; ------------------------------------------- 
   win-h (multi lmet h)
 
@@ -59,8 +60,10 @@
   (e r) end
   (a d) bspc
   (s f) del
+  (tab q) f9  ;; Layout Cheat Sheet Overlay (AHK Bridge)
   
   ;; Single key fallbacks (Remapped to Custom/hyn)
+  (tab) tab
   (q) c
   (w) s
   (e) t
@@ -76,9 +79,9 @@
 ;; --------------------------------------------------------------------------- 
 (deflayer hyn
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
-  tab  (chord hyn-chords q) (chord hyn-chords w) (chord hyn-chords e) (chord hyn-chords r) r    y    u    i    o    p    [    ]    \
+  (chord hyn-chords tab)  (chord hyn-chords q) (chord hyn-chords w) (chord hyn-chords e) (chord hyn-chords r) r    y    u    i    o    p    [    ]    \
   ret  (chord hyn-chords a) (chord hyn-chords s) (chord hyn-chords d) (chord hyn-chords f) u    h    j    k    l    ;    '    ret
-  lsft l    d    n    m    @win-h    n    m    ,    .    /    rsft
+  lsft l    d    n    m    f7     n    m    ,    .    /    rsft
   @lctl-mod  @lmet-mod @to-mouse     @spc-mir       ralt rmet rctl
 )
 
@@ -89,7 +92,7 @@
   -    0    9    8    7    6    5    4    3    2    1    =    grv  bspc
   bspc b    p    w    y    q    y    u    i    o    p    [    ]    \
   '    k    j    g    f    z    h    j    k    l    ;    '    ret
-  lsft c    b    x    v    c    n    m    ,    .    /    rsft
+  lsft c    b    x    v    @win-h    n    m    ,    .    /    rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 

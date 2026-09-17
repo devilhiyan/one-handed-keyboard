@@ -31,6 +31,7 @@ This is the primary typing layer. Physical keys correspond to the **Halmak** lay
 | **T** | `r` | **G** | `u` |
 | **Z** | `l` | **X** | `d` |
 | **C** | `n` | **V** | `m` |
+| **B** | `Toggle NVDA (Admin)` | | |
 
 #### Chords (Mult-Key Combos)
 | Chord (Physical) | Action / Output | Note |
@@ -59,6 +60,7 @@ This is the primary typing layer. Physical keys correspond to the **Halmak** lay
 | **G + W** | `Left Arrow` | Media Seek Rewind (5s) |
 | **A + T** | `Brightness Up` | |
 | **Q + G** | `Brightness Down` | |
+| **Tab + Q** | `Layout Cheat Sheet` | Hyn mode only (F9 bridge) |
 
 #### Punctuation Chords
 | Chord (Physical) | Output | Chord (Physical) | Output |
@@ -94,6 +96,7 @@ Activates when `Space` is held. Maps keys to the opposite side of the keyboard.
 | **X** | `b` | Bottom Middle -> Bottom Left |
 | **C** | `k` | Bottom Right -> Home Right |
 | **V** | `j` | Bottom Right -> Home Right |
+| **B** | `Win + H` | Windows Voice Typing / Dictation |
 | **1 .. 0** | Replaces number row in reverse order (0 = 1, 9 = 2...) |
 
 #### Mirror Chords
@@ -138,7 +141,9 @@ Activates when `Space` is held. Maps keys to the opposite side of the keyboard.
 ### 4. Technical Protocol (Bridge)
 | Key | Action |
 | :--- | :--- |
+| **F7** | Toggle NVDA Screen Reader (Admin, Hyn mode only) |
 | **F8** | Switch to QWERTY |
+| **F9** | Toggle Layout Cheat Sheet (Hyn mode only) |
 | **F23** | Switch to Halmak (Nav OFF) / `Ctrl+Shift+F23`: **Brightness Up** |
 | **F24** | Switch to Navigation Mode (Nav ON) / `Ctrl+Shift+F24`: **Brightness Down** |
 
@@ -149,3 +154,14 @@ Holding `Left Control` activates a temporary layer with special functions:
 *   **Ctrl + Space (Hold)**: Activates **Mirror Layer**.
     *   *Usage*: Allows `Ctrl` + `Space` + `Key` chords.
     *   *Example*: `Ctrl` + `Space` + `D` (Physical) -> `Ctrl` + `W` (Output).
+
+---
+
+### 6. Layout Cheat Sheet Overlay
+*   **Activation:** Press physical `Tab + Q` together while in **Hyn mode** (Kanata sends bridge key `F9`).
+*   **Active Monitor Fit:** Automatically detects which screen has active focus or the mouse cursor, and fits the cheat sheet to that monitor's work area like a maximized window.
+*   **Mouse Wheel Zooming:** Scroll wheel up or down (`WheelUp` / `WheelDown`) to zoom smoothly at the mouse cursor location (1.0x to 4.5x).
+*   **Instant Close:** Left-click, right-click, middle-click, or pressing ANY keyboard key immediately closes the overlay.
+*   **Super-Resolution & PDF Assets:** Generated at 3200x2040 Ultra-HD resolution (`layout_cheatsheet.png`) for razor-sharp zoom, alongside a vector-rasterized PDF (`layout_cheatsheet.pdf`) for offline reading and printing.
+
+

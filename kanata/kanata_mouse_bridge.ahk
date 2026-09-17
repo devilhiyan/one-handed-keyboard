@@ -28,6 +28,12 @@ Global MouseMode := 1 ; 0 = Keyboard Nav (Arrows), 1 = Mouse Nav (Movement)
 Global NavMode := false
 Global Ishyn := true
 Global MoveUpVar := 0, MoveDownVar := 0, MoveLeftVar := 0, MoveRightVar := 0
+Global CheatSheetGui := ""
+Global CheatPic := ""
+Global CurPicX := 0, CurPicY := 0, CurPicW := 0, CurPicH := 0
+Global BasePicX := 0, BasePicY := 0, BasePicW := 0, BasePicH := 0
+Global CurZoom := 1.0
+Global CheatInputHook := ""
 
 ; FileAppend "Configuration initialized. Setting up functions...`n", "ahk_debug.log"
 
@@ -49,6 +55,7 @@ Notify(Text, Duration:=2000) {
     }
     global NavMode := true
     global Ishyn := false
+    CloseCheatSheet()
     Notify("Navigation Mode: ON (" . (MouseMode ? "Mouse Nav" : "Keyboard Nav") . ")")
     ; Distinct sound for Navigation Mode (High pitch beep, 2 beeps)
     Loop 2 {
@@ -72,6 +79,7 @@ Notify(Text, Duration:=2000) {
 ^!F22:: {
     global NavMode := false
     global Ishyn := false
+    CloseCheatSheet()
     Notify("Layout: QWERTY")
     ; Distinct sound for QWERTY Mode (Low pitch beep, 3 beeps)
     Loop 3 {
@@ -349,4 +357,312 @@ ChangeBrightness(Amount) {
         Notify("Brightness Error (WMI)", 2000)
     }
 }
+
+; ------------------------------------------------------------------------------
+; One-Handed Keyboard Cheat Sheet Overlay (Hyn Mode Only - Maximized Fit)
+; ------------------------------------------------------------------------------
+CloseCheatSheet() {
+    Global CheatSheetGui, CheatPic, CheatInputHook, CurZoom
+    if (CheatInputHook != "") {
+        hook := CheatInputHook
+        CheatInputHook := ""
+        try hook.Stop()
+    }
+    if (CheatSheetGui != "") {
+        guiObj := CheatSheetGui
+        CheatSheetGui := ""
+        CheatPic := ""
+        try guiObj.Destroy()
+    }
+    CurZoom := 1.0
+}
+
+GetActiveMonitorIndex() {
+    monCount := MonitorGetCount()
+    if (monCount <= 1)
+        return 1
+
+    ; Priority 1: Check mouse cursor position
+    CoordMode "Mouse", "Screen"
+    MouseGetPos &mx, &my
+    mouseMon := 0
+    Loop monCount {
+        MonitorGet(A_Index, &mL, &mT, &mR, &mB)
+        if (mx >= mL && mx < mR && my >= mT && my < mB) {
+            mouseMon := A_Index
+            break
+        }
+    }
+
+    ; Priority 2: Check active focused application window
+    activeHwnd := WinActive("A")
+    winMon := 0
+    if (activeHwnd) {
+        try {
+            winClass := WinGetClass(activeHwnd)
+            if (winClass != "WorkerW" && winClass != "Progman" && winClass != "Shell_TrayWnd") {
+                WinGetPos(&wx, &wy, &ww, &wh, activeHwnd)
+                if (ww > 50 && wh > 50) {
+                    cx := wx + (ww // 2)
+                    cy := wy + (wh // 2)
+                    Loop monCount {
+                        MonitorGet(A_Index, &mL, &mT, &mR, &mB)
+                        if (cx >= mL && cx < mR && cy >= mT && cy < mB) {
+                            winMon := A_Index
+                            break
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    ; If mouse is on a valid monitor, use mouse monitor (where user is looking/pointing)
+    if (mouseMon > 0)
+        return mouseMon
+
+    ; Fallback to active window monitor
+    if (winMon > 0)
+        return winMon
+
+    return MonitorGetPrimary()
+}
+
+CheatSheetActive() {
+    Global CheatSheetGui
+    if (CheatSheetGui == "")
+        return false
+    try {
+        return WinExist("ahk_id " . CheatSheetGui.Hwnd)
+    }
+    return false
+}
+
+ZoomCheatSheet(factor) {
+    Global CheatSheetGui, CheatPic
+    Global CurPicX, CurPicY, CurPicW, CurPicH
+    Global BasePicX, BasePicY, BasePicW, BasePicH
+    Global CurZoom
+
+    if (CheatSheetGui == "" || CheatPic == "")
+        return
+
+    CoordMode "Mouse", "Screen"
+    MouseGetPos &screenMX, &screenMY
+
+    CheatSheetGui.GetPos(&guiX, &guiY, &guiW, &guiH)
+
+    mouseX := screenMX - guiX
+    mouseY := screenMY - guiY
+
+    if (CurPicW <= 0 || CurPicH <= 0)
+        return
+
+    ; Normalized anchor position (0.0 to 1.0) under cursor
+    u := (mouseX - CurPicX) / CurPicW
+    v := (mouseY - CurPicY) / CurPicH
+
+    ; Clamp anchor to prevent drift if cursor is in outer letterbox margins
+    u := Max(0.0, Min(1.0, u))
+    v := Max(0.0, Min(1.0, v))
+
+    newZoom := CurZoom * factor
+    newZoom := Max(1.0, Min(4.5, newZoom))
+
+    ; If zoomed back to normal 1.0x, snap cleanly back to base fit
+    if (newZoom <= 1.01) {
+        CurZoom := 1.0
+        CurPicX := BasePicX
+        CurPicY := BasePicY
+        CurPicW := BasePicW
+        CurPicH := BasePicH
+        CheatPic.Move(CurPicX, CurPicY, CurPicW, CurPicH)
+        CheatPic.Redraw()
+        return
+    }
+
+    k := newZoom / CurZoom
+    CurZoom := newZoom
+
+    newW := Integer(CurPicW * k)
+    newH := Integer(CurPicH * k)
+
+    ; Preserve point under mouse cursor
+    newX := Integer(mouseX - (u * newW))
+    newY := Integer(mouseY - (v * newH))
+
+    ; Clamp boundaries to prevent image from moving off-screen
+    if (newW > guiW) {
+        newX := Min(0, Max(newX, guiW - newW))
+    } else {
+        newX := (guiW - newW) // 2
+    }
+
+    if (newH > guiH) {
+        newY := Min(0, Max(newY, guiH - newH))
+    } else {
+        newY := (guiH - newH) // 2
+    }
+
+    CurPicX := newX
+    CurPicY := newY
+    CurPicW := newW
+    CurPicH := newH
+
+    CheatPic.Move(CurPicX, CurPicY, CurPicW, CurPicH)
+    CheatPic.Redraw()
+}
+
+ToggleCheatSheet() {
+    Global CheatSheetGui, CheatPic, Ishyn
+    Global CurPicX, CurPicY, CurPicW, CurPicH
+    Global BasePicX, BasePicY, BasePicW, BasePicH
+    Global CurZoom, CheatInputHook
+
+    ; Strict requirement: only accessible in Hyn mode
+    if (!Ishyn)
+        return
+
+    ; If already open, close it (toggle behavior)
+    if (CheatSheetGui != "") {
+        CloseCheatSheet()
+        return
+    }
+
+    imgPath := A_ScriptDir . "\layout_cheatsheet.png"
+    if (!FileExist(imgPath)) {
+        Notify("Cheat sheet image not found!", 2000)
+        return
+    }
+
+    ; Detect active monitor (where mouse or focused app is)
+    targetMon := GetActiveMonitorIndex()
+
+    ; Get monitor work area (matches maximized window bounds)
+    MonitorGetWorkArea(targetMon, &wLeft, &wTop, &wRight, &wBottom)
+    monW := wRight - wLeft
+    monH := wBottom - wTop
+
+    ; Native image resolution: 1600 x 1020 (ratio ~1.5686)
+    imgRatio := 1600.0 / 1020.0
+
+    ; Scale to fit screen like a maximized window (preserving aspect ratio)
+    if ((monW / monH) > imgRatio) {
+        ; Screen is wider: fit to full height, center horizontally
+        imgH := monH
+        imgW := Integer(monH * imgRatio)
+        imgX := (monW - imgW) // 2
+        imgY := 0
+    } else {
+        ; Screen is narrower/taller: fit to full width, center vertically
+        imgW := monW
+        imgH := Integer(monW / imgRatio)
+        imgX := 0
+        imgY := (monH - imgH) // 2
+    }
+
+    ; Create GUI covering the entire monitor work area like a maximized window
+    CheatSheetGui := Gui("-DPIScale +AlwaysOnTop -Caption +ToolWindow", "One-Handed Keyboard Cheat Sheet")
+    CheatSheetGui.BackColor := "181825"
+
+    ; Add image control scaled to fit
+    CheatPic := CheatSheetGui.Add("Picture", "x" . imgX . " y" . imgY . " w" . imgW . " h" . imgH, imgPath)
+
+    ; Initialize base and current bounds for zoom tracking
+    BasePicX := imgX
+    BasePicY := imgY
+    BasePicW := imgW
+    BasePicH := imgH
+    CurPicX := imgX
+    CurPicY := imgY
+    CurPicW := imgW
+    CurPicH := imgH
+    CurZoom := 1.0
+
+    ; Dismiss when clicking image, closing window, or pressing Escape
+    CheatPic.OnEvent("Click", (*) => CloseCheatSheet())
+    CheatSheetGui.OnEvent("Close", (*) => CloseCheatSheet())
+    CheatSheetGui.OnEvent("Escape", (*) => CloseCheatSheet())
+
+    ; Hook keyboard input: ANY key press immediately closes the cheat sheet
+    CheatInputHook := InputHook("L0")
+    CheatInputHook.KeyOpt("{All}", "E")
+    CheatInputHook.KeyOpt("{LCtrl}{RCtrl}{LAlt}{RAlt}{LShift}{RShift}{LWin}{RWin}", "E")
+    CheatInputHook.KeyOpt("{F9}", "-E") ; Exclude F9 so Tab+Q cleanly toggles
+    CheatInputHook.OnEnd := (ih) => CloseCheatSheet()
+    CheatInputHook.Start()
+
+    ; Display across the work area of the active monitor
+    CheatSheetGui.Show("x" . wLeft . " y" . wTop . " w" . monW . " h" . monH)
+}
+
+; F9 is the Kanata bridge hotkey for physical Tab + Q in Hyn mode
+*F9:: {
+    if (Ishyn) {
+        ToggleCheatSheet()
+    }
+}
+
+; ------------------------------------------------------------------------------
+; NVDA Screen Reader Toggle (Physical B Key in Hyn Mode)
+; ------------------------------------------------------------------------------
+ToggleNVDA() {
+    Global Ishyn
+    if (!Ishyn)
+        return
+
+    nvdaDir := "C:\Program Files\NVDA"
+    nvdaSlave := nvdaDir . "\nvda_slave.exe"
+    nvdaMain := nvdaDir . "\nvda.exe"
+
+    if ProcessExist("nvda.exe") {
+        ; NVDA is currently open -> Close it cleanly
+        Notify("NVDA: Closing...", 1500)
+        try {
+            Run('"' . nvdaMain . '" -q', nvdaDir)
+        }
+        ; Wait up to 2 seconds for process to exit; force close if hung
+        if (ProcessWaitClose("nvda.exe", 2) == 0) {
+            try ProcessClose("nvda.exe")
+        }
+        Notify("NVDA: Off", 1500)
+        SoundBeep 400, 150
+    } else {
+        ; NVDA is closed -> Launch without asking for permission (zero UAC prompt)
+        Notify("NVDA: Starting...", 1500)
+        SoundBeep 850, 150
+        
+        ; Priority 1: Direct launch with working directory set to NVDA install directory
+        try {
+            Run('"' . nvdaSlave . '" launchNVDA -r', nvdaDir)
+        } catch {
+            ; Priority 2: Fallback via PowerShell Start-Process (inherits uiAccess elevation)
+            psCmd := 'powershell.exe -WindowStyle Hidden -Command "Start-Process \"' . nvdaSlave . '\" -ArgumentList \"launchNVDA -r\" -WorkingDirectory \"' . nvdaDir . '\""'
+            try {
+                Run(psCmd,, "Hide")
+            } catch as err {
+                Notify("NVDA Launch Failed: " . err.Message, 3000)
+            }
+        }
+    }
+}
+
+; F7 is the Kanata bridge hotkey for physical B in Hyn mode
+*F7:: {
+    if (Ishyn) {
+        ToggleNVDA()
+    }
+}
+
+; Context-sensitive hotkeys when the Cheat Sheet overlay is active:
+; - Mouse wheel zooms in/out anchored at the cursor
+; - Any mouse click (left, right, middle) or Esc immediately dismisses the overlay
+#HotIf CheatSheetActive()
+*WheelUp::ZoomCheatSheet(1.25)
+*WheelDown::ZoomCheatSheet(0.8)
+*LButton::CloseCheatSheet()
+*RButton::CloseCheatSheet()
+*MButton::CloseCheatSheet()
+*Esc::CloseCheatSheet()
+#HotIf
 
