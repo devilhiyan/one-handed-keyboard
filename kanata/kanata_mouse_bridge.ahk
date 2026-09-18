@@ -3,6 +3,11 @@
 #MaxThreadsPerHotkey 2
 SetMouseDelay -1 
 
+; Hotkey rate limit tuning:
+; Disable the 70 hotkeys / 2000ms warning dialog for intentionally held keys (e.g. Tab+Q peek)
+A_HotkeyInterval := 0
+A_MaxHotkeysPerInterval := 10000
+
 ; Debug Logging
 ; FileAppend "AHK Script Started at " A_Now "`n", "ahk_debug.log"
 ; OnExit((ExitReason, ExitCode) => FileAppend("AHK Script Exiting: " ExitReason " Code: " ExitCode " at " A_Now "`n", "ahk_debug.log"))
@@ -34,6 +39,9 @@ Global CurPicX := 0, CurPicY := 0, CurPicW := 0, CurPicH := 0
 Global BasePicX := 0, BasePicY := 0, BasePicW := 0, BasePicH := 0
 Global CurZoom := 1.0
 Global CheatInputHook := ""
+Global F9Pressed := false
+Global F9DownTime := 0
+Global F9ClosedByToggle := false
 
 ; FileAppend "Configuration initialized. Setting up functions...`n", "ahk_debug.log"
 
@@ -634,7 +642,7 @@ ToggleCheatSheet() {
     CheatInputHook := InputHook("L0")
     CheatInputHook.KeyOpt("{All}", "E")
     CheatInputHook.KeyOpt("{LCtrl}{RCtrl}{LAlt}{RAlt}{LShift}{RShift}{LWin}{RWin}", "E")
-    CheatInputHook.KeyOpt("{F9}", "-E") ; Exclude F9 so Tab+Q cleanly toggles
+    CheatInputHook.KeyOpt("{F9}{Tab}{q}", "-E") ; Exclude F9, Tab, and Q so chord transitions don't prematurely close
     CheatInputHook.OnEnd := (ih) => CloseCheatSheet()
     CheatInputHook.Start()
 
@@ -643,10 +651,53 @@ ToggleCheatSheet() {
 }
 
 ; F9 is the Kanata bridge hotkey for physical Tab + Q in Hyn mode
+; Supports dual behavior:
+; - Tap (<300ms): Pins the cheat sheet open on screen.
+; - Hold (>=300ms): Peeks the cheat sheet; releasing Tab + Q automatically hides it.
 *F9:: {
-    if (Ishyn) {
-        ToggleCheatSheet()
+    Global Ishyn, F9Pressed, F9DownTime, F9ClosedByToggle
+    if (!Ishyn)
+        return
+
+    ; Suppress auto-repeat while holding Tab + Q to avoid error loops
+    if (F9Pressed)
+        return
+
+    F9Pressed := true
+    F9DownTime := A_TickCount
+    F9ClosedByToggle := false
+
+    ; If already open, close it (toggle behavior)
+    if (CheatSheetActive()) {
+        F9ClosedByToggle := true
+        CloseCheatSheet()
+        return
     }
+
+    ToggleCheatSheet()
+}
+
+*F9 Up:: {
+    Global Ishyn, F9Pressed, F9DownTime, F9ClosedByToggle
+    if (!F9Pressed)
+        return
+
+    F9Pressed := false
+
+    ; If this press was used to toggle an already-open cheat sheet closed, do nothing
+    if (F9ClosedByToggle) {
+        F9ClosedByToggle := false
+        return
+    }
+
+    ; Calculate hold duration
+    holdDuration := A_TickCount - F9DownTime
+
+    ; If held for >= 300ms, user was peeking -> hide on release
+    if (holdDuration >= 300) {
+        CloseCheatSheet()
+    }
+    ; Otherwise: user tapped quickly (<300ms) -> keep open (pinned)
 }
 
 ; ------------------------------------------------------------------------------

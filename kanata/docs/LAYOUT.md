@@ -17,7 +17,9 @@ This is the default layer, optimized for one-handed typing using the Halmak layo
     *   *Note:* Standard physical keyboard on one-handed devices has no dedicated Win key.
 *   `Z + X + C + V`: Dedicated home-row **`Escape` (`Esc`)**.
 *   `b`: Toggles **NVDA Screen Reader** (runs as Administrator without UAC prompts via bridge key `F7`).
-*   `Tab + Q`: Toggles the on-screen **Layout Cheat Sheet** overlay (Hyn mode only).
+*   `Tab + Q`: Shows the on-screen **Layout Cheat Sheet** overlay (Hyn mode only):
+    *   **Tap (< 300ms):** Pins the cheat sheet open on screen (dismiss by clicking or pressing any key).
+    *   **Hold (>= 300ms):** Peeks the cheat sheet; letting go automatically hides it.
 *   `L-Ctrl`: Taps for `L-Ctrl`, **Holds** to activate `ctrl-layer` (helper).
 *   `L-Ctrl` (Tap-Hold special): Used to toggle **Navigation/Mouse Mode**.
 

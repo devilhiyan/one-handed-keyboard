@@ -61,7 +61,7 @@ This is the primary typing layer. Physical keys correspond to the **Halmak** lay
 | **G + W** | `Left Arrow` | Media Seek Rewind (5s) |
 | **A + T** | `Brightness Up` | |
 | **Q + G** | `Brightness Down` | |
-| **Tab + Q** | `Layout Cheat Sheet` | Hyn mode only (F9 bridge) |
+| **Tab + Q** | `Layout Cheat Sheet` | Tap to Pin (<300ms) / Hold to Peek (>=300ms) |
 
 #### Punctuation Chords
 | Chord (Physical) | Output | Chord (Physical) | Output |
@@ -176,6 +176,8 @@ Holding `Left Control` activates a temporary layer with special functions:
 
 ### 6. Layout Cheat Sheet Overlay
 *   **Activation:** Press physical `Tab + Q` together while in **Hyn mode** (Kanata sends bridge key `F9`).
+    *   **Tap to Pin (< 300ms):** Press and release quickly to keep the cheat sheet pinned on screen.
+    *   **Hold to Peek (>= 300ms):** Press and hold to view; releasing `Tab + Q` automatically hides it.
 *   **Active Monitor Fit:** Automatically detects which screen has active focus or the mouse cursor, and fits the cheat sheet to that monitor's work area like a maximized window.
 *   **Mouse Wheel Zooming:** Scroll wheel up or down (`WheelUp` / `WheelDown`) to zoom smoothly at the mouse cursor location (1.0x to 6.0x).
 *   **Middle-Mouse Drag Panning:** Click and drag with the **Middle Mouse Button** (`MButton`) to pan around smoothly when zoomed in, with boundary clamping.
