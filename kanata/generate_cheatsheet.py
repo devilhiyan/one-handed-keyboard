@@ -140,31 +140,33 @@ def main():
     # -------------------------------------------------------------
     # 5. SECTION 4: NAVIGATION & EDITING CHORDS
     # -------------------------------------------------------------
-    card4_x, card4_y, card4_w, card4_h = S(40), S(385), S(480), S(290)
+    card4_x, card4_y, card4_w, card4_h = S(40), S(375), S(480), S(305)
     draw_card(draw, card4_x, card4_y, card4_w, card4_h, "4. NAVIGATION & EDITING CHORDS", title_color=(137, 220, 235))
     
     nav_edit_items = [
         ("W + E", "Up Arrow", "A + F", "Ctrl + C  (Copy)"),
-        ("S + D", "Down Arrow", "A + F (Mirror)", "Ctrl + V  (Paste)"),
-        ("A + S", "Left Arrow", "Z + X", "Ctrl + Z  (Undo)"),
-        ("D + F", "Right Arrow", "C + V", "Ctrl + Y  (Redo)"),
-        ("Q + W", "Home", "S + F", "Backspace"),
-        ("E + R", "End", "S + D + F", "Ctrl + Backspace"),
-        ("A + D", "Delete", "X + C", "Ctrl + J"),
+        ("S + D", "Down Arrow", "A + F (Mir)", "Ctrl + V  (Paste)"),
+        ("A + S", "Left Arrow", "Z + C", "Ctrl + X  (Cut)"),
+        ("D + F", "Right Arrow", "Z + X", "Ctrl + Z  (Undo)"),
+        ("Q + W", "Home", "C + V", "Ctrl + Y  (Redo)"),
+        ("E + R", "End", "S + F", "Backspace"),
+        ("Q + W (Mir)", "Page Up", "S + D + F", "Ctrl + Backspace"),
+        ("E + R (Mir)", "Page Down", "A + D", "Delete"),
+        ("Z+X+C+V", "Escape (Esc)", "A + D (Mir)", "Insert (Ins)"),
     ]
-    ne_y = card4_y + S(55)
+    ne_y = card4_y + S(50)
     for col1_k, col1_v, col2_k, col2_v in nav_edit_items:
-        draw.text((card4_x + S(20), ne_y), col1_k, fill=(249, 226, 175), font=font_bold)
-        draw.text((card4_x + S(105), ne_y), col1_v, fill=(205, 214, 244), font=font_val)
+        draw.text((card4_x + S(16), ne_y), col1_k, fill=(249, 226, 175), font=font_bold)
+        draw.text((card4_x + S(115), ne_y), col1_v, fill=(205, 214, 244), font=font_val)
         
-        draw.text((card4_x + S(245), ne_y), col2_k, fill=(249, 226, 175), font=font_bold)
-        draw.text((card4_x + S(360), ne_y), col2_v, fill=(205, 214, 244), font=font_val)
-        ne_y += S(31)
+        draw.text((card4_x + S(240), ne_y), col2_k, fill=(249, 226, 175), font=font_bold)
+        draw.text((card4_x + S(355), ne_y), col2_v, fill=(205, 214, 244), font=font_val)
+        ne_y += S(27)
 
     # -------------------------------------------------------------
     # 6. SECTION 5: SYMBOL & PUNCTUATION CHORDS
     # -------------------------------------------------------------
-    card5_x, card5_y, card5_w, card5_h = S(540), S(385), S(480), S(290)
+    card5_x, card5_y, card5_w, card5_h = S(540), S(375), S(480), S(305)
     draw_card(draw, card5_x, card5_y, card5_w, card5_h, "5. PUNCTUATION & SYMBOLS", title_color=(245, 194, 231))
     
     symbols_data = [
@@ -189,53 +191,54 @@ def main():
     # -------------------------------------------------------------
     # 7. SECTION 6: MEDIA, BRIGHTNESS & SPECIAL SHORTCUTS
     # -------------------------------------------------------------
-    card6_x, card6_y, card6_w, card6_h = S(1040), S(385), S(520), S(290)
+    card6_x, card6_y, card6_w, card6_h = S(1040), S(375), S(520), S(305)
     draw_card(draw, card6_x, card6_y, card6_w, card6_h, "6. MEDIA, BRIGHTNESS & UTILITIES", title_color=(250, 179, 135))
     
     media_data = [
         ("A + R", "Volume Up", "G + E", "Seek Forward (5s)"),
         ("Q + F", "Volume Down", "G + W", "Seek Rewind (5s)"),
-        ("G + T", "Play / Pause", "A + T", "Brightness Up"),
-        ("Q + T", "Screen Capture (PrtScn)", "Q + G", "Brightness Down"),
-        ("Z+X+C+V", "F10 Key", "W+E+R", ".  (Period)"),
+        ("A + R (Mir)", "Mute Audio", "A + T", "Brightness Up"),
+        ("G + T", "Play / Pause", "Q + G", "Brightness Down"),
+        ("Q + T", "Screen Capture", "W + E + R", ".  (Period)"),
         ("R + W", ",  (Comma)", "F + E", ";  (Semicolon)"),
         ("Q + E", "<  (Less Than)", "E + T", ">  (Greater Than)"),
         ("F + G", "_  (Underscore)", "F + G (Mir)", "-  (Hyphen / Minus)"),
     ]
-    med_y = card6_y + S(55)
+    med_y = card6_y + S(50)
     for c1_k, c1_v, c2_k, c2_v in media_data:
         draw.text((card6_x + S(20), med_y), c1_k, fill=(249, 226, 175), font=font_bold)
-        draw.text((card6_x + S(105), med_y), c1_v, fill=(205, 214, 244), font=font_val)
+        draw.text((card6_x + S(125), med_y), c1_v, fill=(205, 214, 244), font=font_val)
         
         draw.text((card6_x + S(265), med_y), c2_k, fill=(249, 226, 175), font=font_bold)
         draw.text((card6_x + S(370), med_y), c2_v, fill=(205, 214, 244), font=font_val)
-        med_y += S(28)
+        med_y += S(30)
 
     # -------------------------------------------------------------
-    # 8. SECTION 7: CORE MODIFIERS & LAYER WORKFLOW
+    # 8. SECTION 7: CORE MODIFIERS & FUNCTION KEYS
     # -------------------------------------------------------------
-    card7_x, card7_y, card7_w, card7_h = S(40), S(695), S(1520), S(230)
-    draw_card(draw, card7_x, card7_y, card7_w, card7_h, "7. CORE MODIFIERS & LAYER WORKFLOW", title_color=(203, 166, 247))
+    card7_x, card7_y, card7_w, card7_h = S(40), S(695), S(1520), S(235)
+    draw_card(draw, card7_x, card7_y, card7_w, card7_h, "7. CORE MODIFIERS & FUNCTION KEYS (F1–F12)", title_color=(203, 166, 247))
 
     mod_boxes = [
-        ("SPACEBAR (Thumb)", "• Tap: Types standard Space\n• Hold: Activates Mirror Layer\n• Hold Space + B: Win + H (Dictation)\n• Hold Space + 1..0: 0..1 (Reversed numbers)"),
-        ("LEFT CONTROL", "• Tap: Toggle Mouse Navigation Mode ON / OFF\n• Hold: Activates Control Layer (Helper shortcuts)\n• Hold Ctrl + Space: Mirror shortcut chords"),
-        ("LEFT WINDOWS (Win)", "• Tap: Normal Windows Start Key\n• Hold: Activates Fn Layer\n• Hold Win + Space: Switch back to QWERTY mode"),
-        ("PHYSICAL 'B' KEY", "• In Hyn Mode: Toggle [ NVDA ] (Admin)\n• In Mirror Layer (Space + B): Sends [ Win + H ]\n• In QWERTY Mode: Standard [ b ] key")
+        ("SPACEBAR (Thumb)", "• Tap: Types standard Space\n• Hold: Activates Mirror Layer\n• Hold Space + B: Win + H (Dictation)\n• Hold Space + 1..5: 0..6 (Numbers)"),
+        ("FUNCTION KEYS (F1–F12)", "• F1..F5 Alone: Normal F1..F5\n• Space + F5..F1: F6..F10 (Rev Mirror)\n• Space + Esc + F1: F11 (Fullscreen)\n• Space + F1 + F2: F12 (DevTools)"),
+        ("PHYSICAL 'B' KEY", "• In Hyn: Toggle [ NVDA ] (Admin)\n• Space + B: Win + H (Dictation)\n• In QWERTY: Standard [ b ] key\n• Zero UAC prompt elevation"),
+        ("LEFT CONTROL", "• Tap: Toggle Mouse Navigation ON/OFF\n• Hold: Control Layer (Helper shortcuts)\n• Hold Ctrl + Space: Mirror shortcut chords\n• Instant arrow & pointer access"),
+        ("PHYSICAL ESC (Win)", "• In Hyn: Left Win (Start/Fn)\n• Z+X+C+V: Pure Escape (Esc)\n• Space + Esc + F1: F11 (Fullscreen)\n• In QWERTY: Standard Escape")
     ]
-    box_w = S(350)
-    box_gap = S(25)
-    b_x = card7_x + S(20)
-    b_y = card7_y + S(55)
+    box_w = S(286)
+    box_gap = S(14)
+    b_x = card7_x + S(16)
+    b_y = card7_y + S(50)
     for title, desc in mod_boxes:
-        draw.rounded_rectangle([b_x, b_y, b_x + box_w, b_y + S(155)], radius=S(8), fill=(38, 38, 56), outline=(69, 71, 90), width=S(1))
-        draw.text((b_x + S(14), b_y + S(12)), title, fill=(137, 180, 250), font=font_bold)
-        draw.line([b_x + S(14), b_y + S(34), b_x + box_w - S(14), b_y + S(34)], fill=(69, 71, 90), width=S(1))
+        draw.rounded_rectangle([b_x, b_y, b_x + box_w, b_y + S(165)], radius=S(8), fill=(38, 38, 56), outline=(69, 71, 90), width=S(1))
+        draw.text((b_x + S(10), b_y + S(10)), title, fill=(137, 180, 250), font=get_font(13, bold=True))
+        draw.line([b_x + S(10), b_y + S(32), b_x + box_w - S(10), b_y + S(32)], fill=(69, 71, 90), width=S(1))
         
-        d_y = b_y + S(44)
+        d_y = b_y + S(40)
         for line in desc.split("\n"):
-            draw.text((b_x + S(14), d_y), line, fill=(205, 214, 244), font=get_font(13))
-            d_y += S(24)
+            draw.text((b_x + S(10), d_y), line, fill=(205, 214, 244), font=get_font(11))
+            d_y += S(28)
         b_x += box_w + box_gap
 
     # -------------------------------------------------------------

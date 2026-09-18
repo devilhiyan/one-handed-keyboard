@@ -31,7 +31,7 @@ This is the primary typing layer. Physical keys correspond to the **Halmak** lay
 | **T** | `r` | **G** | `u` |
 | **Z** | `l` | **X** | `d` |
 | **C** | `n` | **V** | `m` |
-| **B** | `Toggle NVDA (Admin)` | | |
+| **B** | `Toggle NVDA (Admin)` | **Esc** (Top-Left) | `Left Windows (Tap) / Fn Layer (Hold)` |
 
 #### Chords (Mult-Key Combos)
 | Chord (Physical) | Action / Output | Note |
@@ -49,9 +49,10 @@ This is the primary typing layer. Physical keys correspond to the **Halmak** lay
 | **X + C** | `Ctrl + J` | |
 | **Z + X** | `Ctrl + Z` | Undo (Left Hand) |
 | **L + D** | `Ctrl + Z` | Undo (Right Hand equivalent) |
+| **Z + C** | `Ctrl + X` | Cut |
 | **C + V** | `Ctrl + Y` | Redo (Left Hand) |
 | **N + M** | `Ctrl + Y` | Redo (Right Hand equivalent) |
-| **Z + X + C + V**| `F10` | |
+| **Z + X + C + V**| `Escape (Esc)` | Direct home-row Escape |
 | **A + R** | `Volume Up` | |
 | **Q + F** | `Volume Down` | |
 | **G + T** | `Play/Pause` | |
@@ -102,9 +103,25 @@ Activates when `Space` is held. Maps keys to the opposite side of the keyboard.
 #### Mirror Chords
 | Chord (Physical) | Action / Output |
 | :--- | :--- |
+| **Q + W** | `Page Up` |
+| **E + R** | `Page Down` |
+| **A + D** | `Insert` |
+| **A + R** | `Mute Audio` |
 | **S + D + F** | `Ctrl + Alt + Backspace` |
 | **A + F** | `Ctrl + V` (Paste) |
 | **Z + X** | `Ctrl + Alt + Z` |
+
+#### Function Keys (F1 – F12 via Space Mirroring)
+| Key / Combination | Output | Function |
+| :--- | :--- | :--- |
+| **`F1`** to **`F5`** (Alone) | **`F1`** to **`F5`** | Standard F-keys (Help, Rename, Find, Close, Refresh) |
+| **`Space + F5`** | **`F6`** | Focus address bar / tools |
+| **`Space + F4`** | **`F7`** | Caret browsing / spelling |
+| **`Space + F3`** | **`F8`** | Windows safe mode / extend selection |
+| **`Space + F2`** | **`F9`** | Application tools / build |
+| **`Space + F1`** | **`F10`** | Menu bar focus |
+| **`Space + Esc + F1`** | **`F11`** | Fullscreen mode |
+| **`Space + F1 + F2`** | **`F12`** | Developer Tools / Save As |
 
 #### Mirror Punctuation
 | Chord | Output | Chord | Output |

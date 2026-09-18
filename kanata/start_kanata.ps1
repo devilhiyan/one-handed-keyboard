@@ -1,12 +1,9 @@
 Set-Location $PSScriptRoot
 
-# function Log-Debug {
-#     param([string]$Message)
-#     $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-#     Add-Content -Path "launch_debug.log" -Value "[$timestamp] $Message"
-# }
-
-# Log-Debug "Starting launch script..."
+# Clean up any lingering or previous instances of Kanata and AHK bridge
+Get-Process kanata* -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { $_.CommandLine -like "*kanata_mouse_bridge.ahk*" } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+Start-Sleep -Milliseconds 300
 
 $ahkPath = "C:\Program Files\AutoHotkey\v2\AutoHotkey64.exe"
 $ahkScript = Join-Path $PSScriptRoot "kanata_mouse_bridge.ahk"

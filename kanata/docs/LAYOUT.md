@@ -11,10 +11,14 @@ This is the default layer, optimized for one-handed typing using the Halmak layo
 
 **Key Behaviors:**
 *   `Space`: Taps for `Space`, **Holds** to activate the **Mirror Layer**.
+*   `Physical Esc` (Top-Left): Acts as **`Left Windows`** (`@lmet-mod`) in Hyn mode:
+    *   **Tap:** Standard Windows Start key (enables `Win + E`, `Win + D`, etc.).
+    *   **Hold:** Activates `fn-layer`.
+    *   *Note:* Standard physical keyboard on one-handed devices has no dedicated Win key.
+*   `Z + X + C + V`: Dedicated home-row **`Escape` (`Esc`)**.
 *   `b`: Toggles **NVDA Screen Reader** (runs as Administrator without UAC prompts via bridge key `F7`).
 *   `Tab + Q`: Toggles the on-screen **Layout Cheat Sheet** overlay (Hyn mode only).
 *   `L-Ctrl`: Taps for `L-Ctrl`, **Holds** to activate `ctrl-layer` (helper).
-*   `L-Win`: Taps for `L-Win`, **Holds** to activate `fn-layer`.
 *   `L-Ctrl` (Tap-Hold special): Used to toggle **Navigation/Mouse Mode**.
 
 ## 2. Mirror Layer
@@ -41,6 +45,25 @@ This layer "mirrors" the keyboard, allowing the left hand to type keys normally 
 | `g` | `v` |
 
 *(Note: The exact mapping is defined in the `deflayer mirror` section of `kanata.kbd`)*
+
+### Function Keys (F1 – F12)
+Physical function keys `F1` to `F5` on the left hand are mirrored using the **Spacebar**:
+*   `F1` – `F5` (Alone): Normal `F1` to `F5`.
+*   `Space + F5`: `F6`
+*   `Space + F4`: `F7`
+*   `Space + F3`: `F8`
+*   `Space + F2`: `F9`
+*   `Space + F1`: `F10`
+*   `Space + Esc + F1`: `F11` (Browser Fullscreen)
+*   `Space + F1 + F2`: `F12` (Developer Tools / Save As)
+
+### Navigation & Editing Chords
+*   `Z + X + C + V`: **`Escape` (`Esc`)** (Instant home-row Escape)
+*   `Z + C`: **`Cut` (`Ctrl + X`)**
+*   `Space + Q + W`: **`Page Up`** (Mirror pair of `Home`)
+*   `Space + E + R`: **`Page Down`** (Mirror pair of `End`)
+*   `Space + A + D`: **`Insert`** (Mirror pair of `Delete`)
+*   `Space + A + R`: **`Mute Audio`** (Mirror pair of `Volume Up`)
 
 ## 3. Mouse / Navigation Layer
 
