@@ -36,6 +36,7 @@
   to-qwer    (multi lctl lalt f22 (layer-switch qwer))
   to-hyn  (multi f23 (layer-switch hyn))
   tog-qwer   (multi f23 f8 (layer-switch qwer))
+  tog-mmode  (multi lctl lalt f10)
 
   ;; ------------------------------------------- 
   ;; MODIFIERS AS LAYER SWITCHERS
@@ -58,7 +59,7 @@
   ;; ------------------------------------------- 
   ;; Tap LCTL to toggle Mouse Layer + Signal AHK (F24=On, F23=Off)
   lctl-enter-nav (tap-hold 150 150 @to-mouse lctl)
-  lctl-exit-nav  (tap-hold 150 150 @to-qwer lctl)
+  lctl-exit-nav  (tap-hold 150 150 @to-qwer (multi lctl (layer-toggle mouse-ctrl-layer)))
 
   ;; Space as modifier in navigation mode
   spc-nav-mod (tap-hold 150 150 spc (layer-toggle mouse-spc-mod))
@@ -268,7 +269,7 @@
   @tog-qwer _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    @tog-mmode    _    _    _    _    _    _
   _    _    _              @spc-ctl-layer      _    _    _
 )
 
@@ -288,7 +289,7 @@
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    @tog-mmode    _    _    _    _    _    _
   _    _    _              @to-hyn     _    _    _
 )
 

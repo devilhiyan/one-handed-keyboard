@@ -1,16 +1,4 @@
-# Hyn Layer Specification
-
-## Purpose
-Defines key mappings, behaviors, and special function triggers for the one-handed Hyn layer.
-## Requirements
-### Requirement: Dictation Shortcut (Windows + H)
-The base Hyn layer SHALL map the physical B key to the Windows Dictation shortcut.
-
-#### Scenario: User presses B
-- **WHEN** the user is in the Hyn layer and presses the physical B key
-- **THEN** the system outputs `Windows + H` (`lmet + h`)
-- **AND** it does not output the character `b`.
-
+## ADDED Requirements
 ### Requirement: Middle Mouse Click B-Mode
 The system SHALL support using the Middle Mouse Button as the B key in HYN mode and Navigation mode, enabled by default.
 
@@ -33,4 +21,3 @@ The system SHALL support using the Middle Mouse Button as the B key in HYN mode 
 - **WHEN** the system is in QWERTY mode or Middle Click B-Mode is disabled
 - **AND** the user clicks the Middle Mouse Button
 - **THEN** the system outputs standard Windows middle click.
-

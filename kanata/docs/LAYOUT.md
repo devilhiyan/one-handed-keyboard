@@ -17,6 +17,8 @@ This is the default layer, optimized for one-handed typing using the Halmak layo
     *   *Note:* Standard physical keyboard on one-handed devices has no dedicated Win key.
 *   `Z + X + C + V`: Dedicated home-row **`Escape` (`Esc`)**.
 *   `b`: Toggles **NVDA Screen Reader** (runs as Administrator without UAC prompts via bridge key `F7`).
+*   `Middle Mouse Click`: In both Hyn and Navigation modes, middle clicking acts as the `b` key (toggles **NVDA Screen Reader** by default). Holding `Space` + middle clicking triggers **Windows Voice Typing** (`Win + H`).
+*   `Ctrl + B`: Acts as a toggle button to turn Middle Click B-Mode ON or OFF in Hyn and Navigation modes.
 *   `Tab + Q`: Shows the on-screen **Layout Cheat Sheet** overlay (Hyn mode only):
     *   **Tap (< 300ms):** Pins the cheat sheet open on screen (dismiss by clicking or pressing any key).
     *   **Hold (>= 300ms):** Peeks the cheat sheet; letting go automatically hides it.
@@ -84,6 +86,9 @@ This layer has two sub-modes, toggled via **Ctrl + Space**.
 | `Capslock` | Left Click (Hold to Drag) |
 | `Shift` | Right Click |
 | `Space + Capslock` | Enter |
+| `Middle Click` | Toggle NVDA Screen Reader (B-Mode enabled by default) |
+| `Space + Mid-Click` | Windows Voice Typing (`Win + H`) |
+| `Ctrl + B` | Toggle Middle Click B-Mode ON/OFF |
 
 ### B. Keyboard Mode (Transient)
 *Focus: Rapid text navigation.*
@@ -97,6 +102,8 @@ This layer has two sub-modes, toggled via **Ctrl + Space**.
 | `Space + Capslock` | Left Click (Hold to Drag) |
 | `Shift` | Shift |
 | `Space + Shift` | Right Click |
+| `Middle Click` | Toggle NVDA Screen Reader (B-Mode enabled by default) |
+| `Ctrl + B` | Toggle Middle Click B-Mode ON/OFF |
 
 **Exiting:** Tap `L-Ctrl` again to return to Halmak layer.
 
@@ -105,6 +112,8 @@ This layer has two sub-modes, toggled via **Ctrl + Space**.
 **Activation:** Toggle via the `fn-layer` (Hold `L-Win` + press toggle key).
 
 A standard passthrough layer for gaming or when others use the keyboard.
+*   **Middle Click:** Operates strictly as a normal Windows middle mouse button.
+*   **Ctrl + B:** Operates as standard `Ctrl + B` (e.g. bold text in editors).
 
 ## 5. Layout Cheat Sheet Overlay
 

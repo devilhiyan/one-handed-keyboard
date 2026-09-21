@@ -119,23 +119,24 @@ def main():
     card3_x, card3_y, card3_w, card3_h = S(1040), S(100), S(520), S(265)
     draw_card(draw, card3_x, card3_y, card3_w, card3_h, "3. MOUSE NAVIGATION MODE (TAP L-CTRL)", title_color=(166, 227, 161))
     
-    font_bold = get_font(14, bold=True)
-    font_val = get_font(14, bold=False)
+    font_bold = get_font(13, bold=True)
+    font_val = get_font(13, bold=False)
     
     mouse_items = [
         ("W / A / S / D", "Move Cursor Up / Left / Down / Right (Accelerating)"),
         ("Q / E", "Mouse Wheel Up / Down (Scroll)"),
         ("CapsLock", "Left Click (Hold to Drag)"),
         ("Left Shift", "Right Click"),
+        ("Middle Click", "Toggle NVDA (B-Key Mode in Hyn/Nav)"),
+        ("Ctrl + B", "Toggle Middle Click B-Mode ON/OFF"),
         ("Space + CapsLock", "Send Enter"),
-        ("Space + Shift", "Right Click (Fixed)"),
         ("Q + W / W + E", "Home / End (Quick Jump)")
     ]
-    m_y = card3_y + S(55)
+    m_y = card3_y + S(46)
     for key, desc in mouse_items:
-        draw.text((card3_x + S(20), m_y), key, fill=(249, 226, 175), font=font_bold)
-        draw.text((card3_x + S(180), m_y), desc, fill=(205, 214, 244), font=font_val)
-        m_y += S(28)
+        draw.text((card3_x + S(18), m_y), key, fill=(249, 226, 175), font=font_bold)
+        draw.text((card3_x + S(172), m_y), desc, fill=(205, 214, 244), font=font_val)
+        m_y += S(26)
 
     # -------------------------------------------------------------
     # 5. SECTION 4: NAVIGATION & EDITING CHORDS
@@ -222,7 +223,7 @@ def main():
     mod_boxes = [
         ("SPACEBAR (Thumb)", "• Tap: Types standard Space\n• Hold: Activates Mirror Layer\n• Hold Space + B: Win + H (Dictation)\n• Hold Space + 1..5: 0..6 (Numbers)"),
         ("FUNCTION KEYS (F1–F12)", "• F1..F5 Alone: Normal F1..F5\n• Space + F5..F1: F6..F10 (Rev Mirror)\n• Space + Esc + F1: F11 (Fullscreen)\n• Space + F1 + F2: F12 (DevTools)"),
-        ("PHYSICAL 'B' KEY", "• In Hyn: Toggle [ NVDA ] (Admin)\n• Space + B: Win + H (Dictation)\n• In QWERTY: Standard [ b ] key\n• Zero UAC prompt elevation"),
+        ("PHYSICAL 'B' & MID-CLICK", "• In Hyn/Nav: Toggle [ NVDA ] (Admin)\n• Middle Click: Acts as 'B' (NVDA)\n• Ctrl + B: Toggle M-Click Mode\n• Space + B / Mid-Click: Win + H"),
         ("LEFT CONTROL", "• Tap: Toggle Mouse Navigation ON/OFF\n• Hold: Control Layer (Helper shortcuts)\n• Hold Ctrl + Space: Mirror shortcut chords\n• Instant arrow & pointer access"),
         ("PHYSICAL ESC (Win)", "• In Hyn: Left Win (Start/Fn)\n• Z+X+C+V: Pure Escape (Esc)\n• Space + Esc + F1: F11 (Fullscreen)\n• In QWERTY: Standard Escape")
     ]
@@ -246,7 +247,7 @@ def main():
     # -------------------------------------------------------------
     draw.rounded_rectangle([S(40), S(945), W - S(40), S(995)], radius=S(10), fill=(30, 30, 46), outline=(137, 180, 250), width=S(2))
     font_footer = get_font(15, bold=True)
-    footer_text = "CONTROLS: Show: [ Tab + Q ] (Tap to Pin, Hold to Peek)  |  Zoom: Mouse Wheel (up to 6X)  |  Pan: Middle Mouse Drag  |  Close: Any Key / Click"
+    footer_text = "CONTROLS: Show: [ Tab + Q ] (Pin/Peek)  |  Mid-Click: NVDA Toggle (Hyn/Nav)  |  Toggle Mode: [ Ctrl + B ]  |  Zoom: Wheel  |  Pan: Mid-Drag"
     draw.text((S(60), S(960)), footer_text, fill=(249, 226, 175), font=font_footer)
 
     # Save PNG (lossless Super-Resolution)

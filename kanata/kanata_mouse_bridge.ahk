@@ -32,6 +32,7 @@ Global MouseMode := 1 ; 0 = Keyboard Nav (Arrows), 1 = Mouse Nav (Movement)
 ; Navigation State
 Global NavMode := false
 Global Ishyn := true
+Global MiddleButtonAsB := true ; Middle mouse click acts as B key (NVDA/Dictation) in Hyn & Nav modes
 Global MoveUpVar := 0, MoveDownVar := 0, MoveLeftVar := 0, MoveRightVar := 0
 Global CheatSheetGui := ""
 Global CheatPic := ""
@@ -751,6 +752,34 @@ ToggleNVDA() {
     }
 }
 
+; ------------------------------------------------------------------------------
+; Middle Mouse Button Mode Toggle (Ctrl + B in Hyn or Navigation Mode)
+; Toggles whether Middle Click acts as the B key (NVDA toggle) or standard Middle Click
+; ------------------------------------------------------------------------------
+ToggleMiddleButtonMode() {
+    Global MiddleButtonAsB, Ishyn, NavMode
+    ; Only operable in Hyn or Navigation mode
+    if (!Ishyn && !NavMode)
+        return
+
+    MiddleButtonAsB := !MiddleButtonAsB
+    if (MiddleButtonAsB) {
+        Notify("Middle Click: B-Key Mode (NVDA) [ON]", 1500)
+        SoundBeep 850, 150 ; High pitch beep for enabled
+    } else {
+        Notify("Middle Click: Standard Mode [OFF]", 1500)
+        SoundBeep 400, 150 ; Low pitch beep for disabled
+    }
+}
+
+; Bridge hotkeys for Ctrl + B (Toggle Middle Button Mode)
+^!F10::ToggleMiddleButtonMode()
+^F7::ToggleMiddleButtonMode()
+
+#HotIf (Ishyn || NavMode)
+^b::ToggleMiddleButtonMode()
+#HotIf
+
 ; Context-sensitive hotkeys when the Cheat Sheet overlay is active:
 ; - Mouse wheel zooms in/out anchored at the cursor (up to 6X)
 ; - Middle mouse button hold & drag pans the zoomed image
@@ -762,5 +791,20 @@ ToggleNVDA() {
 *RButton::CloseCheatSheet()
 *MButton::PanCheatSheetStart()
 *Esc::CloseCheatSheet()
+#HotIf
+
+; Middle Mouse Button in Hyn or Navigation Mode:
+; When MiddleButtonAsB is ON, acts like the physical B key:
+; - Space held: Opens Windows Voice Typing (Win + H)
+; - Alone: Toggles NVDA Screen Reader
+; In QWERTY mode or when MiddleButtonAsB is OFF, acts as standard middle mouse click.
+#HotIf (Ishyn || NavMode) && MiddleButtonAsB && !CheatSheetActive()
+*MButton:: {
+    if (GetKeyState("Space", "P") || GetKeyState("Space")) {
+        SendInput "#{h}"
+    } else {
+        ToggleNVDA()
+    }
+}
 #HotIf
 
