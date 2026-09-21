@@ -63,6 +63,7 @@ This is the primary typing layer. Physical keys correspond to the **Halmak** lay
 | **A + T** | `Brightness Up` | |
 | **Q + G** | `Brightness Down` | |
 | **Tab + Q** | `Layout Cheat Sheet` | Tap to Pin (<300ms) / Hold to Peek (>=300ms) |
+| **Tab + `** | `Insert` | |
 
 #### Punctuation Chords
 | Chord (Physical) | Output | Chord (Physical) | Output |
@@ -95,7 +96,7 @@ Activates when `Space` is held. Maps keys to the opposite side of the keyboard.
 | **F** | `f` | Home Right -> Home Left |
 | **G** | `v` | Home Right -> Bottom Middle |
 | **Z** | `c` | Bottom Left -> Bottom Middle |
-| **X** | `b` | Bottom Middle -> Bottom Left |
+| **X** | `Toggle Key Output Overlay` | System Utility (Space + X) |
 | **C** | `k` | Bottom Right -> Home Right |
 | **V** | `j` | Bottom Right -> Home Right |
 | **B** | `Win + H` | Windows Voice Typing / Dictation |
@@ -106,11 +107,22 @@ Activates when `Space` is held. Maps keys to the opposite side of the keyboard.
 | :--- | :--- |
 | **Q + W** | `Page Up` |
 | **E + R** | `Page Down` |
-| **A + D** | `Insert` |
+| **A + D** | `Insert` (Mirror pair of Delete) |
 | **A + R** | `Mute Audio` |
 | **S + D + F** | `Ctrl + Alt + Backspace` |
 | **A + F** | `Ctrl + V` (Paste) |
 | **Z + X** | `Ctrl + Alt + Z` |
+| **Space + X** | `Toggle Key Output Overlay` |
+| **Ctrl + Space + X** | `Toggle Sticky Modifiers Mode` |
+
+#### Sticky Modifiers & Overlapping Chains
+* **Covered Modifiers:** `Ctrl`, `Alt`, `Shift`, `Win`, and `Insert` (`Tab + \``).
+* **Space Mirror Rule:** `Space` attaches to the letter key (producing the mirrored letter), not to the modifier.
+* **Hand-Off Chaining:** Holding at least one key continuously preserves the chain across transitions. Once all keys are released, the chain completes and auto-releases sticky modifiers.
+* **Real-Time Mirroring:** Each key press checks the instant state of `Space`:
+  * `Ctrl + Space + W`, release `Space`, press `R` -> **`Ctrl + b + R`**
+  * `Ctrl + Space + W`, release `W`, keep `Space` held, press `R` -> **`Ctrl + b + x`**
+  * `Ctrl + W + Space + R` -> **`Ctrl + s + x`**
 
 #### Function Keys (F1 – F12 via Space Mirroring)
 | Key / Combination | Output | Function |
@@ -189,5 +201,17 @@ Holding `Left Control` activates a temporary layer with special functions:
 *   **Middle-Mouse Drag Panning:** Click and drag with the **Middle Mouse Button** (`MButton`) to pan around smoothly when zoomed in, with boundary clamping.
 *   **Instant Close:** Left-click, right-click, or pressing ANY keyboard key immediately closes the overlay.
 *   **Super-Resolution & PDF Assets:** Generated at 3200x2040 Ultra-HD resolution (`layout_cheatsheet.png`) for razor-sharp zoom, alongside a vector-rasterized PDF (`layout_cheatsheet.pdf`) for offline reading and printing.
+
+---
+
+### 7. Key Output Overlay (Live Keystroke HUD)
+*   **Activation:** Press physical **`Space + X`** (holding Spacebar and tapping `X`), or right-click the AutoHotkey system tray icon and toggle **`Show Output Keys (Space + X)`**.
+*   **Location:** Positioned in the bottom-right corner of the primary monitor, directly above the system tray and clock.
+*   **Real-Time Output Display:** Shows the final keystrokes sent to Windows (e.g. `Insert`, `Up`, `Ctrl + C`, `Delete`, `s`) rather than the raw physical keys pressed.
+*   **Trailing History:** Displays a subtle breadcrumb trail of the last 3 keys.
+*   **Auto-Hide:** Automatically hides after 2.5 seconds of typing inactivity to keep the screen clean.
+*   **Non-Intrusive:** Uses `+AlwaysOnTop -Caption +ToolWindow +E0x20` (click-through) so it never steals keyboard focus and mouse clicks pass right through.
+*   **Persistent Setting:** Toggling saves the user's preference to `kanata/kanata_settings.ini`.
+
 
 

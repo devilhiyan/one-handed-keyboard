@@ -36,6 +36,7 @@
   to-qwer    (multi lctl lalt f22 (layer-switch qwer))
   to-hyn  (multi f23 (layer-switch hyn))
   tog-qwer   (multi f23 f8 (layer-switch qwer))
+  tog-mmode  (multi lctl lalt f10)
 
   ;; ------------------------------------------- 
   ;; MODIFIERS AS LAYER SWITCHERS
@@ -58,7 +59,7 @@
   ;; ------------------------------------------- 
   ;; Tap LCTL to toggle Mouse Layer + Signal AHK (F24=On, F23=Off)
   lctl-enter-nav (tap-hold 150 150 @to-mouse lctl)
-  lctl-exit-nav  (tap-hold 150 150 @to-qwer lctl)
+  lctl-exit-nav  (tap-hold 150 150 @to-qwer (multi lctl (layer-toggle mouse-ctrl-layer)))
 
   ;; Space as modifier in navigation mode
   spc-nav-mod (tap-hold 150 150 spc (layer-toggle mouse-spc-mod))
@@ -67,8 +68,8 @@
   ;; CTRL LAYER SPACE SPECIAL
   ;; -------------------------------------------
   ;; Tap Control+Space -> Mouse Mode
-  ;; Hold Control+Space -> Mirror Layer (Allows Ctrl+Space+Key -> Ctrl+MirrorKey)
-  spc-ctl-layer (tap-hold 150 150 @to-mouse (layer-toggle mirror))
+  ;; Hold Control+Space -> Ctrl-Space Layer (Allows Ctrl+Space+X -> Toggle Sticky Modifiers)
+  spc-ctl-layer (tap-hold 150 150 @to-mouse (layer-toggle ctrl-spc-layer))
 )
 
 (defchords mirror-fchords 50
@@ -100,6 +101,10 @@
   (d f) right
   (q w) home
   (e r) end
+  (tab q) f9   ;; Layout Cheat Sheet Overlay (AHK Bridge)
+  (tab grv) ins ;; Insert Key
+  (tab grv w) (macro ins s) ;; Insert + S (NVDA Speech Mode Toggle)
+  (tab grv e) (macro ins t) ;; Insert + T (NVDA Title Read)
   
   (s f) bspc
   (s d f) C-bspc
@@ -134,10 +139,10 @@
   (a w) S-'
   (s e f) =
   (f g) S--
-  (tab q) f9  ;; Layout Cheat Sheet Overlay (AHK Bridge)
 
   ;; Single key fallbacks (Remapped to Custom/hyn)
   (tab) tab
+  (grv) grv
   (q) c
   (w) s
   (e) t
@@ -191,7 +196,7 @@
   (f) f
   (g) v
   (z) c
-  (x) b
+  (x) C-A-f8  ;; Toggle Key Output Overlay (AHK Bridge)
   (c) k
   (v) j
   (l) l
@@ -204,7 +209,7 @@
 ;; --------------------------------------------------------------------------- 
 (deflayer hyn
   @lmet-mod  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
-  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  (chord hyn-chords grv)  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   (chord hyn-chords tab)  (chord hyn-chords q) (chord hyn-chords w) (chord hyn-chords e) (chord hyn-chords r) (chord hyn-chords t)    y    u    i    o    p    [    ]    \
   ret  (chord hyn-chords a) (chord hyn-chords s) (chord hyn-chords d) (chord hyn-chords f) (chord hyn-chords g)    h    j    k    (chord hyn-chords l)    ;    '    ret
   lsft (chord hyn-chords z) (chord hyn-chords x) (chord hyn-chords c) (chord hyn-chords v) f7     (chord hyn-chords n)    (chord hyn-chords m)    ,    .    /    rsft
@@ -220,6 +225,18 @@
   bspc (chord mirror-chords q) (chord mirror-chords w) (chord mirror-chords e) (chord mirror-chords r) (chord mirror-chords t)    y    u    i    o    p    [    ]    \
   caps (chord mirror-chords a) (chord mirror-chords s) (chord mirror-chords d) (chord mirror-chords f) (chord mirror-chords g)    h    j    k    (chord mirror-chords l)    ;    '    ret
   lsft (chord mirror-chords z) (chord mirror-chords x) (chord mirror-chords c) (chord mirror-chords v) @win-h    (chord mirror-chords n)    (chord mirror-chords m)    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+;; --------------------------------------------------------------------------- 
+;; 2b. CTRL-SPACE LAYER (Activated by holding Ctrl + Space in hyn) 
+;; --------------------------------------------------------------------------- 
+(deflayer ctrl-spc-layer
+  (chord mirror-fchords esc) (chord mirror-fchords f1) (chord mirror-fchords f2) f8 f7 f6 _ _ _ _ _ _ _
+  -    0    9    8    7    6    5    4    3    2    1    =    grv  bspc
+  bspc (chord mirror-chords q) (chord mirror-chords w) (chord mirror-chords e) (chord mirror-chords r) (chord mirror-chords t)    y    u    i    o    p    [    ]    \
+  caps (chord mirror-chords a) (chord mirror-chords s) (chord mirror-chords d) (chord mirror-chords f) (chord mirror-chords g)    h    j    k    (chord mirror-chords l)    ;    '    ret
+  lsft (chord mirror-chords z) C-A-f7                   (chord mirror-chords c) (chord mirror-chords v) @win-h    (chord mirror-chords n)    (chord mirror-chords m)    ,    .    /    rsft
   lctl lmet lalt           spc            ralt rmet rctl
 )
 
@@ -268,7 +285,7 @@
   @tog-qwer _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    @tog-mmode    _    _    _    _    _    _
   _    _    _              @spc-ctl-layer      _    _    _
 )
 
@@ -288,7 +305,7 @@
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    @tog-mmode    _    _    _    _    _    _
   _    _    _              @to-hyn     _    _    _
 )
 

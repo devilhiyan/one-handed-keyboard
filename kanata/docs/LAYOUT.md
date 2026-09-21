@@ -44,7 +44,7 @@ This layer "mirrors" the keyboard, allowing the left hand to type keys normally 
 | `d` | `g` |
 | `f` | `f` |
 | `z` | `c` |
-| `x` | `b` |
+| `x` | `Toggle Key Output Overlay` |
 | `c` | `x` |
 | `v` | `z` |
 | `b` | `Win + H` (Speech Dictation) |
@@ -66,10 +66,12 @@ Physical function keys `F1` to `F5` on the left hand are mirrored using the **Sp
 ### Navigation & Editing Chords
 *   `Z + X + C + V`: **`Escape` (`Esc`)** (Instant home-row Escape)
 *   `Z + C`: **`Cut` (`Ctrl + X`)**
+*   `Tab + \``: **`Insert`**
+*   `Space + A + D`: **`Insert`** (Mirror pair of `Delete`)
 *   `Space + Q + W`: **`Page Up`** (Mirror pair of `Home`)
 *   `Space + E + R`: **`Page Down`** (Mirror pair of `End`)
-*   `Space + A + D`: **`Insert`** (Mirror pair of `Delete`)
 *   `Space + A + R`: **`Mute Audio`** (Mirror pair of `Volume Up`)
+*   `Space + X`: **`Toggle Key Output Overlay`** (Floating popup near system tray)
 
 ## 3. Mouse / Navigation Layer
 
@@ -129,3 +131,15 @@ A standard passthrough layer for gaming or when others use the keyboard.
 *   **Middle-Mouse Drag Panning:** Hold and drag the **Middle Mouse Button** (`MButton`) to pan across the magnified sheet with boundary clamping.
 *   **Instant Dismissal:** Pressing either **Left-Click**, **Right-Click**, or **ANY keyboard key** (as well as `Tab + Q` or `Escape`) closes the cheat sheet immediately.
 *   **Assets:** Generated from [kanata/generate_cheatsheet.py](../generate_cheatsheet.py) to [kanata/layout_cheatsheet.png](../layout_cheatsheet.png) (3200x2040 Super-Resolution) and [kanata/layout_cheatsheet.pdf](../layout_cheatsheet.pdf) (vector-rasterized PDF for offline reading/printing).
+
+## 6. Sticky Modifiers & Overlapping Chains
+
+*   **Trigger:** Press `Ctrl + Space + X` (physical X) or toggle via the system tray menu (`Sticky Modifiers (Ctrl + Space + X)`).
+*   **Covered Modifiers:** `Ctrl`, `Alt`, `Shift`, `Win`, and `Insert` (`Tab + \``).
+*   **Space Attachment Rule:** `Space` is excluded from sticky behavior because it controls the mirror layer. `Space` attaches directly to the letter key to produce the mirrored character, not to the modifier.
+*   **Overlapping Chain Rule (Hand-Off):** Multi-key combinations remain active as long as at least ONE key is held down at all times. Switching keys during the sequence keeps the chain alive. Releasing all keys breaks the chain and sends the final command.
+*   **Real-Time Mirroring:** Each key press checks the instant state of `Space`:
+    *   `Ctrl + Space + W`, release `Space`, press `R` -> **`Ctrl + b + R`**
+    *   `Ctrl + Space + W`, release `W`, keep `Space` held, press `R` -> **`Ctrl + b + x`**
+    *   `Ctrl + W + Space + R` -> **`Ctrl + s + x`**
+

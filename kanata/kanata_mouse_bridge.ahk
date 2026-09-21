@@ -1,5 +1,6 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force
+Persistent
 #MaxThreadsPerHotkey 2
 SetMouseDelay -1 
 
@@ -45,6 +46,41 @@ Global CheatInputHook := ""
 Global F9Pressed := false
 Global F9DownTime := 0
 Global F9ClosedByToggle := false
+
+; Key Output Overlay Settings & State
+Global SettingsFile := A_ScriptDir . "\kanata_settings.ini"
+Global ShowKeyOverlay := Integer(IniRead(SettingsFile, "Settings", "ShowOutputKeys", "0"))
+Global StickyHoldEnabled := Integer(IniRead(SettingsFile, "Settings", "StickyHoldEnabled", "0"))
+Global OutputKeyGui := ""
+Global OutputKeyText := ""
+Global OutputKeyTrail := ""
+Global OutputKeyHook := ""
+Global OutputRecentKeys := []
+Global ActiveStickyMods := Map()
+Global ActiveHeldKeys := Map()
+Global ActiveChainDisplay := []
+Global LastModifierTapped := 0
+Global LastModifierTapTime := 0
+
+; Tray Menu Configuration
+try {
+    A_TrayMenu.Add() ; Separator
+    A_TrayMenu.Add("Show Output Keys (Space + X)", ToggleKeyOverlay)
+    A_TrayMenu.Add("Sticky Modifiers (Ctrl + Space + X)", ToggleStickyModifiers)
+    UpdateKeyOverlayMenu()
+    UpdateStickyModifiersMenu()
+}
+
+; Initialize Overlay if enabled in settings
+if (ShowKeyOverlay) {
+    EnsureOutputKeyGui()
+    SetTimer HideOutputKeyOverlay, -2000
+}
+
+; Start InputHook if either Key Overlay or Sticky Modifiers is enabled
+if (ShowKeyOverlay || StickyHoldEnabled) {
+    StartOutputKeyHook()
+}
 
 ; FileAppend "Configuration initialized. Setting up functions...`n", "ahk_debug.log"
 
@@ -877,4 +913,450 @@ SendPendingMiddleClick() {
     }
 }
 #HotIf
+
+; ==============================================================================
+; Key Output Overlay (Small popup near system tray showing final output keys)
+; Toggled via Space + X (Kanata sends Ctrl+Alt+F8) or System Tray Menu
+; ==============================================================================
+
+PositionOutputKeyGui() {
+    Global OutputKeyGui
+    if (OutputKeyGui == "")
+        return
+
+    ; Detect primary monitor dimensions and work area
+    primaryMon := MonitorGetPrimary()
+    MonitorGet(primaryMon, &mL, &mT, &mR, &mB)
+    MonitorGetWorkArea(primaryMon, &wL, &wT, &wR, &wB)
+
+    ; Get exact rendered window size on screen in physical screen pixels
+    WinGetPos(&curX, &curY, &realW, &realH, OutputKeyGui.Hwnd)
+    if (realW <= 0 || realH <= 0)
+        return
+
+    ; Dynamic DPI scale factor (e.g. 1.75 at 168 DPI)
+    dpiScale := A_ScreenDPI / 96.0
+
+    ; Retrieve taskbar height if present, with DPI-scaled fallback (48px standard at 100% DPI)
+    tbH := 0
+    try {
+        if WinExist("ahk_class Shell_TrayWnd")
+            WinGetPos(,,, &tbH, "ahk_class Shell_TrayWnd")
+    }
+    minTbH := Integer(48 * dpiScale)
+    if (tbH < minTbH)
+        tbH := minTbH
+
+    ; Handle both standard and auto-hide taskbars:
+    ; When auto-hide is enabled, wB reaches mB, so we reserve space for the taskbar (mB - tbH)
+    taskbarTop := Min(wB, mB - tbH)
+    paddingY := Integer(20 * dpiScale)
+    paddingX := Integer(20 * dpiScale)
+
+    ; Calculate final physical coordinates
+    finalX := Min(wR, mR) - realW - paddingX
+    finalY := taskbarTop - realH - paddingY
+
+    ; Keep within screen bounds
+    if (finalX < mL + 10)
+        finalX := mL + 10
+    if (finalY < mT + 10)
+        finalY := mT + 10
+
+    ; WinMove operates directly in raw screen pixels without DPI coordinate multiplication
+    WinMove(finalX, finalY,,, OutputKeyGui.Hwnd)
+}
+
+EnsureOutputKeyGui() {
+    Global OutputKeyGui, OutputKeyText, OutputKeyTrail
+    if (OutputKeyGui != "")
+        return
+
+    ; +AlwaysOnTop: Visible over apps
+    ; -Caption: Sleek borderless window
+    ; +Border: Crisp high-contrast 1px border
+    ; +ToolWindow: Doesn't clutter taskbar / Alt+Tab
+    ; +E0x20: WS_EX_TRANSPARENT -> 100% click-through!
+    OutputKeyGui := Gui("+AlwaysOnTop -Caption +Border +ToolWindow +E0x20", "Key Output Overlay")
+    OutputKeyGui.BackColor := "181825"
+
+    ; Header
+    OutputKeyGui.SetFont("s8 bold", "Segoe UI")
+    OutputKeyGui.Add("Text", "x15 y10 w230 h18 cA6ADC8 Center", "OUTPUT KEY")
+
+    ; Main Key Display
+    OutputKeyGui.SetFont("s16 bold", "Segoe UI")
+    OutputKeyText := OutputKeyGui.Add("Text", "x15 y32 w230 h36 c89DCEB Center", "Ready")
+
+    ; Recent Key History Trail
+    OutputKeyGui.SetFont("s8", "Segoe UI")
+    OutputKeyTrail := OutputKeyGui.Add("Text", "x15 y72 w230 h20 c9399B2 Center", "")
+
+    ; Render window with initial size
+    OutputKeyGui.Show("w260 h102 NoActivate")
+
+    ; Pin directly above the system tray and inside the right screen edge
+    PositionOutputKeyGui()
+}
+
+HideOutputKeyOverlay() {
+    Global OutputKeyGui
+    if (OutputKeyGui != "") {
+        try OutputKeyGui.Hide()
+    }
+}
+
+FormatOutputKeyName(vk, sc) {
+    name := GetKeyName(Format("vk{:02x}sc{:03x}", vk, sc))
+    if (name == "")
+        name := Format("vk{:02X}", vk)
+
+    ; Make common keys clean and friendly
+    switch StrLower(name) {
+        case "backspace": return "Backspace"
+        case "delete":    return "Delete"
+        case "insert":    return "Insert"
+        case "return":    return "Enter"
+        case "escape":    return "Escape"
+        case "space":     return "Space"
+        case "tab":       return "Tab"
+        case "up":        return "Up"
+        case "down":      return "Down"
+        case "left":      return "Left"
+        case "right":     return "Right"
+        case "prior":     return "Page Up"
+        case "next":      return "Page Down"
+        case "home":      return "Home"
+        case "end":       return "End"
+        case "printscreen": return "PrtScn"
+        default:
+            if (StrLen(name) == 1)
+                return StrUpper(name)
+            return name
+    }
+}
+
+IsModVk(vk) {
+    Global StickyHoldEnabled
+    if (vk == 0x2D)
+        return (StickyHoldEnabled != 0)
+    return (vk == 0x10 || vk == 0x11 || vk == 0x12 || vk == 0x5B || vk == 0x5C || (vk >= 0xA0 && vk <= 0xA5))
+}
+
+GetModSendName(vk) {
+    switch vk {
+        case 0x11, 0xA2: return "LCtrl"
+        case 0xA3: return "RCtrl"
+        case 0x10, 0xA0: return "LShift"
+        case 0xA1: return "RShift"
+        case 0x12, 0xA4: return "LAlt"
+        case 0xA5: return "RAlt"
+        case 0x5B: return "LWin"
+        case 0x5C: return "RWin"
+        case 0x2D: return "Insert"
+        default: return ""
+    }
+}
+
+GetModFriendlyName(vk) {
+    switch vk {
+        case 0x11, 0xA2, 0xA3: return "Ctrl"
+        case 0x10, 0xA0, 0xA1: return "Shift"
+        case 0x12, 0xA4, 0xA5: return "Alt"
+        case 0x5B, 0x5C: return "Win"
+        case 0x2D: return "Insert"
+        default: return ""
+    }
+}
+
+DisarmStickyModifiers() {
+    Global ActiveStickyMods, ActiveChainDisplay, ActiveHeldKeys
+    for modSend, _ in ActiveStickyMods {
+        try SendInput("{Blind}{" . modSend . " Up}")
+    }
+    ActiveStickyMods.Clear()
+    ActiveChainDisplay := []
+    ActiveHeldKeys.Clear()
+}
+
+OnOutputKeyDown(ih, vk, sc) {
+    Global OutputKeyGui, OutputKeyText, OutputKeyTrail, OutputRecentKeys, ShowKeyOverlay
+    Global StickyHoldEnabled, ActiveStickyMods, ActiveHeldKeys, ActiveChainDisplay, LastModifierTapped, LastModifierTapTime
+
+    ; Ignore internal bridge F-keys (F13..F24: vk 0x7C..0x87)
+    if (vk >= 0x7C && vk <= 0x87)
+        return
+
+    ; Ignore internal hotkey triggers:
+    ; ^!F7 (0x76) = Toggle Sticky Modifiers (Ctrl+Space+X)
+    ; ^!F8 (0x77) = Toggle Key Output Overlay (Space+X)
+    ; ^!F10 (0x79) = Toggle Middle Mode (Ctrl+B)
+    if (GetKeyState("Ctrl") && GetKeyState("Alt") && (vk == 0x76 || vk == 0x77 || vk == 0x79))
+        return
+
+    ; Escape cancels sticky modifiers and resets active chain
+    if (vk == 0x1B) {
+        if (ActiveStickyMods.Count > 0)
+            DisarmStickyModifiers()
+        if (ShowKeyOverlay) {
+            EnsureOutputKeyGui()
+            OutputKeyText.Text := "Escape"
+            try OutputKeyGui.Show("NoActivate")
+            PositionOutputKeyGui()
+            SetTimer HideOutputKeyOverlay, -1500
+        }
+        return
+    }
+
+    ; If modifier is pressed down
+    if IsModVk(vk) {
+        if (StickyHoldEnabled) {
+            LastModifierTapped := vk
+            LastModifierTapTime := A_TickCount
+        }
+        return
+    }
+
+    ; Non-modifier key pressed down
+    ActiveHeldKeys[vk] := true
+
+    ; Reset sticky modifier 3-second safety timeout
+    if (ActiveStickyMods.Count > 0)
+        SetTimer DisarmStickyModifiers, -3000
+
+    ; If Key Output Overlay is enabled, update visual representation
+    if (ShowKeyOverlay) {
+        baseKey := FormatOutputKeyName(vk, sc)
+
+        ; Build active modifier prefix (combining actual physical keys + active sticky modifiers)
+        mods := ""
+        if (GetKeyState("Ctrl") || ActiveStickyMods.Has("LCtrl") || ActiveStickyMods.Has("RCtrl"))
+            mods .= "Ctrl + "
+        if (GetKeyState("Alt") || ActiveStickyMods.Has("LAlt") || ActiveStickyMods.Has("RAlt"))
+            mods .= "Alt + "
+        if (GetKeyState("Shift") || ActiveStickyMods.Has("LShift") || ActiveStickyMods.Has("RShift"))
+            mods .= "Shift + "
+        if (GetKeyState("LWin") || GetKeyState("RWin") || ActiveStickyMods.Has("LWin") || ActiveStickyMods.Has("RWin"))
+            mods .= "Win + "
+        if (GetKeyState("Insert") || ActiveStickyMods.Has("Insert"))
+            mods .= "Insert + "
+
+        displayText := mods . baseKey
+
+        ; Append to current chain if multiple keys are chained
+        ActiveChainDisplay.Push(baseKey)
+        if (ActiveChainDisplay.Length > 1) {
+            chainStr := mods
+            for idx, k in ActiveChainDisplay {
+                if (idx > 1)
+                    chainStr .= " + "
+                chainStr .= k
+            }
+            displayText := chainStr
+        }
+
+        ; Update history trail (deduplicated)
+        if (OutputRecentKeys.Length == 0 || OutputRecentKeys[OutputRecentKeys.Length] != displayText) {
+            OutputRecentKeys.Push(displayText)
+            if (OutputRecentKeys.Length > 3)
+                OutputRecentKeys.RemoveAt(1)
+        }
+
+        trailText := ""
+        for idx, k in OutputRecentKeys {
+            if (idx > 1)
+                trailText .= "  ->  "
+            trailText .= k
+        }
+
+        EnsureOutputKeyGui()
+        OutputKeyText.Text := displayText
+        OutputKeyTrail.Text := trailText
+
+        try OutputKeyGui.Show("NoActivate")
+        PositionOutputKeyGui()
+        SetTimer HideOutputKeyOverlay, -2500
+    }
+}
+
+OnOutputKeyUp(ih, vk, sc) {
+    Global OutputKeyGui, OutputKeyText, ShowKeyOverlay
+    Global StickyHoldEnabled, ActiveStickyMods, ActiveHeldKeys, ActiveChainDisplay, LastModifierTapped, LastModifierTapTime
+
+    ; Ignore internal bridge F-keys and triggers
+    if (vk >= 0x7C && vk <= 0x87)
+        return
+
+    ; Check if modifier was tapped and released alone
+    if IsModVk(vk) {
+        if (StickyHoldEnabled && LastModifierTapped == vk) {
+            elapsed := A_TickCount - LastModifierTapTime
+            ; Only arm if tapped quickly (< 450ms) and no character keys were held during the tap
+            if (elapsed < 450 && ActiveHeldKeys.Count == 0) {
+                modSend := GetModSendName(vk)
+                friendlyName := GetModFriendlyName(vk)
+                if (modSend != "") {
+                    if ActiveStickyMods.Has(modSend) {
+                        ; Tapping an already-active sticky modifier cancels it
+                        try SendInput("{Blind}{" . modSend . " Up}")
+                        ActiveStickyMods.Delete(modSend)
+                        SoundBeep 700, 60
+                        if (ShowKeyOverlay) {
+                            EnsureOutputKeyGui()
+                            OutputKeyText.Text := "[" . friendlyName . " Cancelled]"
+                            try OutputKeyGui.Show("NoActivate")
+                            PositionOutputKeyGui()
+                            SetTimer HideOutputKeyOverlay, -1500
+                        }
+                    } else {
+                        ; Arm the sticky modifier
+                        ActiveStickyMods[modSend] := true
+                        try SendInput("{Blind}{" . modSend . " Down}")
+                        SetTimer DisarmStickyModifiers, -3000
+                        SoundBeep 1200, 50
+                        if (ShowKeyOverlay) {
+                            EnsureOutputKeyGui()
+                            OutputKeyText.Text := "[" . friendlyName . " Sticky]"
+                            try OutputKeyGui.Show("NoActivate")
+                            PositionOutputKeyGui()
+                            SetTimer HideOutputKeyOverlay, -2500
+                        }
+                    }
+                }
+            }
+            LastModifierTapped := 0
+        }
+        return
+    }
+
+    ; Non-modifier key was released
+    if ActiveHeldKeys.Has(vk)
+        ActiveHeldKeys.Delete(vk)
+
+    ; Check if the entire chain is now completed/broken:
+    ; The chain stays alive as long as ANY key is still held down OR Space is still held physically for mirroring
+    isSpaceHeld := GetKeyState("Space", "P")
+    if (ActiveHeldKeys.Count == 0 && !isSpaceHeld) {
+        ; All keys in chain released! Auto-release sticky modifiers
+        if (ActiveStickyMods.Count > 0) {
+            DisarmStickyModifiers()
+        }
+        ActiveChainDisplay := []
+    }
+}
+
+EnsureHookRunning() {
+    Global OutputKeyHook, ShowKeyOverlay, StickyHoldEnabled
+    shouldRun := (ShowKeyOverlay || StickyHoldEnabled)
+    if (shouldRun) {
+        if (OutputKeyHook == "")
+            StartOutputKeyHook()
+    } else {
+        if (OutputKeyHook != "")
+            StopOutputKeyHook()
+    }
+}
+
+StartOutputKeyHook() {
+    Global OutputKeyHook
+    if (OutputKeyHook != "") {
+        try OutputKeyHook.Stop()
+    }
+    OutputKeyHook := InputHook("V")
+    OutputKeyHook.KeyOpt("{All}", "N")
+    OutputKeyHook.KeyOpt("{LCtrl}{RCtrl}{LAlt}{RAlt}{LShift}{RShift}{LWin}{RWin}", "N")
+    OutputKeyHook.OnKeyDown := OnOutputKeyDown
+    OutputKeyHook.OnKeyUp := OnOutputKeyUp
+    OutputKeyHook.Start()
+}
+
+StopOutputKeyHook() {
+    Global OutputKeyHook
+    if (OutputKeyHook != "") {
+        try OutputKeyHook.Stop()
+        OutputKeyHook := ""
+    }
+    HideOutputKeyOverlay()
+}
+
+UpdateKeyOverlayMenu() {
+    Global ShowKeyOverlay
+    try {
+        if (ShowKeyOverlay) {
+            A_TrayMenu.Check("Show Output Keys (Space + X)")
+        } else {
+            A_TrayMenu.Uncheck("Show Output Keys (Space + X)")
+        }
+    }
+}
+
+ToggleKeyOverlay(*) {
+    Global ShowKeyOverlay, SettingsFile, OutputKeyText, OutputKeyTrail, OutputKeyGui, OutputRecentKeys
+    ShowKeyOverlay := !ShowKeyOverlay
+    try IniWrite(String(ShowKeyOverlay), SettingsFile, "Settings", "ShowOutputKeys")
+
+    UpdateKeyOverlayMenu()
+    EnsureHookRunning()
+
+    if (ShowKeyOverlay) {
+        EnsureOutputKeyGui()
+        Notify("Key Output Overlay: ON (Near Tray)", 1500)
+        SoundBeep 850, 100
+        Sleep 30
+        SoundBeep 1150, 150
+        OutputRecentKeys := []
+        OutputKeyText.Text := "Ready"
+        OutputKeyTrail.Text := ""
+        try OutputKeyGui.Show("NoActivate")
+        PositionOutputKeyGui()
+        SetTimer HideOutputKeyOverlay, -2500
+    } else {
+        Notify("Key Output Overlay: OFF", 1500)
+        SoundBeep 1150, 100
+        Sleep 30
+        SoundBeep 700, 150
+    }
+}
+
+UpdateStickyModifiersMenu() {
+    Global StickyHoldEnabled
+    try {
+        if (StickyHoldEnabled) {
+            A_TrayMenu.Check("Sticky Modifiers (Ctrl + Space + X)")
+        } else {
+            A_TrayMenu.Uncheck("Sticky Modifiers (Ctrl + Space + X)")
+        }
+    }
+}
+
+ToggleStickyModifiers(*) {
+    Global StickyHoldEnabled, SettingsFile
+    StickyHoldEnabled := !StickyHoldEnabled
+    try IniWrite(String(StickyHoldEnabled), SettingsFile, "Settings", "StickyHoldEnabled")
+
+    UpdateStickyModifiersMenu()
+    EnsureHookRunning()
+
+    if (StickyHoldEnabled) {
+        Notify("Sticky Modifiers: ON (Ctrl + Space + X)", 1500)
+        SoundBeep 850, 80
+        Sleep 30
+        SoundBeep 1200, 120
+    } else {
+        DisarmStickyModifiers()
+        Notify("Sticky Modifiers: OFF", 1500)
+        SoundBeep 1200, 80
+        Sleep 30
+        SoundBeep 700, 120
+    }
+}
+
+; Bridge Hotkey: Space + X (Kanata sends Ctrl+Alt+F8)
+^!f8::ToggleKeyOverlay()
+
+; Bridge Hotkey: Ctrl + Space + X (Kanata sends Ctrl+Alt+F7)
+^!f7::ToggleStickyModifiers()
+
+
+
 

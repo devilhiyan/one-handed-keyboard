@@ -103,14 +103,14 @@ def main():
     keys_mirror = [
         [("Q", "z"), ("W", "b"), ("E", "p"), ("R", "y"), ("T", "x")],
         [("A", "q"), ("S", "g"), ("D", "w"), ("F", "f"), ("G", "v")],
-        [("Z", "c"), ("X", "b"), ("C", "k"), ("V", "j"), ("B", "Win+H")]
+        [("Z", "c"), ("X", "Overlay"), ("C", "k"), ("V", "j"), ("B", "Win+H")]
     ]
     start_kx2 = card2_x + S(18)
     for r_idx, row in enumerate(keys_mirror):
         for c_idx, (phys, out) in enumerate(row):
             kx = start_kx2 + c_idx * (kw + pad_x)
             ky = start_ky + r_idx * (kh + pad_y)
-            is_hl = (phys == "B")
+            is_hl = (phys in ("B", "X"))
             draw_keycap(draw, kx, ky, kw, kh, phys, out, is_highlight=is_hl)
 
     # -------------------------------------------------------------
@@ -154,7 +154,7 @@ def main():
         ("E + R", "End", "S + F", "Backspace"),
         ("Q + W (Mir)", "Page Up", "S + D + F", "Ctrl + Backspace"),
         ("E + R (Mir)", "Page Down", "A + D", "Delete"),
-        ("Z+X+C+V", "Escape (Esc)", "A + D (Mir)", "Insert (Ins)"),
+        ("Z+X+C+V", "Escape (Esc)", "Tab + `", "Insert (Ins)"),
     ]
     ne_y = card4_y + S(50)
     for col1_k, col1_v, col2_k, col2_v in nav_edit_items:
@@ -222,11 +222,11 @@ def main():
     draw_card(draw, card7_x, card7_y, card7_w, card7_h, "7. CORE MODIFIERS & FUNCTION KEYS (F1–F12)", title_color=(203, 166, 247))
 
     mod_boxes = [
-        ("SPACEBAR (Thumb)", "• Tap: Types standard Space\n• Hold: Activates Mirror Layer\n• Hold Space + B: Win + H (Dictation)\n• Hold Space + 1..5: 0..6 (Numbers)"),
+        ("SPACEBAR (Thumb)", "• Tap: Types standard Space\n• Hold: Activates Mirror Layer\n• Space + X: Key Output Overlay\n• Ctrl+Space+X: Sticky Modifiers"),
         ("FUNCTION KEYS (F1–F12)", "• F1..F5 Alone: Normal F1..F5\n• Space + F5..F1: F6..F10 (Rev Mirror)\n• Space + Esc + F1: F11 (Fullscreen)\n• Space + F1 + F2: F12 (DevTools)"),
         ("PHYSICAL 'B' & MID-CLICK", "• In Hyn: Toggle [ NVDA ] (Admin)\n• Ctrl + B: Switch Double vs Single Mode\n• Mode 1: Normal Click / Double=NVDA\n• Mode 2: Single=NVDA / Space=Normal"),
-        ("LEFT CONTROL", "• Tap: Toggle Mouse Navigation ON/OFF\n• Hold: Control Layer (Helper shortcuts)\n• Hold Ctrl + Space: Mirror shortcut chords\n• Instant arrow & pointer access"),
-        ("PHYSICAL ESC (Win)", "• In Hyn: Left Win (Start/Fn)\n• Z+X+C+V: Pure Escape (Esc)\n• Space + Esc + F1: F11 (Fullscreen)\n• In QWERTY: Standard Escape")
+        ("LEFT CONTROL & STICKY", "• Tap: Toggle Mouse Nav ON/OFF\n• Hold: Control Layer (Helper keys)\n• Ctrl+Space+X: Sticky Mod Mode\n• Chain combos with key hand-off"),
+        ("PHYSICAL ESC (Win)", "• In Hyn: Left Win (Start/Fn)\n• Z+X+C+V: Pure Escape (Esc)\n• Tab + `: Insert Key\n• In QWERTY: Standard Escape")
     ]
     box_w = S(286)
     box_gap = S(14)
@@ -248,7 +248,7 @@ def main():
     # -------------------------------------------------------------
     draw.rounded_rectangle([S(40), S(945), W - S(40), S(995)], radius=S(10), fill=(30, 30, 46), outline=(137, 180, 250), width=S(2))
     font_footer = get_font(15, bold=True)
-    footer_text = "CONTROLS: Show: [ Tab + Q ] (Pin/Peek)  |  Switch Middle Mode: [ Ctrl + B ] (Double vs Single NVDA)  |  Pan: Mid-Drag"
+    footer_text = "CONTROLS: Cheat Sheet: [ Tab + Q ]  |  Output Overlay: [ Space + X ]  |  Sticky Modifiers: [ Ctrl + Space + X ]  |  Mid-Click: [ Ctrl + B ]"
     draw.text((S(60), S(960)), footer_text, fill=(249, 226, 175), font=font_footer)
 
     # Save PNG (lossless Super-Resolution)
