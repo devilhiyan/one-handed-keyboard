@@ -32,7 +32,7 @@ This is the primary typing layer. Physical keys correspond to the **Halmak** lay
 | **Z** | `l` | **X** | `d` |
 | **C** | `n` | **V** | `m` |
 | **B** | `Toggle NVDA (Admin)` | **Esc** (Top-Left) | `Left Windows (Tap) / Fn Layer (Hold)` |
-| **Middle Click** | `Toggle NVDA (Hyn & Nav)` | **Ctrl + B** | `Toggle Middle Click Mode ON/OFF` |
+| **Middle Click** | `Normal / Toggle NVDA (Ctrl+B)` | **Ctrl + B** | `Switch Middle Mode (Double vs Single NVDA)` |
 
 #### Chords (Mult-Key Combos)
 | Chord (Physical) | Action / Output | Note |
@@ -151,8 +151,9 @@ Activates when `Space` is held. Maps keys to the opposite side of the keyboard.
 | **Space+Caps** | Enter | Left Click | F11 |
 | **Shift** | Right Click | Shift | F18 |
 | **Space+Shift**| Right Click | Right Click | F12 |
-| **Middle Click**| Toggle NVDA (B-Mode Default) | Toggle NVDA (B-Mode Default) | - |
-| **Space+Mid-Click**| Voice Typing (`Win + H`) | Voice Typing (`Win + H`) | - |
+| **Middle Click**| Normal Middle Click (Default) / NVDA | Normal Middle Click (Default) / NVDA | - |
+| **Double Mid-Click**| Toggle NVDA Screen Reader (Default) | Toggle NVDA Screen Reader (Default) | - |
+| **Space+Mid-Click**| Simple Middle Click (in Mode 2) | Simple Middle Click (in Mode 2) | - |
 | **Q + W** | `Home` | `Home` | F21 |
 | **W + E** | `End` | `End` | F22 |
 
@@ -164,14 +165,14 @@ Activates when `Space` is held. Maps keys to the opposite side of the keyboard.
 | **F7** | Toggle NVDA Screen Reader (Admin, Hyn mode only) |
 | **F8** | Switch to QWERTY |
 | **F9** | Toggle Layout Cheat Sheet (Hyn mode only) |
-| **Ctrl+Alt+F10** | Toggle Middle Mouse Button B-Mode ON/OFF |
+| **Ctrl+Alt+F10** | Switch Middle Mouse Mode (Double vs Single NVDA) |
 | **F23** | Switch to Halmak (Nav OFF) / `Ctrl+Shift+F23`: **Brightness Up** |
 | **F24** | Switch to Navigation Mode (Nav ON) / `Ctrl+Shift+F24`: **Brightness Down** |
 
 ### 5. Control Layer & Shortcuts
 Holding `Left Control` activates a temporary layer with special functions:
 *   **Tap LCtrl**: Toggles Mouse Mode.
-*   **Ctrl + B**: Toggles Middle Click B-Mode ON and OFF (active in Hyn and Nav modes; enabled by default).
+*   **Ctrl + B**: Switches Middle Click Mode between Double-Click NVDA Mode (normal click, double-click=NVDA) and Single-Click NVDA Mode (single-click=NVDA, Space+click=normal).
 *   **Ctrl + Space (Tap)**: Toggles Mouse Mode.
 *   **Ctrl + Space (Hold)**: Activates **Mirror Layer**.
     *   *Usage*: Allows `Ctrl` + `Space` + `Key` chords.

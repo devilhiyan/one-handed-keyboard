@@ -32,7 +32,9 @@ Global MouseMode := 1 ; 0 = Keyboard Nav (Arrows), 1 = Mouse Nav (Movement)
 ; Navigation State
 Global NavMode := false
 Global Ishyn := true
-Global MiddleButtonAsB := true ; Middle mouse click acts as B key (NVDA/Dictation) in Hyn & Nav modes
+Global MiddleClickMode := "Double" ; "Double" = Double-click NVDA / Single-click normal; "Single" = Single-click NVDA / Space+click normal
+Global MiddleClickActive := false
+Global MButtonWaitingForSecond := false
 Global MoveUpVar := 0, MoveDownVar := 0, MoveLeftVar := 0, MoveRightVar := 0
 Global CheatSheetGui := ""
 Global CheatPic := ""
@@ -754,21 +756,33 @@ ToggleNVDA() {
 
 ; ------------------------------------------------------------------------------
 ; Middle Mouse Button Mode Toggle (Ctrl + B in Hyn or Navigation Mode)
-; Toggles whether Middle Click acts as the B key (NVDA toggle) or standard Middle Click
+; Switches between:
+; - "Double": Single click is normal middle click; Double click toggles NVDA
+; - "Single": Single click toggles NVDA; Space + Middle click is normal middle click
 ; ------------------------------------------------------------------------------
 ToggleMiddleButtonMode() {
-    Global MiddleButtonAsB, Ishyn, NavMode
+    Global MiddleClickMode, MButtonWaitingForSecond, MiddleClickActive, Ishyn, NavMode
     ; Only operable in Hyn or Navigation mode
     if (!Ishyn && !NavMode)
         return
 
-    MiddleButtonAsB := !MiddleButtonAsB
-    if (MiddleButtonAsB) {
-        Notify("Middle Click: B-Key Mode (NVDA) [ON]", 1500)
-        SoundBeep 850, 150 ; High pitch beep for enabled
+    ; Cancel any pending timers/states
+    SetTimer SendPendingMiddleClick, 0
+    MButtonWaitingForSecond := false
+    MiddleClickActive := false
+
+    if (MiddleClickMode == "Single") {
+        MiddleClickMode := "Double"
+        Notify("Middle Click: Normal Click (Double-Click NVDA)", 2000)
+        SoundBeep 650, 100
+        Sleep 40
+        SoundBeep 900, 150
     } else {
-        Notify("Middle Click: Standard Mode [OFF]", 1500)
-        SoundBeep 400, 150 ; Low pitch beep for disabled
+        MiddleClickMode := "Single"
+        Notify("Middle Click: Single-Click NVDA (Space+Click Normal)", 2000)
+        SoundBeep 900, 100
+        Sleep 40
+        SoundBeep 650, 150
     }
 }
 
@@ -793,17 +807,73 @@ ToggleMiddleButtonMode() {
 *Esc::CloseCheatSheet()
 #HotIf
 
+; Helper to send delayed single middle click in Double-Click Mode
+SendPendingMiddleClick() {
+    Global MButtonWaitingForSecond
+    if (MButtonWaitingForSecond) {
+        MButtonWaitingForSecond := false
+        Click "Middle"
+    }
+}
+
 ; Middle Mouse Button in Hyn or Navigation Mode:
-; When MiddleButtonAsB is ON, acts like the physical B key:
-; - Space held: Opens Windows Voice Typing (Win + H)
-; - Alone: Toggles NVDA Screen Reader
-; In QWERTY mode or when MiddleButtonAsB is OFF, acts as standard middle mouse click.
-#HotIf (Ishyn || NavMode) && MiddleButtonAsB && !CheatSheetActive()
+; - In "Single" Mode:
+;   - Space held: Simple Middle Click (supports click and hold-to-drag/autoscroll)
+;   - Alone: Toggles NVDA Screen Reader
+; - In "Double" Mode:
+;   - Single click: Standard middle click
+;   - Double click: Toggles NVDA Screen Reader
+;   - Hold & drag: Standard middle button hold & drag (autoscroll / CAD pan)
+; In QWERTY mode: passes through natively to Windows.
+#HotIf (Ishyn || NavMode) && !CheatSheetActive()
 *MButton:: {
-    if (GetKeyState("Space", "P") || GetKeyState("Space")) {
-        SendInput "#{h}"
-    } else {
+    Global MiddleClickMode, MiddleClickActive, MButtonWaitingForSecond
+
+    ; ---------------------------------------------------------
+    ; MODE 1: Single-Click Mode (B-Key Mode)
+    ; ---------------------------------------------------------
+    if (MiddleClickMode == "Single") {
+        if (GetKeyState("Space", "P") || GetKeyState("Space")) {
+            MiddleClickActive := true
+            Click "Middle Down"
+        } else {
+            MiddleClickActive := false
+            ToggleNVDA()
+        }
+        return
+    }
+
+    ; ---------------------------------------------------------
+    ; MODE 2: Double-Click Mode (Standard Mode)
+    ; ---------------------------------------------------------
+    ; If already waiting for second click -> this IS the double click!
+    if (MButtonWaitingForSecond) {
+        SetTimer SendPendingMiddleClick, 0
+        MButtonWaitingForSecond := false
         ToggleNVDA()
+        return
+    }
+
+    ; Check if user is holding the button down (> 180ms) for drag / autoscroll
+    if !KeyWait("MButton", "T0.18") {
+        MiddleClickActive := true
+        Click "Middle Down"
+        KeyWait "MButton"
+        Click "Middle Up"
+        MiddleClickActive := false
+        return
+    }
+
+    ; User released quickly within 180ms -> start timer to check for double-click
+    MButtonWaitingForSecond := true
+    SetTimer SendPendingMiddleClick, -240
+}
+
+*MButton Up:: {
+    Global MiddleClickActive
+    if (MiddleClickActive) {
+        MiddleClickActive := false
+        Click "Middle Up"
     }
 }
 #HotIf

@@ -17,8 +17,10 @@ This is the default layer, optimized for one-handed typing using the Halmak layo
     *   *Note:* Standard physical keyboard on one-handed devices has no dedicated Win key.
 *   `Z + X + C + V`: Dedicated home-row **`Escape` (`Esc`)**.
 *   `b`: Toggles **NVDA Screen Reader** (runs as Administrator without UAC prompts via bridge key `F7`).
-*   `Middle Mouse Click`: In both Hyn and Navigation modes, middle clicking acts as the `b` key (toggles **NVDA Screen Reader** by default). Holding `Space` + middle clicking triggers **Windows Voice Typing** (`Win + H`).
-*   `Ctrl + B`: Acts as a toggle button to turn Middle Click B-Mode ON or OFF in Hyn and Navigation modes.
+*   `Middle Mouse Click`: Operates in two modes (switchable via `Ctrl + B`):
+    *   **Double-Click Mode (Default):** Single middle click is normal middle click (and hold/drag for autoscroll); double-clicking toggles **NVDA Screen Reader**.
+    *   **Single-Click Mode:** Single middle click toggles **NVDA Screen Reader**; holding `Space` + middle clicking outputs a **Simple Middle Click**.
+*   `Ctrl + B`: Switches between Double-Click Mode and Single-Click Mode in Hyn and Navigation modes.
 *   `Tab + Q`: Shows the on-screen **Layout Cheat Sheet** overlay (Hyn mode only):
     *   **Tap (< 300ms):** Pins the cheat sheet open on screen (dismiss by clicking or pressing any key).
     *   **Hold (>= 300ms):** Peeks the cheat sheet; letting go automatically hides it.
@@ -86,9 +88,10 @@ This layer has two sub-modes, toggled via **Ctrl + Space**.
 | `Capslock` | Left Click (Hold to Drag) |
 | `Shift` | Right Click |
 | `Space + Capslock` | Enter |
-| `Middle Click` | Toggle NVDA Screen Reader (B-Mode enabled by default) |
-| `Space + Mid-Click` | Windows Voice Typing (`Win + H`) |
-| `Ctrl + B` | Toggle Middle Click B-Mode ON/OFF |
+| `Middle Click` | Normal Middle Click (Default) / Toggle NVDA (Mode 2) |
+| `Double Mid-Click` | Toggle NVDA Screen Reader (Double-Click Mode Default) |
+| `Space + Mid-Click` | Simple Middle Click (in Single-Click Mode) |
+| `Ctrl + B` | Switch Middle Click Mode (Double vs Single NVDA) |
 
 ### B. Keyboard Mode (Transient)
 *Focus: Rapid text navigation.*
@@ -102,8 +105,10 @@ This layer has two sub-modes, toggled via **Ctrl + Space**.
 | `Space + Capslock` | Left Click (Hold to Drag) |
 | `Shift` | Shift |
 | `Space + Shift` | Right Click |
-| `Middle Click` | Toggle NVDA Screen Reader (B-Mode enabled by default) |
-| `Ctrl + B` | Toggle Middle Click B-Mode ON/OFF |
+| `Middle Click` | Normal Middle Click (Default) / Toggle NVDA (Mode 2) |
+| `Double Mid-Click` | Toggle NVDA Screen Reader (Double-Click Mode Default) |
+| `Space + Mid-Click` | Simple Middle Click (in Single-Click Mode) |
+| `Ctrl + B` | Switch Middle Click Mode (Double vs Single NVDA) |
 
 **Exiting:** Tap `L-Ctrl` again to return to Halmak layer.
 
