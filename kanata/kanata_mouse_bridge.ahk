@@ -51,6 +51,8 @@ Global F9ClosedByToggle := false
 Global SettingsFile := A_ScriptDir . "\kanata_settings.ini"
 Global ShowKeyOverlay := Integer(IniRead(SettingsFile, "Settings", "ShowOutputKeys", "0"))
 Global StickyHoldEnabled := Integer(IniRead(SettingsFile, "Settings", "StickyHoldEnabled", "0"))
+Global DriverModeSetting := IniRead(SettingsFile, "Driver", "Mode", "auto")
+Global NVDACustomPath := IniRead(SettingsFile, "NVDA", "CustomPath", "")
 Global OutputKeyGui := ""
 Global OutputKeyText := ""
 Global OutputKeyTrail := ""
@@ -69,6 +71,22 @@ try {
     A_TrayMenu.Add("Sticky Modifiers (Ctrl + Space + X)", ToggleStickyModifiers)
     UpdateKeyOverlayMenu()
     UpdateStickyModifiersMenu()
+
+    ; Driver Backend Submenu
+    Global DriverSubMenu := Menu()
+    DriverSubMenu.Add("Auto-Detect (Recommended)", (*) => SelectDriverMode("auto"))
+    DriverSubMenu.Add("WinIOv2 (Desktop / Win 11)", (*) => SelectDriverMode("winIOv2"))
+    DriverSubMenu.Add("Interception (Laptop / Legacy)", (*) => SelectDriverMode("wintercept"))
+    DriverSubMenu.Add() ; Separator
+    DriverSubMenu.Add("Restart Kanata Now", (*) => RestartKanata())
+    A_TrayMenu.Add("Driver Backend", DriverSubMenu)
+    UpdateDriverMenu()
+
+    ; NVDA Submenu
+    Global NVDASubMenu := Menu()
+    NVDASubMenu.Add("Toggle NVDA (Physical B)", (*) => ToggleNVDA())
+    NVDASubMenu.Add("Setup / Connect NVDA...", (*) => ShowNVDASetupGui())
+    A_TrayMenu.Add("NVDA Screen Reader", NVDASubMenu)
 }
 
 ; Initialize Overlay if enabled in settings
@@ -371,15 +389,20 @@ StartMove() {
 #HotIf
 
 ; ------------------------------------------------------------------------------
-; Brightness Control (WMI)
+; Brightness Control (WMI for Laptop Displays with Desktop Fallback)
 ; ------------------------------------------------------------------------------
 ChangeBrightness(Amount) {
     try {
-        ; Get current brightness
-        CurrentBrightness := 0
+        ; Check if WMI brightness is supported (Internal Laptop displays)
+        CurrentBrightness := -1
         For Mon in ComObjGet("winmgmts:\\.\root\wmi").ExecQuery("Select * from WmiMonitorBrightness") {
             CurrentBrightness := Mon.CurrentBrightness
             break
+        }
+
+        if (CurrentBrightness == -1) {
+            Notify("Brightness: Unavailable on external monitor", 1500)
+            return
         }
 
         ; Calculate new
@@ -393,7 +416,7 @@ ChangeBrightness(Amount) {
         }
         Notify("Brightness: " . NewBrightness . "%", 1000)
     } catch as e {
-        Notify("Brightness Error (WMI)", 2000)
+        Notify("Brightness: Unavailable on external monitor", 1500)
     }
 }
 
@@ -740,16 +763,59 @@ ToggleCheatSheet() {
 }
 
 ; ------------------------------------------------------------------------------
-; NVDA Screen Reader Toggle (Physical B Key in Hyn Mode)
+; NVDA Screen Reader Paths & Detection Helper
 ; ------------------------------------------------------------------------------
-ToggleNVDA() {
+GetNVDAPaths() {
+    Global NVDACustomPath, SettingsFile
+    
+    ; Re-read in case updated in settings
+    try NVDACustomPath := IniRead(SettingsFile, "NVDA", "CustomPath", "")
+
+    candidateDirs := []
+    if (NVDACustomPath != "")
+        candidateDirs.Push(NVDACustomPath)
+    
+    candidateDirs.Push("C:\Program Files\NVDA")
+    candidateDirs.Push("C:\Program Files (x86)\NVDA")
+    try candidateDirs.Push(A_AppData . "\NVDA")
+
+    For dir in candidateDirs {
+        if (dir != "" && DirExist(dir)) {
+            mainExe := dir . "\nvda.exe"
+            slaveExe := dir . "\nvda_slave.exe"
+            if (FileExist(mainExe) || FileExist(slaveExe)) {
+                return {
+                    dir: dir,
+                    main: FileExist(mainExe) ? mainExe : slaveExe,
+                    slave: FileExist(slaveExe) ? slaveExe : mainExe,
+                    found: true
+                }
+            }
+        }
+    }
+
+    return { dir: "", main: "", slave: "", found: false }
+}
+
+; ------------------------------------------------------------------------------
+; NVDA Screen Reader Toggle (Physical B Key in Hyn Mode / Tray Menu)
+; ------------------------------------------------------------------------------
+ToggleNVDA(force:=false) {
     Global Ishyn
-    if (!Ishyn)
+    if (!force && !Ishyn)
         return
 
-    nvdaDir := "C:\Program Files\NVDA"
-    nvdaSlave := nvdaDir . "\nvda_slave.exe"
-    nvdaMain := nvdaDir . "\nvda.exe"
+    nvdaInfo := GetNVDAPaths()
+
+    if (!nvdaInfo.found) {
+        ; NVDA not detected on system -> Prompt user with Setup Assistant
+        ShowNVDASetupGui()
+        return
+    }
+
+    nvdaDir := nvdaInfo.dir
+    nvdaMain := nvdaInfo.main
+    nvdaSlave := nvdaInfo.slave
 
     if ProcessExist("nvda.exe") {
         ; NVDA is currently open -> Close it cleanly
@@ -781,6 +847,83 @@ ToggleNVDA() {
             }
         }
     }
+}
+
+; ------------------------------------------------------------------------------
+; NVDA Setup & Connect Assistant GUI
+; ------------------------------------------------------------------------------
+Global NVDAGui := ""
+
+ShowNVDASetupGui() {
+    Global NVDAGui, SettingsFile, NVDACustomPath
+
+    if (NVDAGui != "") {
+        try {
+            NVDAGui.Show()
+            return
+        }
+    }
+
+    nvdaInfo := GetNVDAPaths()
+
+    NVDAGui := Gui("+AlwaysOnTop", "NVDA Screen Reader Setup & Connect")
+    NVDAGui.SetFont("s10", "Segoe UI")
+
+    NVDAGui.Add("Text", "w460", "NVDA Screen Reader is required for one-handed keyboard speech feedback.")
+    NVDAGui.Add("Text", "w460 cGray", "Pressing the physical B key or Middle-Click toggles NVDA on and off.")
+    NVDAGui.Add("Text", "w460", "─────────────────────────────────────────────────────────────")
+
+    NVDAGui.Add("Text", "w460 Bold", "Step 1: Install NVDA (if not already installed)")
+    btnDL := NVDAGui.Add("Button", "w240 h30", "Download NVDA (Official Website)")
+    btnDL.OnEvent("Click", (*) => Run("https://www.nvaccess.org/download/"))
+
+    NVDAGui.Add("Text", "w460", "")
+
+    NVDAGui.Add("Text", "w460 Bold", "Step 2: Custom / Portable Directory (Optional)")
+    pathEdit := NVDAGui.Add("Edit", "w350 r1", nvdaInfo.found ? nvdaInfo.dir : NVDACustomPath)
+    btnBrowse := NVDAGui.Add("Button", "x+10 w100 hp", "Browse...")
+    btnBrowse.OnEvent("Click", (*) => BrowseNVDAPath(pathEdit))
+
+    NVDAGui.Add("Text", "xs w460", "")
+
+    NVDAGui.Add("Text", "w460 Bold", "Step 3: Connect & Test")
+    btnConnect := NVDAGui.Add("Button", "w220 h34 Default", "Connect & Start NVDA")
+    btnConnect.OnEvent("Click", (*) => ConnectNVDAAction(pathEdit.Value, NVDAGui))
+
+    btnClose := NVDAGui.Add("Button", "x+10 w100 h34", "Close")
+    btnClose.OnEvent("Click", (*) => NVDAGui.Destroy())
+
+    NVDAGui.OnEvent("Close", (*) => NVDAGui := "")
+    NVDAGui.Show("w490")
+}
+
+BrowseNVDAPath(editCtrl) {
+    selectedFolder := DirSelect("*" . editCtrl.Value, 3, "Select NVDA Installation or Portable Directory")
+    if (selectedFolder != "") {
+        editCtrl.Value := selectedFolder
+    }
+}
+
+ConnectNVDAAction(pathVal, guiObj) {
+    Global SettingsFile, NVDACustomPath
+    pathVal := Trim(pathVal)
+    
+    if (pathVal != "") {
+        IniWrite(pathVal, SettingsFile, "NVDA", "CustomPath")
+        NVDACustomPath := pathVal
+    }
+
+    nvdaInfo := GetNVDAPaths()
+    if (!nvdaInfo.found) {
+        MsgBox("NVDA executable (nvda.exe or nvda_slave.exe) was not found in:`n" . (pathVal != "" ? pathVal : "standard Program Files locations.") . "`n`nPlease complete the installation or choose the folder containing nvda.exe.", "NVDA Not Found", "Icon!")
+        return
+    }
+
+    try guiObj.Destroy()
+    Notify("NVDA Connected Successfully! Starting...", 2000)
+    SoundBeep 1000, 150
+    Sleep 200
+    ToggleNVDA(true)
 }
 
 ; F7 is the Kanata bridge hotkey for physical B in Hyn mode
@@ -1357,6 +1500,46 @@ ToggleStickyModifiers(*) {
 ; Bridge Hotkey: Ctrl + Space + X (Kanata sends Ctrl+Alt+F7)
 ^!f7::ToggleStickyModifiers()
 
+; ==============================================================================
+; Driver Backend Selection & Kanata Restart Helpers
+; ==============================================================================
+UpdateDriverMenu() {
+    Global DriverSubMenu, DriverModeSetting, SettingsFile
+    try DriverModeSetting := IniRead(SettingsFile, "Driver", "Mode", "auto")
 
+    try {
+        DriverSubMenu.Uncheck("Auto-Detect (Recommended)")
+        DriverSubMenu.Uncheck("WinIOv2 (Desktop / Win 11)")
+        DriverSubMenu.Uncheck("Interception (Laptop / Legacy)")
 
+        if (DriverModeSetting == "winIOv2") {
+            DriverSubMenu.Check("WinIOv2 (Desktop / Win 11)")
+        } else if (DriverModeSetting == "wintercept") {
+            DriverSubMenu.Check("Interception (Laptop / Legacy)")
+        } else {
+            DriverSubMenu.Check("Auto-Detect (Recommended)")
+        }
+    }
+}
 
+SelectDriverMode(mode) {
+    Global DriverModeSetting, SettingsFile
+    DriverModeSetting := mode
+    try IniWrite(mode, SettingsFile, "Driver", "Mode")
+    UpdateDriverMenu()
+
+    choice := MsgBox("Driver backend set to: " . mode . "`n`nWould you like to restart Kanata now to apply this change?", "Restart Kanata?", "YesNo Iconi")
+    if (choice == "Yes") {
+        RestartKanata()
+    }
+}
+
+RestartKanata() {
+    Notify("Restarting Kanata...", 1500)
+    scriptPath := A_ScriptDir . "\start_kanata.ps1"
+    try {
+        Run('powershell.exe -ExecutionPolicy Bypass -File "' . scriptPath . '"', A_ScriptDir, "Hide")
+    } catch as err {
+        Notify("Restart Failed: " . err.Message, 3000)
+    }
+}

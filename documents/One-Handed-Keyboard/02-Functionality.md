@@ -213,5 +213,26 @@ Holding `Left Control` activates a temporary layer with special functions:
 *   **Non-Intrusive:** Uses `+AlwaysOnTop -Caption +ToolWindow +E0x20` (click-through) so it never steals keyboard focus and mouse clicks pass right through.
 *   **Persistent Setting:** Toggling saves the user's preference to `kanata/kanata_settings.ini`.
 
+---
+
+### 8. Universal Cross-Device Compatibility & Driver Switching
+The system operates seamlessly across different computers (e.g., Laptops and Windows 11 Desktops) on a single unified branch (`development`).
+*   **Driver Backends:**
+    *   **Auto-Detect (Default):** Checks Windows Registry (`UpperFilters`) for the Interception driver. If found (typical on configured laptops), it launches the `wintercept` binary. If not found (e.g., on Windows 11 24H2 where driver signature/HVCI blocks Interception), it automatically selects `winIOv2` (`LLHOOK + SendInput`).
+    *   **Manual Selection:** Users can manually force `winIOv2` or `wintercept` via the System Tray menu (`Driver Backend`) or in `kanata/kanata_settings.ini`.
+    *   **Safety Fallback:** If `wintercept` is requested on an incompatible system, the launcher logs a warning and automatically falls back to `winIOv2` without crashing.
+*   **Self-Elevation:** `start_kanata.ps1` automatically requests Administrator privilege (`Verb RunAs`) so Kanata and AutoHotkey can intercept keys across elevated windows and games.
+*   **Display Brightness Fallback:** If WMI monitor methods are unavailable (e.g., external HDMI/DisplayPort desktop monitors), a non-intrusive tooltip notification is displayed rather than failing silently.
+
+---
+
+### 9. NVDA Screen Reader Setup & Connect Assistant
+*   **Automatic Path Resolution:** Scans custom paths in `kanata_settings.ini`, `C:\Program Files\NVDA`, `C:\Program Files (x86)\NVDA`, and `%APPDATA%\NVDA`.
+*   **Interactive Setup Assistant:** If NVDA is not found when the user presses physical `B` or triggers NVDA via Middle-Click, an interactive GUI window opens offering:
+    1. Direct download button to NV Access official download page.
+    2. Folder picker to select portable or custom NVDA directories.
+    3. One-click "Connect & Start NVDA" button.
+*   **Tray Menu Management:** Right-clicking the AutoHotkey tray icon provides an `NVDA Screen Reader` menu with instant toggle and direct access to the Setup & Connect assistant.
+
 
 

@@ -143,3 +143,13 @@ A standard passthrough layer for gaming or when others use the keyboard.
     *   `Ctrl + Space + W`, release `W`, keep `Space` held, press `R` -> **`Ctrl + b + x`**
     *   `Ctrl + W + Space + R` -> **`Ctrl + s + x`**
 
+## 7. Universal Driver Backend Switching
+*   **Auto-Detect (Default):** Checks the Windows Registry for the Interception driver (`UpperFilters`). If found (such as on configured laptops), launches `wintercept`. If not found (e.g., Windows 11 24H2 / Desktops), automatically selects `winIOv2`.
+*   **Manual Selection:** Configurable via the system tray menu (`Driver Backend`) or `kanata/kanata_settings.ini` (`[Driver] Mode=auto|winIOv2|wintercept`).
+*   **Safety Fallback:** If `wintercept` is manually selected on an unsupported machine, it automatically falls back to `winIOv2` to prevent crashes.
+
+## 8. NVDA Screen Reader Setup & Connect Assistant
+*   **Automatic Path Resolution:** Scans custom paths in `kanata_settings.ini`, `C:\Program Files\NVDA`, `C:\Program Files (x86)\NVDA`, and `%APPDATA%\NVDA`.
+*   **Setup Assistant GUI:** If NVDA is not found when triggering physical `B` or Middle-Click, an interactive GUI opens offering direct website download, custom/portable directory selection, and instant connection.
+*   **Tray Menu:** Direct access via `NVDA Screen Reader` in the AutoHotkey tray icon.
+
