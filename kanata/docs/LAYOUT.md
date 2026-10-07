@@ -10,11 +10,17 @@ This is the default layer, optimized for one-handed typing using the Halmak layo
 *   **Chords:** Extensive use of 2-key chords for navigation and editing (see [CHORDS.md](CHORDS.md)).
 
 **Key Behaviors:**
-*   `Space`: Taps for `Space`, **Holds** to activate the **Mirror Layer**.
+*   `Space`:
+    *   **Alone / Held Alone:** Physical `Space` (held outputs true continuous Space hold).
+    *   **Held + Key:** Activates the **Mirror Layer** (`Space + E` $\implies$ `p`, `Space + G` $\implies$ `v`).
 *   `Physical Esc` (Top-Left): Acts as **`Left Windows`** (`@lmet-mod`) in Hyn mode:
-    *   **Tap:** Standard Windows Start key (enables `Win + E`, `Win + D`, etc.).
-    *   **Hold:** Activates `fn-layer`.
-    *   *Note:* Standard physical keyboard on one-handed devices has no dedicated Win key.
+    *   **Tap:** Standard Windows Start key.
+    *   **Hold:** Holds `Left Windows` down and activates `fn-layer` (clean physical QWERTY shortcuts like `Win + E`, `Win + D`, `Win + R`, `Win + Shift + T`, `Win + Shift + C`).
+    *   **Esc + Space + G:** Outputs **`Win + V`** (Windows Clipboard History).
+    *   **Esc + Shift + Space + G:** Outputs **`Win + Shift + V`** (PowerToys Advanced Paste).
+    *   **Esc + Space (Tap alone):** Outputs native **`Win + Space`** (language toggle, zero mode switching).
+*   `Physical Alt`:
+    *   **Alt + Space:** Triggers **PowerToys Run** immediately with zero tap-hold delay via `alt-layer`.
 *   `Z + X + C + V`: Dedicated home-row **`Escape` (`Esc`)**.
 *   `b`: Toggles **NVDA Screen Reader** (runs as Administrator without UAC prompts via bridge key `F7`).
 *   `Middle Mouse Click`: Operates in two modes (switchable via `Ctrl + B`):
@@ -24,8 +30,9 @@ This is the default layer, optimized for one-handed typing using the Halmak layo
 *   `Tab + Q`: Shows the on-screen **Layout Cheat Sheet** overlay (Hyn mode only):
     *   **Tap (< 300ms):** Pins the cheat sheet open on screen (dismiss by clicking or pressing any key).
     *   **Hold (>= 300ms):** Peeks the cheat sheet; letting go automatically hides it.
-*   `L-Ctrl`: Taps for `L-Ctrl`, **Holds** to activate `ctrl-layer` (helper).
-*   `L-Ctrl` (Tap-Hold special): Used to toggle **Navigation/Mouse Mode**.
+*   `L-Ctrl` (Tap): Cycles through the **3 primary keyboard modes**:
+    $$\text{Hyn} \xrightarrow{\text{Tap LCtrl}} \text{Navigation} \xrightarrow{\text{Tap LCtrl}} \text{QWERTY} \xrightarrow{\text{Tap LCtrl}} \text{Hyn}$$
+*   `L-Ctrl` (Hold): Activates `ctrl-layer-hyn`. `Ctrl + Space + Key` never acts as a navigation mode switcher.
 
 ## 2. Mirror Layer
 

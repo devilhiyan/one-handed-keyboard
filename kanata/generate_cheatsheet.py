@@ -222,11 +222,11 @@ def main():
     draw_card(draw, card7_x, card7_y, card7_w, card7_h, "7. CORE MODIFIERS & FUNCTION KEYS (F1–F12)", title_color=(203, 166, 247))
 
     mod_boxes = [
-        ("SPACEBAR (Thumb)", "• Tap: Types standard Space\n• Hold: Activates Mirror Layer\n• Space + X: Key Output Overlay\n• Ctrl+Space+X: Sticky Modifiers"),
+        ("SPACEBAR (Dual-Role)", "• Alone: Literal Space (Held/Tap)\n• + Key: Mirror Group (E->p, G->v)\n• Space + X: Key Output Overlay\n• Esc+Space+G: Win+V Clipboard"),
         ("FUNCTION KEYS (F1–F12)", "• F1..F5 Alone: Normal F1..F5\n• Space + F5..F1: F6..F10 (Rev Mirror)\n• Space + Esc + F1: F11 (Fullscreen)\n• Space + F1 + F2: F12 (DevTools)"),
         ("PHYSICAL 'B' & MID-CLICK", "• In Hyn: Toggle [ NVDA ] (Admin)\n• Ctrl + B: Switch Double vs Single Mode\n• Mode 1: Normal Click / Double=NVDA\n• Mode 2: Single=NVDA / Space=Normal"),
-        ("LEFT CONTROL & STICKY", "• Tap: Toggle Mouse Nav ON/OFF\n• Hold: Control Layer (Helper keys)\n• Ctrl+Space+X: Sticky Mod Mode\n• Chain combos with key hand-off"),
-        ("PHYSICAL ESC (Win)", "• In Hyn: Left Win (Start/Fn)\n• Z+X+C+V: Pure Escape (Esc)\n• Tab + `: Insert Key\n• In QWERTY: Standard Escape")
+        ("LEFT CONTROL & STICKY", "• Tap: 3-Way Cycle (Hyn/Nav/Qwer)\n• Hold: Control Layer (QWERTY keys)\n• Ctrl+Space+X: Sticky Modifiers\n• Hand-off combos with key latching"),
+        ("PHYSICAL ESC (Win)", "• Hold: Left Win + fn-layer (QWERTY)\n• Esc+Space+G: Win+V / Shift:PT Paste\n• Alt+Space: PowerToys Run instant\n• Z+X+C+V: Pure Escape (Esc)")
     ]
     box_w = S(286)
     box_gap = S(14)

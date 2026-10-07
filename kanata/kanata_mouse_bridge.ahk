@@ -95,10 +95,8 @@ if (ShowKeyOverlay) {
     SetTimer HideOutputKeyOverlay, -2000
 }
 
-; Start InputHook if either Key Overlay or Sticky Modifiers is enabled
-if (ShowKeyOverlay || StickyHoldEnabled) {
-    StartOutputKeyHook()
-}
+; Start InputHook permanently for Universal Hand-Off Chaining engine
+StartOutputKeyHook()
 
 ; FileAppend "Configuration initialized. Setting up functions...`n", "ahk_debug.log"
 
@@ -1330,17 +1328,35 @@ OnOutputKeyUp(ih, vk, sc) {
     if (vk >= 0x7C && vk <= 0x87)
         return
 
-    ; Check if modifier was tapped and released alone
+    ; Check if modifier was released
     if IsModVk(vk) {
+        modSend := GetModSendName(vk)
+        friendlyName := GetModFriendlyName(vk)
+
+        ; 1. UNIVERSAL OVERLAPPING HAND-OFF:
+        ; If modifier was released while other keys or Space are STILL held down,
+        ; the modifier latches as sticky (hand-off)!
+        isOtherKeyHeld := (ActiveHeldKeys.Count > 0 || GetKeyState("Space", "P"))
+        if (isOtherKeyHeld && modSend != "") {
+            ActiveStickyMods[modSend] := true
+            try SendInput("{Blind}{" . modSend . " Down}")
+            if (ShowKeyOverlay) {
+                EnsureOutputKeyGui()
+                OutputKeyText.Text := "[" . friendlyName . " Latched]"
+                try OutputKeyGui.Show("NoActivate")
+                PositionOutputKeyGui()
+                SetTimer HideOutputKeyOverlay, -2500
+            }
+            LastModifierTapped := 0
+            return
+        }
+
+        ; 2. Standalone tap of modifier (< 450ms alone with no other keys held)
         if (StickyHoldEnabled && LastModifierTapped == vk) {
             elapsed := A_TickCount - LastModifierTapTime
-            ; Only arm if tapped quickly (< 450ms) and no character keys were held during the tap
             if (elapsed < 450 && ActiveHeldKeys.Count == 0) {
-                modSend := GetModSendName(vk)
-                friendlyName := GetModFriendlyName(vk)
                 if (modSend != "") {
                     if ActiveStickyMods.Has(modSend) {
-                        ; Tapping an already-active sticky modifier cancels it
                         try SendInput("{Blind}{" . modSend . " Up}")
                         ActiveStickyMods.Delete(modSend)
                         SoundBeep 700, 60
@@ -1352,7 +1368,6 @@ OnOutputKeyUp(ih, vk, sc) {
                             SetTimer HideOutputKeyOverlay, -1500
                         }
                     } else {
-                        ; Arm the sticky modifier
                         ActiveStickyMods[modSend] := true
                         try SendInput("{Blind}{" . modSend . " Down}")
                         SetTimer DisarmStickyModifiers, -3000
@@ -1379,7 +1394,8 @@ OnOutputKeyUp(ih, vk, sc) {
     ; Check if the entire chain is now completed/broken:
     ; The chain stays alive as long as ANY key is still held down OR Space is still held physically for mirroring
     isSpaceHeld := GetKeyState("Space", "P")
-    if (ActiveHeldKeys.Count == 0 && !isSpaceHeld) {
+    isAnyModHeld := (GetKeyState("Ctrl", "P") || GetKeyState("Alt", "P") || GetKeyState("Shift", "P") || GetKeyState("LWin", "P") || GetKeyState("RWin", "P"))
+    if (ActiveHeldKeys.Count == 0 && !isSpaceHeld && !isAnyModHeld) {
         ; All keys in chain released! Auto-release sticky modifiers
         if (ActiveStickyMods.Count > 0) {
             DisarmStickyModifiers()
@@ -1389,15 +1405,9 @@ OnOutputKeyUp(ih, vk, sc) {
 }
 
 EnsureHookRunning() {
-    Global OutputKeyHook, ShowKeyOverlay, StickyHoldEnabled
-    shouldRun := (ShowKeyOverlay || StickyHoldEnabled)
-    if (shouldRun) {
-        if (OutputKeyHook == "")
-            StartOutputKeyHook()
-    } else {
-        if (OutputKeyHook != "")
-            StopOutputKeyHook()
-    }
+    Global OutputKeyHook
+    if (OutputKeyHook == "")
+        StartOutputKeyHook()
 }
 
 StartOutputKeyHook() {

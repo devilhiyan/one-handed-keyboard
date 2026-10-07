@@ -44,7 +44,9 @@
   lctl-mod-hyn (tap-hold 150 150 @to-mouse (multi lctl (layer-toggle ctrl-layer-hyn)))
   lctl-mod-qwer   (tap-hold 150 150 @to-hyn (multi lctl (layer-toggle ctrl-layer-qwer)))
   lctl-mouse      (tap-hold 150 150 @to-qwer (layer-toggle mouse-ctrl-layer))
-  lmet-mod        (tap-hold 150 150 lmet (layer-toggle fn-layer))
+  lmet-mod        (tap-hold-press 150 150 lmet (multi lmet (layer-toggle fn-layer)))
+  lalt-mod        (tap-hold-press 150 150 lalt (multi lalt (layer-toggle alt-layer)))
+  spc-fn          (tap-hold-press 150 150 spc (layer-toggle mirror))
 
   ;; ------------------------------------------- 
   ;; MOUSE ACTIONS (Mapped to F-Keys for AHK Bridge)
@@ -67,16 +69,16 @@
   ;; -------------------------------------------
   ;; CTRL LAYER SPACE SPECIAL
   ;; -------------------------------------------
-  ;; Tap Control+Space -> Mouse Mode
+  ;; Tap Control+Space -> Native Control+Space (No Mode Switch)
   ;; Hold Control+Space -> Ctrl-Space Layer (Allows Ctrl+Space+X -> Toggle Sticky Modifiers)
-  spc-ctl-layer (tap-hold 150 150 @to-mouse (layer-toggle ctrl-spc-layer))
+  spc-ctl-layer (tap-hold-press 150 150 spc (layer-toggle ctrl-spc-layer))
 )
 
 (defchords mirror-fchords 50
   (esc f1) f11  ;; Space + Esc + F1 -> F11 (Fullscreen)
   (f1 f2)  f12  ;; Space + F1 + F2  -> F12 (DevTools / Save As)
 
-  (esc) esc
+  (esc) lmet
   (f1)  f10     ;; Space + F1 -> F10
   (f2)  f9      ;; Space + F2 -> F9
 )
@@ -213,7 +215,7 @@
   (chord hyn-chords tab)  (chord hyn-chords q) (chord hyn-chords w) (chord hyn-chords e) (chord hyn-chords r) (chord hyn-chords t)    y    u    i    o    p    [    ]    \
   ret  (chord hyn-chords a) (chord hyn-chords s) (chord hyn-chords d) (chord hyn-chords f) (chord hyn-chords g)    h    j    k    (chord hyn-chords l)    ;    '    ret
   lsft (chord hyn-chords z) (chord hyn-chords x) (chord hyn-chords c) (chord hyn-chords v) f7     (chord hyn-chords n)    (chord hyn-chords m)    ,    .    /    rsft
-  @lctl-mod-hyn  @lmet-mod lalt     @spc-mir       ralt rmet rctl
+  @lctl-mod-hyn  @lmet-mod @lalt-mod     @spc-mir       ralt rmet rctl
 )
 
 ;; --------------------------------------------------------------------------- 
@@ -261,7 +263,7 @@
   tab  (chord mouse-nav-chords q) (chord mouse-nav-chords w) (chord mouse-nav-chords e) _    _    _    _    _    _    _    _    _    _
   f17  (chord mouse-nav-chords a) (chord mouse-nav-chords s) (chord mouse-nav-chords d) _    _    _    _    _    _    _    _    _
   f18  _    _    _    _    _    _    _    _    _    _    _
-  @lctl-exit-nav  @lmet-mod @to-hyn @spc-nav-mod           _    _    _
+  @lctl-exit-nav  @lmet-mod lalt     @spc-nav-mod           _    _    _
 )
 
 ;; ------------------------------------------- 
@@ -282,7 +284,7 @@
 ;; Activated while holding LCTL (Standard - hyn)
 (deflayer ctrl-layer-hyn
   _    _    _    _    _    _    _    _    _    _    _    _    _
-  @tog-qwer _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    _    _    _    _    _    _    _    _
   _    _    _    _    _    @tog-mmode    _    _    _    _    _    _
@@ -311,10 +313,21 @@
 
 ;; Activated while holding LMET (FN)
 (deflayer fn-layer
-  _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _    _    _    _    _    _    _    _    _    _
-  _    _    _              @tog-qwer      _    _    _
+  _    f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  _    _    _              @spc-fn        _    _    _
 )
+
+;; Activated while holding LALT
+(deflayer alt-layer
+  _    f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  _    _    _              spc            _    _    _
+)
+

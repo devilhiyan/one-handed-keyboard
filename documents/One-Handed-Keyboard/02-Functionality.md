@@ -34,6 +34,15 @@ This is the primary typing layer. Physical keys correspond to the **Halmak** lay
 | **B** | `Toggle NVDA (Admin)` | **Esc** (Top-Left) | `Left Windows (Tap) / Fn Layer (Hold)` |
 | **Middle Click** | `Normal / Toggle NVDA (Ctrl+B)` | **Ctrl + B** | `Switch Middle Mode (Double vs Single NVDA)` |
 
+**Key Behaviors:**
+* **Physical Esc (Top-Left):** Acts as `Left Windows` (`@lmet-mod`) in Hyn mode:
+  * **Tap:** Standard Windows Start menu key.
+  * **Hold:** Holds `Left Windows` down and activates `fn-layer` (clean physical QWERTY shortcuts like `Win + E`, `Win + D`, `Win + R`, `Win + Shift + T`, `Win + Shift + C`).
+  * **Esc + Space + G:** Outputs `Win + V` (Windows Clipboard History).
+  * **Esc + Shift + Space + G:** Outputs `Win + Shift + V` (PowerToys Advanced Paste).
+  * **Esc + Space (Tap alone):** Outputs native `Win + Space` (language switch, zero mode switching).
+* **Physical Alt:** `Alt + Space` triggers **PowerToys Run** immediately with zero delay.
+
 #### Chords (Mult-Key Combos)
 | Chord (Physical) | Action / Output | Note |
 | :--- | :--- | :--- |
@@ -115,14 +124,22 @@ Activates when `Space` is held. Maps keys to the opposite side of the keyboard.
 | **Space + X** | `Toggle Key Output Overlay` |
 | **Ctrl + Space + X** | `Toggle Sticky Modifiers Mode` |
 
-#### Sticky Modifiers & Overlapping Chains
+#### Universal Overlapping Hand-Off Chaining & Sticky Modifiers
 * **Covered Modifiers:** `Ctrl`, `Alt`, `Shift`, `Win`, and `Insert` (`Tab + \``).
-* **Space Mirror Rule:** `Space` attaches to the letter key (producing the mirrored letter), not to the modifier.
-* **Hand-Off Chaining:** Holding at least one key continuously preserves the chain across transitions. Once all keys are released, the chain completes and auto-releases sticky modifiers.
-* **Real-Time Mirroring:** Each key press checks the instant state of `Space`:
+* **Group Opener:** Any key held down acts as a group opener. If another key is pressed while held, it forms an atomic group.
+* **Overlapping Hand-Off Chaining:** Releasing any key in a multi-key combination while keeping at least one key pressed latches the released key as **sticky**, preserving the modifier/key state. When all keys are released ($N=0$), the chain ends and all modifiers are disarmed.
+* **Strict Temporal Order:** The order of key presses is strictly preserved (`Space → E → Ctrl` $\implies$ `p + Ctrl`; `Ctrl → Space → E` $\implies$ `Ctrl + p`; `Ctrl → E → Space` $\implies$ `Ctrl + e + Space`).
+* **Space Dual-Role:**
+  * If `Space` is pressed with a modifier and released while the modifier remains held, it acts as a literal `Space`.
+  * If `Space` is pressed again and followed by a letter, it acts as the **Mirror Modifier** (e.g. `Space + G` $\implies$ `v`).
+  * If held down alone without a follow-up, it sustains a true continuous key-down hold for the physical duration.
+* **Real-Time Mirroring Examples:**
   * `Ctrl + Space + W`, release `Space`, press `R` -> **`Ctrl + b + R`**
   * `Ctrl + Space + W`, release `W`, keep `Space` held, press `R` -> **`Ctrl + b + x`**
   * `Ctrl + W + Space + R` -> **`Ctrl + s + x`**
+  * `Esc + Space + G` -> **`Win + V`** (Windows Clipboard History)
+  * `Esc + Shift + Space + G` -> **`Win + Shift + V`** (PowerToys Advanced Paste)
+  * `Alt + Space` -> **`Alt + Space`** (PowerToys Run)
 
 #### Function Keys (F1 – F12 via Space Mirroring)
 | Key / Combination | Output | Function |
@@ -148,7 +165,7 @@ Activates when `Space` is held. Maps keys to the opposite side of the keyboard.
 ---
 
 ### 3. Navigation / Mouse Mode
-**Toggle:** `Left Control` (Tap)
+**3-Way Mode Cycle:** `Left Control` (Tap) cycles between **Hyn $\to$ Navigation $\to$ QWERTY $\to$ Hyn**.
 **Bridge:** Sends F-Keys to AutoHotkey for execution.
 
 | Physical Key | Mouse Mode Action | Keyboard Mode Action | Bridge Key |
@@ -183,12 +200,11 @@ Activates when `Space` is held. Maps keys to the opposite side of the keyboard.
 
 ### 5. Control Layer & Shortcuts
 Holding `Left Control` activates a temporary layer with special functions:
-*   **Tap LCtrl**: Toggles Mouse Mode.
+*   **Tap LCtrl**: Cycles through the 3 primary keyboard modes:
+    $$\text{Hyn} \xrightarrow{\text{Tap LCtrl}} \text{Navigation} \xrightarrow{\text{Tap LCtrl}} \text{QWERTY} \xrightarrow{\text{Tap LCtrl}} \text{Hyn}$$
 *   **Ctrl + B**: Switches Middle Click Mode between Double-Click NVDA Mode (normal click, double-click=NVDA) and Single-Click NVDA Mode (single-click=NVDA, Space+click=normal).
-*   **Ctrl + Space (Tap)**: Toggles Mouse Mode.
-*   **Ctrl + Space (Hold)**: Activates **Mirror Layer**.
-    *   *Usage*: Allows `Ctrl` + `Space` + `Key` chords.
-    *   *Example*: `Ctrl` + `Space` + `D` (Physical) -> `Ctrl` + `W` (Output).
+*   **Ctrl + Space (Tap alone)**: Toggles Navigation mode when pressed and released alone with no other keys.
+*   **Ctrl + Space + Key**: When pressed in combination with ANY other key (e.g. `Ctrl + Space + D` $\implies$ `Ctrl + W`), it **never** switches modes; it acts strictly as normal Control + Space + key (triggering the mirror layer for letter keys).
 
 ---
 
