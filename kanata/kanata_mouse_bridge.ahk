@@ -1352,6 +1352,12 @@ OnOutputKeyUp(ih, vk, sc) {
         }
 
         ; 2. Standalone tap of modifier (< 450ms alone with no other keys held)
+        ; Windows key (Esc in Hyn mode) must tap natively without sound or sticky hold
+        if (vk == 0x5B || vk == 0x5C) {
+            LastModifierTapped := 0
+            return
+        }
+
         if (StickyHoldEnabled && LastModifierTapped == vk) {
             elapsed := A_TickCount - LastModifierTapTime
             if (elapsed < 450 && ActiveHeldKeys.Count == 0) {
