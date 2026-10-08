@@ -224,8 +224,12 @@ Holding `Left Control` activates a temporary layer with special functions:
 ### 7. Key Output Overlay (Live Keystroke HUD)
 *   **Activation:** Press physical **`Space + X`** (holding Spacebar and tapping `X`), or right-click the AutoHotkey system tray icon and toggle **`Show Output Keys (Space + X)`**.
 *   **Location:** Positioned in the bottom-right corner of the primary monitor, directly above the system tray and clock.
-*   **Real-Time Output Display:** Shows the final keystrokes sent to Windows (e.g. `Insert`, `Up`, `Ctrl + C`, `Delete`, `s`) rather than the raw physical keys pressed.
-*   **Trailing History:** Displays a subtle breadcrumb trail of the last 3 keys.
+*   **Real-Time Keystroke HUD (`KEY PRESS = OUTPUT`):** Clearly separates physical key presses from their resulting actions with an `=` sign:
+    *   **Chords:** Shows physical chord and emitted action (e.g. `Q + T = PrtScn`, `W + E = Up`, `A + F = Ctrl + C`).
+    *   **Punctuation Chords:** Accurately formats punctuation symbols without confusion (e.g. `S + E + F = =`, `Space + S + E + F = +`, `G + R = ?`, `A + W = "`, `F + G = _`).
+    *   **Remapped & Mirror Keys:** Shows remapped letters and Space-mirror mappings (e.g. `Q = c`, `Space + W = b`, `Space + F1 = F10`).
+    *   **Standard Keys:** Directly displays native keys and standard shortcuts without redundant equals signs (e.g. `Escape`, `Tab`, `Ctrl + C`).
+*   **Clean History Trail:** Displays a deduplicated breadcrumb trail of the last 3 resolved keystrokes without intermediate chord press noise (e.g. `Ctrl + C  ->  Q + T = PrtScn  ->  Space + W = b`).
 *   **Auto-Hide:** Automatically hides after 2.5 seconds of typing inactivity to keep the screen clean.
 *   **Non-Intrusive:** Uses `+AlwaysOnTop -Caption +ToolWindow +E0x20` (click-through) so it never steals keyboard focus and mouse clicks pass right through.
 *   **Persistent Setting:** Toggling saves the user's preference to `kanata/kanata_settings.ini`.

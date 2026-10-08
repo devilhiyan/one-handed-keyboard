@@ -60,6 +60,8 @@ Global OutputKeyHook := ""
 Global OutputRecentKeys := []
 Global ActiveStickyMods := Map()
 Global ActiveHeldKeys := Map()
+Global ActiveHeldPhysicalKeys := Map()
+Global CurrentResolvedDisplay := ""
 Global ActiveChainDisplay := []
 Global LastModifierTapped := 0
 Global LastModifierTapTime := 0
@@ -1143,18 +1145,18 @@ EnsureOutputKeyGui() {
 
     ; Header
     OutputKeyGui.SetFont("s8 bold", "Segoe UI")
-    OutputKeyGui.Add("Text", "x15 y10 w230 h18 cA6ADC8 Center", "OUTPUT KEY")
+    OutputKeyGui.Add("Text", "x10 y10 w260 h18 cA6ADC8 Center", "KEY PRESS  =  OUTPUT")
 
     ; Main Key Display
-    OutputKeyGui.SetFont("s16 bold", "Segoe UI")
-    OutputKeyText := OutputKeyGui.Add("Text", "x15 y32 w230 h36 c89DCEB Center", "Ready")
+    OutputKeyGui.SetFont("s15 bold", "Segoe UI")
+    OutputKeyText := OutputKeyGui.Add("Text", "x10 y32 w260 h36 c89DCEB Center", "Ready")
 
     ; Recent Key History Trail
     OutputKeyGui.SetFont("s8", "Segoe UI")
-    OutputKeyTrail := OutputKeyGui.Add("Text", "x15 y72 w230 h20 c9399B2 Center", "")
+    OutputKeyTrail := OutputKeyGui.Add("Text", "x10 y72 w260 h20 c9399B2 Center", "")
 
     ; Render window with initial size
-    OutputKeyGui.Show("w260 h102 NoActivate")
+    OutputKeyGui.Show("w280 h104 NoActivate")
 
     ; Pin directly above the system tray and inside the right screen edge
     PositionOutputKeyGui()
@@ -1197,6 +1199,31 @@ FormatOutputKeyName(vk, sc) {
     }
 }
 
+FormatKeyFriendly(name) {
+    switch StrLower(name) {
+        case "backspace": return "Backspace"
+        case "delete":    return "Delete"
+        case "insert":    return "Insert"
+        case "return":    return "Enter"
+        case "escape":    return "Escape"
+        case "space":     return "Space"
+        case "tab":       return "Tab"
+        case "up":        return "Up"
+        case "down":      return "Down"
+        case "left":      return "Left"
+        case "right":     return "Right"
+        case "prior":     return "Page Up"
+        case "next":      return "Page Down"
+        case "home":      return "Home"
+        case "end":       return "End"
+        case "printscreen": return "PrtScn"
+        default:
+            if (StrLen(name) == 1)
+                return StrUpper(name)
+            return StrTitle(name)
+    }
+}
+
 IsModVk(vk) {
     Global StickyHoldEnabled
     if (vk == 0x2D)
@@ -1230,19 +1257,243 @@ GetModFriendlyName(vk) {
     }
 }
 
+GetActiveModPrefix() {
+    Global ActiveStickyMods
+    mods := ""
+    if (GetKeyState("Ctrl") || ActiveStickyMods.Has("LCtrl") || ActiveStickyMods.Has("RCtrl"))
+        mods .= "Ctrl + "
+    if (GetKeyState("Alt") || ActiveStickyMods.Has("LAlt") || ActiveStickyMods.Has("RAlt"))
+        mods .= "Alt + "
+    if (GetKeyState("Shift") || ActiveStickyMods.Has("LShift") || ActiveStickyMods.Has("RShift"))
+        mods .= "Shift + "
+    if (GetKeyState("LWin") || GetKeyState("RWin") || ActiveStickyMods.Has("LWin") || ActiveStickyMods.Has("RWin"))
+        mods .= "Win + "
+    if (GetKeyState("Insert") || ActiveStickyMods.Has("Insert"))
+        mods .= "Insert + "
+    return RTrim(mods, " +")
+}
+
+GetKeysList(mapObj) {
+    arr := []
+    for k, _ in mapObj
+        arr.Push(k)
+    return arr
+}
+
+SortChordKeys(arr) {
+    sorted := []
+    for k in arr
+        sorted.Push(StrLower(k))
+    if (sorted.Length > 1) {
+        loop sorted.Length - 1 {
+            i := A_Index
+            loop sorted.Length - i {
+                j := A_Index
+                if (StrCompare(sorted[j], sorted[j+1]) > 0) {
+                    tmp := sorted[j]
+                    sorted[j] := sorted[j+1]
+                    sorted[j+1] := tmp
+                }
+            }
+        }
+    }
+    res := ""
+    for idx, k in sorted {
+        if (idx > 1)
+            res .= "+"
+        res .= k
+    }
+    return res
+}
+
+; Master Keyboard Layout & Chord Dictionaries
+Global HynChords := Map(
+    "q+t", "PrtScn",
+    "e+w", "Up",
+    "d+s", "Down",
+    "a+s", "Left",
+    "d+f", "Right",
+    "q+w", "Home",
+    "e+r", "End",
+    "f+s", "Backspace",
+    "d+f+s", "Ctrl + Backspace",
+    "a+d", "Delete",
+    "c+x", "Ctrl + J",
+    "c+v+x+z", "Escape",
+    "c+z", "Ctrl + X",
+    "a+f", "Ctrl + C",
+    "x+z", "Ctrl + Z",
+    "d+l", "Ctrl + Z",
+    "c+v", "Ctrl + Y",
+    "m+n", "Ctrl + Y",
+    "a+r", "Volume Up",
+    "f+q", "Volume Down",
+    "g+t", "Play/Pause",
+    "e+g", "Seek Forward (+5s)",
+    "g+w", "Seek Rewind (-5s)",
+    "a+t", "Brightness Up",
+    "g+q", "Brightness Down",
+    "q+tab", "Cheat Sheet",
+    "``+tab", "Insert",
+    "``+tab+w", "Insert + S",
+    "``+tab+e", "Insert + T",
+    "e+s", "/",
+    "g+r", "?",
+    "a+g", "@",
+    "q+r", "{",
+    "g+s", "(",
+    "t+w", "[",
+    "e+r+w", ".",
+    "r+w", ",",
+    "e+f", ";",
+    "e+q", "<",
+    "e+t", ">",
+    "a+w", '"',
+    "e+f+s", "=",
+    "f+g", "_"
+)
+
+Global MirrorChords := Map(
+    "q+w", "Page Up",
+    "e+r", "Page Down",
+    "a+d", "Insert",
+    "a+r", "Mute",
+    "d+f+s", "Ctrl + Alt + Backspace",
+    "a+f", "Ctrl + V",
+    "x+z", "Ctrl + Alt + Z",
+    "d+l", "Ctrl + Z",
+    "c+v", "Ctrl + Y",
+    "m+n", "Ctrl + Y",
+    "e+s", "\",
+    "g+r", "|",
+    "a+g", "@",
+    "q+r", "}",
+    "g+s", ")",
+    "t+w", "]",
+    "e+f", ":",
+    "a+w", "'",
+    "e+f+s", "+",
+    "f+g", "-",
+    "esc+f1", "F11",
+    "f1+f2", "F12"
+)
+
+Global HynSingleKeys := Map(
+    "q", "c", "w", "s", "e", "t", "r", "h", "t", "r",
+    "a", "a", "s", "e", "d", "i", "f", "o", "g", "u",
+    "z", "l", "x", "d", "c", "n", "v", "m"
+)
+
+Global MirrorSingleKeys := Map(
+    "q", "z", "w", "b", "e", "p", "r", "y", "t", "x",
+    "a", "q", "s", "g", "d", "w", "f", "f", "g", "v",
+    "z", "c", "x", "Toggle Overlay", "c", "k", "v", "j",
+    "b", "Win + H", "1", "0", "2", "9", "3", "8", "4", "7",
+    "5", "6", "6", "5", "7", "4", "8", "3", "9", "2", "0", "1",
+    "-", "=", "=", "-", "f1", "F10", "f2", "F9", "f3", "F8",
+    "f4", "F7", "f5", "F6"
+)
+
+Global NavChords := Map(
+    "w", "Up", "a", "Left", "s", "Down", "d", "Right",
+    "q", "Wheel Up", "e", "Wheel Down", "q+w", "Home", "e+w", "End"
+)
+
+ResolveOutputKeyDisplay(keysHeld, isSpaceHeld, modsPrefix, isHynMode := true, isNavMode := false) {
+    Global HynChords, MirrorChords, HynSingleKeys, MirrorSingleKeys, NavChords
+    if (keysHeld.Length == 0)
+        return ""
+
+    sortedChord := SortChordKeys(keysHeld)
+
+    inputs := []
+    for k in keysHeld {
+        if (StrLen(k) == 1)
+            inputs.Push(StrUpper(k))
+        else
+            inputs.Push(FormatKeyFriendly(k))
+    }
+
+    inputStr := ""
+    for idx, k in inputs {
+        if (idx > 1)
+            inputStr .= " + "
+        inputStr .= k
+    }
+
+    if (isSpaceHeld)
+        inputStr := "Space + " . inputStr
+    if (modsPrefix != "")
+        inputStr := modsPrefix . " + " . inputStr
+
+    outResult := ""
+    if (isNavMode) {
+        if NavChords.Has(sortedChord)
+            outResult := NavChords[sortedChord]
+        else if (keysHeld.Length == 1 && NavChords.Has(StrLower(keysHeld[1])))
+            outResult := NavChords[StrLower(keysHeld[1])]
+    } else if (isSpaceHeld) {
+        if MirrorChords.Has(sortedChord)
+            outResult := MirrorChords[sortedChord]
+        else if (keysHeld.Length == 1 && MirrorSingleKeys.Has(StrLower(keysHeld[1])))
+            outResult := MirrorSingleKeys[StrLower(keysHeld[1])]
+    } else if (isHynMode) {
+        if HynChords.Has(sortedChord)
+            outResult := HynChords[sortedChord]
+        else if (keysHeld.Length == 1 && HynSingleKeys.Has(StrLower(keysHeld[1])))
+            outResult := HynSingleKeys[StrLower(keysHeld[1])]
+    }
+
+    if (outResult == "")
+        return inputStr
+
+    if (modsPrefix != "" && !InStr(outResult, modsPrefix)) {
+        outResult := modsPrefix . " + " . outResult
+    }
+
+    if (inputStr != outResult)
+        return inputStr . " = " . outResult
+    return outResult
+}
+
+CommitHistoryEntry() {
+    Global OutputRecentKeys, OutputKeyTrail, CurrentResolvedDisplay, ShowKeyOverlay
+    if (!ShowKeyOverlay || CurrentResolvedDisplay == "" || CurrentResolvedDisplay == "Ready")
+        return
+
+    if (OutputRecentKeys.Length == 0 || OutputRecentKeys[OutputRecentKeys.Length] != CurrentResolvedDisplay) {
+        OutputRecentKeys.Push(CurrentResolvedDisplay)
+        if (OutputRecentKeys.Length > 3)
+            OutputRecentKeys.RemoveAt(1)
+    }
+
+    trailText := ""
+    for idx, k in OutputRecentKeys {
+        if (idx > 1)
+            trailText .= "  ->  "
+        trailText .= k
+    }
+    if (OutputKeyTrail != "")
+        try OutputKeyTrail.Text := trailText
+}
+
 DisarmStickyModifiers() {
-    Global ActiveStickyMods, ActiveChainDisplay, ActiveHeldKeys
+    Global ActiveStickyMods, ActiveChainDisplay, ActiveHeldKeys, ActiveHeldPhysicalKeys, CurrentResolvedDisplay
     for modSend, _ in ActiveStickyMods {
         try SendInput("{Blind}{" . modSend . " Up}")
     }
     ActiveStickyMods.Clear()
     ActiveChainDisplay := []
     ActiveHeldKeys.Clear()
+    ActiveHeldPhysicalKeys.Clear()
+    CurrentResolvedDisplay := ""
 }
 
 OnOutputKeyDown(ih, vk, sc) {
     Global OutputKeyGui, OutputKeyText, OutputKeyTrail, OutputRecentKeys, ShowKeyOverlay
-    Global StickyHoldEnabled, ActiveStickyMods, ActiveHeldKeys, ActiveChainDisplay, LastModifierTapped, LastModifierTapTime
+    Global StickyHoldEnabled, ActiveStickyMods, ActiveHeldKeys, ActiveHeldPhysicalKeys, CurrentResolvedDisplay
+    Global LastModifierTapped, LastModifierTapTime, ActiveMirroredKey, ActiveMirroredOutputVk, ActiveMirroredOutputName
+    Global Ishyn, NavMode
 
     ; Ignore internal bridge F-keys (F13..F24: vk 0x7C..0x87)
     if (vk >= 0x7C && vk <= 0x87)
@@ -1259,9 +1510,12 @@ OnOutputKeyDown(ih, vk, sc) {
     if (vk == 0x1B) {
         if (ActiveStickyMods.Count > 0)
             DisarmStickyModifiers()
+        ActiveHeldPhysicalKeys.Clear()
+        CurrentResolvedDisplay := "Escape"
         if (ShowKeyOverlay) {
             EnsureOutputKeyGui()
             OutputKeyText.Text := "Escape"
+            CommitHistoryEntry()
             try OutputKeyGui.Show("NoActivate")
             PositionOutputKeyGui()
             SetTimer HideOutputKeyOverlay, -1500
@@ -1297,64 +1551,56 @@ OnOutputKeyDown(ih, vk, sc) {
     if (ActiveStickyMods.Count > 0)
         SetTimer DisarmStickyModifiers, -3000
 
+    rawName := GetKeyName(Format("vk{:02x}sc{:03x}", vk, sc))
+    keyName := StrLower(rawName != "" ? rawName : Format("vk{:02x}", vk))
+
     ; If Key Output Overlay is enabled, update visual representation
     if (ShowKeyOverlay) {
-        baseKey := FormatOutputKeyName(vk, sc)
+        ; Check if this incoming key is the synthetic output of the currently held chord/key
+        isSyntheticOutput := false
+        if (ActiveHeldPhysicalKeys.Count > 0) {
+            currentChord := SortChordKeys(GetKeysList(ActiveHeldPhysicalKeys))
+            isSpaceHeld := GetKeyState("Space", "P")
+            expectedOut := ""
+            if (isSpaceHeld && MirrorChords.Has(currentChord))
+                expectedOut := MirrorChords[currentChord]
+            else if (!isSpaceHeld && Ishyn && HynChords.Has(currentChord))
+                expectedOut := HynChords[currentChord]
 
-        ; Build active modifier prefix (combining actual physical keys + active sticky modifiers)
-        mods := ""
-        if (GetKeyState("Ctrl") || ActiveStickyMods.Has("LCtrl") || ActiveStickyMods.Has("RCtrl"))
-            mods .= "Ctrl + "
-        if (GetKeyState("Alt") || ActiveStickyMods.Has("LAlt") || ActiveStickyMods.Has("RAlt"))
-            mods .= "Alt + "
-        if (GetKeyState("Shift") || ActiveStickyMods.Has("LShift") || ActiveStickyMods.Has("RShift"))
-            mods .= "Shift + "
-        if (GetKeyState("LWin") || GetKeyState("RWin") || ActiveStickyMods.Has("LWin") || ActiveStickyMods.Has("RWin"))
-            mods .= "Win + "
-        if (GetKeyState("Insert") || ActiveStickyMods.Has("Insert"))
-            mods .= "Insert + "
-
-        displayText := mods . baseKey
-
-        ; Append to current chain if multiple keys are chained
-        ActiveChainDisplay.Push(baseKey)
-        if (ActiveChainDisplay.Length > 1) {
-            chainStr := mods
-            for idx, k in ActiveChainDisplay {
-                if (idx > 1)
-                    chainStr .= " + "
-                chainStr .= k
+            if (expectedOut != "" && (StrLower(expectedOut) == keyName || StrLower(FormatOutputKeyName(vk, sc)) == StrLower(expectedOut))) {
+                isSyntheticOutput := true
             }
-            displayText := chainStr
         }
 
-        ; Update history trail (deduplicated)
-        if (OutputRecentKeys.Length == 0 || OutputRecentKeys[OutputRecentKeys.Length] != displayText) {
-            OutputRecentKeys.Push(displayText)
-            if (OutputRecentKeys.Length > 3)
-                OutputRecentKeys.RemoveAt(1)
+        ; Only add to physical key buffer if it is not the synthetic output
+        if (!isSyntheticOutput) {
+            ActiveHeldPhysicalKeys[keyName] := keyName
         }
 
-        trailText := ""
-        for idx, k in OutputRecentKeys {
-            if (idx > 1)
-                trailText .= "  ->  "
-            trailText .= k
+        keysArr := GetKeysList(ActiveHeldPhysicalKeys)
+        isSpaceHeld := GetKeyState("Space", "P")
+        modsPrefix := GetActiveModPrefix()
+
+        displayText := ResolveOutputKeyDisplay(keysArr, isSpaceHeld, modsPrefix, Ishyn, NavMode)
+
+        if (displayText != "") {
+            CurrentResolvedDisplay := displayText
+            EnsureOutputKeyGui()
+            OutputKeyText.Text := displayText
+            try OutputKeyGui.Show("NoActivate")
+            PositionOutputKeyGui()
+
+            ; Debounce settlement: commit to history after 100ms or when keys release
+            SetTimer CommitHistoryEntry, -100
+            SetTimer HideOutputKeyOverlay, -2500
         }
-
-        EnsureOutputKeyGui()
-        OutputKeyText.Text := displayText
-        OutputKeyTrail.Text := trailText
-
-        try OutputKeyGui.Show("NoActivate")
-        PositionOutputKeyGui()
-        SetTimer HideOutputKeyOverlay, -2500
     }
 }
 
 OnOutputKeyUp(ih, vk, sc) {
     Global OutputKeyGui, OutputKeyText, ShowKeyOverlay
-    Global StickyHoldEnabled, ActiveStickyMods, ActiveHeldKeys, ActiveChainDisplay, LastModifierTapped, LastModifierTapTime
+    Global StickyHoldEnabled, ActiveStickyMods, ActiveHeldKeys, ActiveHeldPhysicalKeys, CurrentResolvedDisplay
+    Global LastModifierTapped, LastModifierTapTime, ActiveMirroredKey, ActiveMirroredOutputVk, ActiveMirroredOutputName
 
     ; Ignore internal bridge F-keys and triggers
     if (vk >= 0x7C && vk <= 0x87)
@@ -1366,8 +1612,6 @@ OnOutputKeyUp(ih, vk, sc) {
         friendlyName := GetModFriendlyName(vk)
 
         ; 1. UNIVERSAL OVERLAPPING HAND-OFF:
-        ; If modifier was released while other keys or Space are STILL held down,
-        ; the modifier latches as sticky (hand-off)!
         isOtherKeyHeld := (ActiveHeldKeys.Count > 0 || GetKeyState("Space", "P"))
         if (isOtherKeyHeld && modSend != "") {
             ActiveStickyMods[modSend] := true
@@ -1375,6 +1619,8 @@ OnOutputKeyUp(ih, vk, sc) {
             if (ShowKeyOverlay) {
                 EnsureOutputKeyGui()
                 OutputKeyText.Text := "[" . friendlyName . " Latched]"
+                CurrentResolvedDisplay := OutputKeyText.Text
+                CommitHistoryEntry()
                 try OutputKeyGui.Show("NoActivate")
                 PositionOutputKeyGui()
                 SetTimer HideOutputKeyOverlay, -2500
@@ -1384,7 +1630,6 @@ OnOutputKeyUp(ih, vk, sc) {
         }
 
         ; 2. Standalone tap of modifier (< 450ms alone with no other keys held)
-        ; Windows key (Esc in Hyn mode) must tap natively without sound or sticky hold
         if (vk == 0x5B || vk == 0x5C) {
             LastModifierTapped := 0
             return
@@ -1401,6 +1646,8 @@ OnOutputKeyUp(ih, vk, sc) {
                         if (ShowKeyOverlay) {
                             EnsureOutputKeyGui()
                             OutputKeyText.Text := "[" . friendlyName . " Cancelled]"
+                            CurrentResolvedDisplay := OutputKeyText.Text
+                            CommitHistoryEntry()
                             try OutputKeyGui.Show("NoActivate")
                             PositionOutputKeyGui()
                             SetTimer HideOutputKeyOverlay, -1500
@@ -1413,6 +1660,8 @@ OnOutputKeyUp(ih, vk, sc) {
                         if (ShowKeyOverlay) {
                             EnsureOutputKeyGui()
                             OutputKeyText.Text := "[" . friendlyName . " Sticky]"
+                            CurrentResolvedDisplay := OutputKeyText.Text
+                            CommitHistoryEntry()
                             try OutputKeyGui.Show("NoActivate")
                             PositionOutputKeyGui()
                             SetTimer HideOutputKeyOverlay, -2500
@@ -1426,10 +1675,7 @@ OnOutputKeyUp(ih, vk, sc) {
     }
 
     ; Non-modifier key was released
-    ; If this is the active mirrored output key being prematurely released by Kanata
-    ; because Space was released, BUT the physical character key is STILL HELD down:
     if (ActiveMirroredKey != "" && vk == ActiveMirroredOutputVk && GetKeyState(ActiveMirroredKey, "P")) {
-        ; Re-assert the mirrored output key down!
         try SendInput("{Blind}{" . ActiveMirroredOutputName . " Down}")
         return
     }
@@ -1437,16 +1683,20 @@ OnOutputKeyUp(ih, vk, sc) {
     if ActiveHeldKeys.Has(vk)
         ActiveHeldKeys.Delete(vk)
 
-    ; Check if the entire chain is now completed/broken:
-    ; The chain stays alive as long as ANY key is still held down OR Space is still held physically for mirroring
+    rawName := GetKeyName(Format("vk{:02x}sc{:03x}", vk, sc))
+    keyName := StrLower(rawName != "" ? rawName : Format("vk{:02x}", vk))
+    if ActiveHeldPhysicalKeys.Has(keyName)
+        ActiveHeldPhysicalKeys.Delete(keyName)
+
+    ; Immediately commit resolved history on key release
+    CommitHistoryEntry()
+
     isSpaceHeld := GetKeyState("Space", "P")
     isAnyModHeld := (GetKeyState("Ctrl", "P") || GetKeyState("Alt", "P") || GetKeyState("Shift", "P") || GetKeyState("LWin", "P") || GetKeyState("RWin", "P"))
-    if (ActiveHeldKeys.Count == 0 && !isSpaceHeld && !isAnyModHeld) {
-        ; All keys in chain released! Auto-release sticky modifiers
+    if (ActiveHeldKeys.Count == 0 && ActiveHeldPhysicalKeys.Count == 0 && !isSpaceHeld && !isAnyModHeld) {
         if (ActiveStickyMods.Count > 0) {
             DisarmStickyModifiers()
         }
-        ActiveChainDisplay := []
     }
 }
 
@@ -1490,7 +1740,7 @@ UpdateKeyOverlayMenu() {
 }
 
 ToggleKeyOverlay(*) {
-    Global ShowKeyOverlay, SettingsFile, OutputKeyText, OutputKeyTrail, OutputKeyGui, OutputRecentKeys
+    Global ShowKeyOverlay, SettingsFile, OutputKeyText, OutputKeyTrail, OutputKeyGui, OutputRecentKeys, ActiveHeldPhysicalKeys, CurrentResolvedDisplay
     ShowKeyOverlay := !ShowKeyOverlay
     try IniWrite(String(ShowKeyOverlay), SettingsFile, "Settings", "ShowOutputKeys")
 
@@ -1504,6 +1754,8 @@ ToggleKeyOverlay(*) {
         Sleep 30
         SoundBeep 1150, 150
         OutputRecentKeys := []
+        ActiveHeldPhysicalKeys.Clear()
+        CurrentResolvedDisplay := ""
         OutputKeyText.Text := "Ready"
         OutputKeyTrail.Text := ""
         try OutputKeyGui.Show("NoActivate")
