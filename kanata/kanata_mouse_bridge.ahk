@@ -64,6 +64,26 @@ Global ActiveChainDisplay := []
 Global LastModifierTapped := 0
 Global LastModifierTapTime := 0
 
+; Held Action Persistence Engine State
+Global ActiveMirroredKey := ""
+Global ActiveMirroredOutputVk := 0
+Global ActiveMirroredOutputName := ""
+Global MirrorPhysMap := Map(
+    "q", { outVk: 0x5A, outName: "z" },
+    "w", { outVk: 0x42, outName: "b" },
+    "e", { outVk: 0x50, outName: "p" },
+    "r", { outVk: 0x59, outName: "y" },
+    "t", { outVk: 0x58, outName: "x" },
+    "a", { outVk: 0x51, outName: "q" },
+    "s", { outVk: 0x47, outName: "g" },
+    "d", { outVk: 0x57, outName: "w" },
+    "f", { outVk: 0x46, outName: "f" },
+    "g", { outVk: 0x56, outName: "v" },
+    "z", { outVk: 0x43, outName: "c" },
+    "c", { outVk: 0x4B, outName: "k" },
+    "v", { outVk: 0x4A, outName: "j" }
+)
+
 ; Tray Menu Configuration
 try {
     A_TrayMenu.Add() ; Separator
@@ -1261,6 +1281,18 @@ OnOutputKeyDown(ih, vk, sc) {
     ; Non-modifier key pressed down
     ActiveHeldKeys[vk] := true
 
+    ; Track mirrored key activation when Space is physically held down
+    if GetKeyState("Space", "P") {
+        for physKey, info in MirrorPhysMap {
+            if (GetKeyState(physKey, "P") && vk == info.outVk) {
+                ActiveMirroredKey := physKey
+                ActiveMirroredOutputVk := info.outVk
+                ActiveMirroredOutputName := info.outName
+                break
+            }
+        }
+    }
+
     ; Reset sticky modifier 3-second safety timeout
     if (ActiveStickyMods.Count > 0)
         SetTimer DisarmStickyModifiers, -3000
@@ -1394,6 +1426,14 @@ OnOutputKeyUp(ih, vk, sc) {
     }
 
     ; Non-modifier key was released
+    ; If this is the active mirrored output key being prematurely released by Kanata
+    ; because Space was released, BUT the physical character key is STILL HELD down:
+    if (ActiveMirroredKey != "" && vk == ActiveMirroredOutputVk && GetKeyState(ActiveMirroredKey, "P")) {
+        ; Re-assert the mirrored output key down!
+        try SendInput("{Blind}{" . ActiveMirroredOutputName . " Down}")
+        return
+    }
+
     if ActiveHeldKeys.Has(vk)
         ActiveHeldKeys.Delete(vk)
 
@@ -1515,6 +1555,60 @@ ToggleStickyModifiers(*) {
 
 ; Bridge Hotkey: Ctrl + Space + X (Kanata sends Ctrl+Alt+F7)
 ^!f7::ToggleStickyModifiers()
+
+; ==============================================================================
+; HELD ACTION PERSISTENCE ENGINE (Universal Combination Latching)
+; ==============================================================================
+ShouldSuppressFallback() {
+    Global ActiveMirroredKey
+    if (ActiveMirroredKey != "" && GetKeyState(ActiveMirroredKey, "P")) {
+        return true
+    }
+    return false
+}
+
+OnMirroredPhysKeyUp(physKey) {
+    Global ActiveMirroredKey, ActiveMirroredOutputVk, ActiveMirroredOutputName
+    if (ActiveMirroredKey == physKey) {
+        try SendInput("{Blind}{" . ActiveMirroredOutputName . " Up}")
+        ActiveMirroredKey := ""
+        ActiveMirroredOutputVk := 0
+        ActiveMirroredOutputName := ""
+    }
+}
+
+; Listeners for physical key release on the left hand (non-blocking passthrough)
+~*q up::OnMirroredPhysKeyUp("q")
+~*w up::OnMirroredPhysKeyUp("w")
+~*e up::OnMirroredPhysKeyUp("e")
+~*r up::OnMirroredPhysKeyUp("r")
+~*t up::OnMirroredPhysKeyUp("t")
+~*a up::OnMirroredPhysKeyUp("a")
+~*s up::OnMirroredPhysKeyUp("s")
+~*d up::OnMirroredPhysKeyUp("d")
+~*f up::OnMirroredPhysKeyUp("f")
+~*g up::OnMirroredPhysKeyUp("g")
+~*z up::OnMirroredPhysKeyUp("z")
+~*c up::OnMirroredPhysKeyUp("c")
+~*v up::OnMirroredPhysKeyUp("v")
+
+; Intercept base-layer fallback keys during staggered space releases
+#HotIf ShouldSuppressFallback()
+*u::return
+*g::return
+*t::return
+*s::return
+*c::return
+*d::return
+*n::return
+*m::return
+*l::return
+*r::return
+*h::return
+*a::return
+*i::return
+*o::return
+#HotIf
 
 ; ==============================================================================
 ; Driver Backend Selection & Kanata Restart Helpers

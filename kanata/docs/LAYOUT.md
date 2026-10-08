@@ -13,6 +13,7 @@ This is the default layer, optimized for one-handed typing using the Halmak layo
 *   `Space`:
     *   **Alone / Held Alone:** Physical `Space` (held outputs true continuous Space hold).
     *   **Held + Key:** Activates the **Mirror Layer** (`Space + E` $\implies$ `p`, `Space + G` $\implies$ `v`).
+    *   **Held Action Persistence:** When `Space + Key` is pressed, releasing `Space` while the key remains physically held maintains the established mirrored output (`v`, `p`, etc.) until that key is physically released, preventing base-layer key bleed (`vu`, `pt`, `Win+G`).
 *   `Physical Esc` (Top-Left): Acts as **`Left Windows`** (`@lmet-mod`) in Hyn mode:
     *   **Tap:** Standard Windows Start key.
     *   **Hold:** Holds `Left Windows` down and activates `fn-layer` (clean physical QWERTY shortcuts like `Win + E`, `Win + D`, `Win + R`, `Win + Shift + T`, `Win + Shift + C`).
