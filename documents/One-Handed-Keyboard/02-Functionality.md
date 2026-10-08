@@ -230,6 +230,7 @@ Holding `Left Control` activates a temporary layer with special functions:
     *   **Remapped & Mirror Keys:** Shows remapped letters and Space-mirror mappings (e.g. `Q = c`, `Space + W = b`, `Space + F1 = F10`).
     *   **Standard Keys:** Directly displays native keys and standard shortcuts without redundant equals signs (e.g. `Escape`, `Tab`, `Ctrl + C`).
 *   **Clean History Trail:** Displays a deduplicated breadcrumb trail of the last 3 resolved keystrokes without intermediate chord press noise (e.g. `Ctrl + C  ->  Q + T = PrtScn  ->  Space + W = b`).
+*   **Instant Release Eviction:** Actively tracks physical and synthetic key releases with continuous liveness checks to immediately purge released keys, ensuring sequential keystrokes never bleed into fake combinations.
 *   **Auto-Hide:** Automatically hides after 2.5 seconds of typing inactivity to keep the screen clean.
 *   **Non-Intrusive:** Uses `+AlwaysOnTop -Caption +ToolWindow +E0x20` (click-through) so it never steals keyboard focus and mouse clicks pass right through.
 *   **Persistent Setting:** Toggling saves the user's preference to `kanata/kanata_settings.ini`.

@@ -1556,6 +1556,16 @@ OnOutputKeyDown(ih, vk, sc) {
 
     ; If Key Output Overlay is enabled, update visual representation
     if (ShowKeyOverlay) {
+        ; Actively purge any keys from the display buffer that are no longer physically down
+        for k, _ in ActiveHeldPhysicalKeys.Clone() {
+            if (!GetKeyState(k, "P") && !GetKeyState(k)) {
+                ActiveHeldPhysicalKeys.Delete(k)
+            }
+        }
+
+        vkRawName := GetKeyName(Format("vk{:02x}", vk))
+        vkName := StrLower(vkRawName != "" ? vkRawName : Format("vk{:02x}", vk))
+
         ; Check if this incoming key is the synthetic output of the currently held chord/key
         isSyntheticOutput := false
         if (ActiveHeldPhysicalKeys.Count > 0) {
@@ -1567,14 +1577,15 @@ OnOutputKeyDown(ih, vk, sc) {
             else if (!isSpaceHeld && Ishyn && HynChords.Has(currentChord))
                 expectedOut := HynChords[currentChord]
 
-            if (expectedOut != "" && (StrLower(expectedOut) == keyName || StrLower(FormatOutputKeyName(vk, sc)) == StrLower(expectedOut))) {
+            if (expectedOut != "" && (StrLower(expectedOut) == keyName || StrLower(expectedOut) == vkName || StrLower(FormatOutputKeyName(vk, sc)) == StrLower(expectedOut))) {
                 isSyntheticOutput := true
             }
         }
 
         ; Only add to physical key buffer if it is not the synthetic output
         if (!isSyntheticOutput) {
-            ActiveHeldPhysicalKeys[keyName] := keyName
+            canonicalName := (vkName != "" ? vkName : keyName)
+            ActiveHeldPhysicalKeys[canonicalName] := canonicalName
         }
 
         keysArr := GetKeysList(ActiveHeldPhysicalKeys)
@@ -1685,8 +1696,20 @@ OnOutputKeyUp(ih, vk, sc) {
 
     rawName := GetKeyName(Format("vk{:02x}sc{:03x}", vk, sc))
     keyName := StrLower(rawName != "" ? rawName : Format("vk{:02x}", vk))
+    vkRawName := GetKeyName(Format("vk{:02x}", vk))
+    vkName := StrLower(vkRawName != "" ? vkRawName : Format("vk{:02x}", vk))
+
     if ActiveHeldPhysicalKeys.Has(keyName)
         ActiveHeldPhysicalKeys.Delete(keyName)
+    if (vkName != "" && ActiveHeldPhysicalKeys.Has(vkName))
+        ActiveHeldPhysicalKeys.Delete(vkName)
+
+    ; Actively purge any keys from the display buffer that are no longer physically down
+    for k, _ in ActiveHeldPhysicalKeys.Clone() {
+        if (!GetKeyState(k, "P") && !GetKeyState(k)) {
+            ActiveHeldPhysicalKeys.Delete(k)
+        }
+    }
 
     ; Immediately commit resolved history on key release
     CommitHistoryEntry()
@@ -1820,7 +1843,9 @@ ShouldSuppressFallback() {
 }
 
 OnMirroredPhysKeyUp(physKey) {
-    Global ActiveMirroredKey, ActiveMirroredOutputVk, ActiveMirroredOutputName
+    Global ActiveMirroredKey, ActiveMirroredOutputVk, ActiveMirroredOutputName, ActiveHeldPhysicalKeys
+    if ActiveHeldPhysicalKeys.Has(physKey)
+        ActiveHeldPhysicalKeys.Delete(physKey)
     if (ActiveMirroredKey == physKey) {
         try SendInput("{Blind}{" . ActiveMirroredOutputName . " Up}")
         ActiveMirroredKey := ""
@@ -1841,6 +1866,7 @@ OnMirroredPhysKeyUp(physKey) {
 ~*f up::OnMirroredPhysKeyUp("f")
 ~*g up::OnMirroredPhysKeyUp("g")
 ~*z up::OnMirroredPhysKeyUp("z")
+~*x up::OnMirroredPhysKeyUp("x")
 ~*c up::OnMirroredPhysKeyUp("c")
 ~*v up::OnMirroredPhysKeyUp("v")
 
