@@ -128,6 +128,7 @@ Activates when `Space` is held. Maps keys to the opposite side of the keyboard.
 * **Covered Modifiers:** `Ctrl`, `Alt`, `Shift`, `Win`, and `Insert` (`Tab + \``).
 * **Group Opener:** Any key held down acts as a group opener. If another key is pressed while held, it forms an atomic group.
 * **Overlapping Hand-Off Chaining:** Releasing any key in a multi-key combination while keeping at least one key pressed latches the released key as **sticky**, preserving the modifier/key state. When all keys are released ($N=0$), the chain ends and all modifiers are disarmed.
+* **Held Action Persistence (Combination Latching):** When a combination is active (e.g. `Space + G` $\implies$ `v`), releasing either key maintains the established output on the remaining held key until it is physically released. If `Space` is released while `G` remains held, `v` continues outputting with zero base-layer key bleed (`vu`, `pt`, `Win+G`).
 * **Strict Temporal Order:** The order of key presses is strictly preserved (`Space → E → Ctrl` $\implies$ `p + Ctrl`; `Ctrl → Space → E` $\implies$ `Ctrl + p`; `Ctrl → E → Space` $\implies$ `Ctrl + e + Space`).
 * **Space Dual-Role:**
   * If `Space` is pressed with a modifier and released while the modifier remains held, it acts as a literal `Space`.

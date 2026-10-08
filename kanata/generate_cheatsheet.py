@@ -222,7 +222,7 @@ def main():
     draw_card(draw, card7_x, card7_y, card7_w, card7_h, "7. CORE MODIFIERS & FUNCTION KEYS (F1–F12)", title_color=(203, 166, 247))
 
     mod_boxes = [
-        ("SPACEBAR (Dual-Role)", "• Alone: Literal Space (Held/Tap)\n• + Key: Mirror Group (E->p, G->v)\n• Space + X: Key Output Overlay\n• Esc+Space+G: Win+V Clipboard"),
+        ("SPACEBAR (Dual-Role)", "• Alone: Literal Space (Held/Tap)\n• + Key: Mirror Group (E->p, G->v)\n• Latched: Releasing Space keeps char\n• Esc+Space+G: Win+V Clipboard"),
         ("FUNCTION KEYS (F1–F12)", "• F1..F5 Alone: Normal F1..F5\n• Space + F5..F1: F6..F10 (Rev Mirror)\n• Space + Esc + F1: F11 (Fullscreen)\n• Space + F1 + F2: F12 (DevTools)"),
         ("PHYSICAL 'B' & MID-CLICK", "• In Hyn: Toggle [ NVDA ] (Admin)\n• Ctrl + B: Switch Double vs Single Mode\n• Mode 1: Normal Click / Double=NVDA\n• Mode 2: Single=NVDA / Space=Normal"),
         ("LEFT CONTROL & STICKY", "• Tap: 3-Way Cycle (Hyn/Nav/Qwer)\n• Hold: Control Layer (QWERTY keys)\n• Ctrl+Space+X: Sticky Modifiers\n• Hand-off combos with key latching"),
