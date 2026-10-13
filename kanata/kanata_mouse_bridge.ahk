@@ -949,15 +949,15 @@ ConnectNVDAAction(pathVal, guiObj) {
 ; F7 is the Kanata bridge hotkey for physical B in Hyn mode
 *F7:: {
     if (Ishyn) {
-        ToggleNVDA()
+        Send "^m"
     }
 }
 
 ; ------------------------------------------------------------------------------
 ; Middle Mouse Button Mode Toggle (Ctrl + B in Hyn or Navigation Mode)
 ; Switches between:
-; - "Double": Single click is normal middle click; Double click toggles NVDA
-; - "Single": Single click toggles NVDA; Space + Middle click is normal middle click
+; - "Double": Single click is normal middle click; Double click sends Ctrl+M
+; - "Single": Single click sends Ctrl+M; Space + Middle click is normal middle click
 ; ------------------------------------------------------------------------------
 ToggleMiddleButtonMode() {
     Global MiddleClickMode, MButtonWaitingForSecond, MiddleClickActive, Ishyn, NavMode
@@ -972,13 +972,13 @@ ToggleMiddleButtonMode() {
 
     if (MiddleClickMode == "Single") {
         MiddleClickMode := "Double"
-        Notify("Middle Click: Normal Click (Double-Click NVDA)", 2000)
+        Notify("Middle Click: Normal Click (Double-Click Ctrl+M)", 2000)
         SoundBeep 650, 100
         Sleep 40
         SoundBeep 900, 150
     } else {
         MiddleClickMode := "Single"
-        Notify("Middle Click: Single-Click NVDA (Space+Click Normal)", 2000)
+        Notify("Middle Click: Single-Click Ctrl+M (Space+Click Normal)", 2000)
         SoundBeep 900, 100
         Sleep 40
         SoundBeep 650, 150
@@ -1018,10 +1018,10 @@ SendPendingMiddleClick() {
 ; Middle Mouse Button in Hyn or Navigation Mode:
 ; - In "Single" Mode:
 ;   - Space held: Simple Middle Click (supports click and hold-to-drag/autoscroll)
-;   - Alone: Toggles NVDA Screen Reader
+;   - Alone: Sends Control + M
 ; - In "Double" Mode:
 ;   - Single click: Standard middle click
-;   - Double click: Toggles NVDA Screen Reader
+;   - Double click: Sends Control + M
 ;   - Hold & drag: Standard middle button hold & drag (autoscroll / CAD pan)
 ; In QWERTY mode: passes through natively to Windows.
 #HotIf (Ishyn || NavMode) && !CheatSheetActive()
@@ -1037,7 +1037,7 @@ SendPendingMiddleClick() {
             Click "Middle Down"
         } else {
             MiddleClickActive := false
-            ToggleNVDA()
+            Send "^m"
         }
         return
     }
@@ -1049,7 +1049,7 @@ SendPendingMiddleClick() {
     if (MButtonWaitingForSecond) {
         SetTimer SendPendingMiddleClick, 0
         MButtonWaitingForSecond := false
-        ToggleNVDA()
+        Send "^m"
         return
     }
 
@@ -1381,7 +1381,8 @@ Global MirrorChords := Map(
 Global HynSingleKeys := Map(
     "q", "c", "w", "s", "e", "t", "r", "h", "t", "r",
     "a", "a", "s", "e", "d", "i", "f", "o", "g", "u",
-    "z", "l", "x", "d", "c", "n", "v", "m"
+    "z", "l", "x", "d", "c", "n", "v", "m",
+    "b", "Ctrl + M"
 )
 
 Global MirrorSingleKeys := Map(

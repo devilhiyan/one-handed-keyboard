@@ -82,7 +82,7 @@ def main():
     keys_base = [
         [("Q", "c"), ("W", "s"), ("E", "t"), ("R", "h"), ("T", "r")],
         [("A", "a"), ("S", "e"), ("D", "i"), ("F", "o"), ("G", "u")],
-        [("Z", "l"), ("X", "d"), ("C", "n"), ("V", "m"), ("B", "NVDA")]
+        [("Z", "l"), ("X", "d"), ("C", "n"), ("V", "m"), ("B", "Ctrl+M")]
     ]
     kw, kh = S(80), S(60)
     pad_x, pad_y = S(10), S(8)
@@ -127,9 +127,9 @@ def main():
         ("Q / E", "Mouse Wheel Up / Down (Scroll)"),
         ("CapsLock", "Left Click (Hold to Drag)"),
         ("Left Shift", "Right Click"),
-        ("Ctrl + B", "Switch Mid-Click: Double vs Single NVDA Mode"),
-        ("Mode 1 (Double)", "Normal Middle Click  |  Double-Click = NVDA"),
-        ("Mode 2 (Single)", "Middle Click = NVDA  |  Space+Click = Normal"),
+        ("Ctrl + B", "Switch Mid-Click: Double vs Single Ctrl+M Mode"),
+        ("Mode 1 (Double)", "Normal Middle Click  |  Double-Click = Ctrl+M"),
+        ("Mode 2 (Single)", "Middle Click = Ctrl+M  |  Space+Click = Normal"),
         ("Space + CapsLock", "Send Enter"),
         ("Q + W / W + E", "Home / End (Quick Jump)")
     ]
@@ -224,7 +224,7 @@ def main():
     mod_boxes = [
         ("SPACEBAR (Dual-Role)", "• Alone: Literal Space (Held/Tap)\n• + Key: Mirror Group (E->p, G->v)\n• Latched: Releasing Space keeps char\n• Esc+Space+G: Win+V Clipboard"),
         ("FUNCTION KEYS (F1–F12)", "• F1..F5 Alone: Normal F1..F5\n• Space + F5..F1: F6..F10 (Rev Mirror)\n• Space + Esc + F1: F11 (Fullscreen)\n• Space + F1 + F2: F12 (DevTools)"),
-        ("PHYSICAL 'B' & MID-CLICK", "• In Hyn: Toggle [ NVDA ] (Admin)\n• Ctrl + B: Switch Double vs Single Mode\n• Mode 1: Normal Click / Double=NVDA\n• Mode 2: Single=NVDA / Space=Normal"),
+        ("PHYSICAL 'B' & MID-CLICK", "• In Hyn: Send [ Ctrl + M ]\n• Ctrl + B: Switch Double vs Single Mode\n• Mode 1: Normal Click / Double=Ctrl+M\n• Mode 2: Single=Ctrl+M / Space=Normal"),
         ("LEFT CONTROL & STICKY", "• Tap: 3-Way Cycle (Hyn/Nav/Qwer)\n• Hold: Control Layer (QWERTY keys)\n• Ctrl+Space+X: Sticky Modifiers\n• Hand-off combos with key latching"),
         ("PHYSICAL ESC (Win)", "• Hold: Left Win + fn-layer (QWERTY)\n• Esc+Space+G: Win+V / Shift:PT Paste\n• Alt+Space: PowerToys Run instant\n• Z+X+C+V: Pure Escape (Esc)")
     ]

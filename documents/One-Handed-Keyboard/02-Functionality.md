@@ -31,8 +31,8 @@ This is the primary typing layer. Physical keys correspond to the **Halmak** lay
 | **T** | `r` | **G** | `u` |
 | **Z** | `l` | **X** | `d` |
 | **C** | `n` | **V** | `m` |
-| **B** | `Toggle NVDA (Admin)` | **Esc** (Top-Left) | `Left Windows (Tap) / Fn Layer (Hold)` |
-| **Middle Click** | `Normal / Toggle NVDA (Ctrl+B)` | **Ctrl + B** | `Switch Middle Mode (Double vs Single NVDA)` |
+| **B** | `Ctrl + M` | **Esc** (Top-Left) | `Left Windows (Tap) / Fn Layer (Hold)` |
+| **Middle Click** | `Normal / Send Ctrl+M (Ctrl+B)` | **Ctrl + B** | `Switch Middle Mode (Double vs Single Ctrl+M)` |
 
 **Key Behaviors:**
 * **Physical Esc (Top-Left):** Acts as `Left Windows` (`@lmet-mod`) in Hyn mode:
@@ -181,8 +181,8 @@ Activates when `Space` is held. Maps keys to the opposite side of the keyboard.
 | **Space+Caps** | Enter | Left Click | F11 |
 | **Shift** | Right Click | Shift | F18 |
 | **Space+Shift**| Right Click | Right Click | F12 |
-| **Middle Click**| Normal Middle Click (Default) / NVDA | Normal Middle Click (Default) / NVDA | - |
-| **Double Mid-Click**| Toggle NVDA Screen Reader (Default) | Toggle NVDA Screen Reader (Default) | - |
+| **Middle Click**| Normal Middle Click (Default) / Ctrl+M | Normal Middle Click (Default) / Ctrl+M | - |
+| **Double Mid-Click**| Send Ctrl+M (Default) | Send Ctrl+M (Default) | - |
 | **Space+Mid-Click**| Simple Middle Click (in Mode 2) | Simple Middle Click (in Mode 2) | - |
 | **Q + W** | `Home` | `Home` | F21 |
 | **W + E** | `End` | `End` | F22 |
@@ -192,10 +192,10 @@ Activates when `Space` is held. Maps keys to the opposite side of the keyboard.
 ### 4. Technical Protocol (Bridge)
 | Key | Action |
 | :--- | :--- |
-| **F7** | Toggle NVDA Screen Reader (Admin, Hyn mode only) |
+| **F7** | Send Ctrl+M (Fallback, Hyn mode only) |
 | **F8** | Switch to QWERTY |
 | **F9** | Toggle Layout Cheat Sheet (Hyn mode only) |
-| **Ctrl+Alt+F10** | Switch Middle Mouse Mode (Double vs Single NVDA) |
+| **Ctrl+Alt+F10** | Switch Middle Mouse Mode (Double vs Single Ctrl+M) |
 | **F23** | Switch to Halmak (Nav OFF) / `Ctrl+Shift+F23`: **Brightness Up** |
 | **F24** | Switch to Navigation Mode (Nav ON) / `Ctrl+Shift+F24`: **Brightness Down** |
 
@@ -203,7 +203,7 @@ Activates when `Space` is held. Maps keys to the opposite side of the keyboard.
 Holding `Left Control` activates a temporary layer with special functions:
 *   **Tap LCtrl**: Cycles through the 3 primary keyboard modes:
     $$\text{Hyn} \xrightarrow{\text{Tap LCtrl}} \text{Navigation} \xrightarrow{\text{Tap LCtrl}} \text{QWERTY} \xrightarrow{\text{Tap LCtrl}} \text{Hyn}$$
-*   **Ctrl + B**: Switches Middle Click Mode between Double-Click NVDA Mode (normal click, double-click=NVDA) and Single-Click NVDA Mode (single-click=NVDA, Space+click=normal).
+*   **Ctrl + B**: Switches Middle Click Mode between Double-Click Ctrl+M Mode (normal click, double-click=Ctrl+M) and Single-Click Ctrl+M Mode (single-click=Ctrl+M, Space+click=normal).
 *   **Ctrl + Space (Tap alone)**: Toggles Navigation mode when pressed and released alone with no other keys.
 *   **Ctrl + Space + Key**: When pressed in combination with ANY other key (e.g. `Ctrl + Space + D` $\implies$ `Ctrl + W`), it **never** switches modes; it acts strictly as normal Control + Space + key (triggering the mirror layer for letter keys).
 
@@ -250,7 +250,7 @@ The system operates seamlessly across different computers (e.g., Laptops and Win
 
 ### 9. NVDA Screen Reader Setup & Connect Assistant
 *   **Automatic Path Resolution:** Scans custom paths in `kanata_settings.ini`, `C:\Program Files\NVDA`, `C:\Program Files (x86)\NVDA`, and `%APPDATA%\NVDA`.
-*   **Interactive Setup Assistant:** If NVDA is not found when the user presses physical `B` or triggers NVDA via Middle-Click, an interactive GUI window opens offering:
+*   **Interactive Setup Assistant:** Interactive GUI window available via the tray menu offering:
     1. Direct download button to NV Access official download page.
     2. Folder picker to select portable or custom NVDA directories.
     3. One-click "Connect & Start NVDA" button.

@@ -23,10 +23,10 @@ This is the default layer, optimized for one-handed typing using the Halmak layo
 *   `Physical Alt`:
     *   **Alt + Space:** Triggers **PowerToys Run** immediately with zero tap-hold delay via `alt-layer`.
 *   `Z + X + C + V`: Dedicated home-row **`Escape` (`Esc`)**.
-*   `b`: Toggles **NVDA Screen Reader** (runs as Administrator without UAC prompts via bridge key `F7`).
+*   `b`: Sends **`Ctrl + M`** in Hyn mode (direct Kanata mapping `C-m` with AHK bridge fallback).
 *   `Middle Mouse Click`: Operates in two modes (switchable via `Ctrl + B`):
-    *   **Double-Click Mode (Default):** Single middle click is normal middle click (and hold/drag for autoscroll); double-clicking toggles **NVDA Screen Reader**.
-    *   **Single-Click Mode:** Single middle click toggles **NVDA Screen Reader**; holding `Space` + middle clicking outputs a **Simple Middle Click**.
+    *   **Double-Click Mode (Default):** Single middle click is normal middle click (and hold/drag for autoscroll); double-clicking sends **`Ctrl + M`**.
+    *   **Single-Click Mode:** Single middle click sends **`Ctrl + M`**; holding `Space` + middle clicking outputs a **Simple Middle Click**.
 *   `Ctrl + B`: Switches between Double-Click Mode and Single-Click Mode in Hyn and Navigation modes.
 *   `Tab + Q`: Shows the on-screen **Layout Cheat Sheet** overlay (Hyn mode only):
     *   **Tap (< 300ms):** Pins the cheat sheet open on screen (dismiss by clicking or pressing any key).
@@ -98,10 +98,10 @@ This layer has two sub-modes, toggled via **Ctrl + Space**.
 | `Capslock` | Left Click (Hold to Drag) |
 | `Shift` | Right Click |
 | `Space + Capslock` | Enter |
-| `Middle Click` | Normal Middle Click (Default) / Toggle NVDA (Mode 2) |
-| `Double Mid-Click` | Toggle NVDA Screen Reader (Double-Click Mode Default) |
+| `Middle Click` | Normal Middle Click (Default) / Send `Ctrl + M` (Mode 2) |
+| `Double Mid-Click` | Send `Ctrl + M` (Double-Click Mode Default) |
 | `Space + Mid-Click` | Simple Middle Click (in Single-Click Mode) |
-| `Ctrl + B` | Switch Middle Click Mode (Double vs Single NVDA) |
+| `Ctrl + B` | Switch Middle Click Mode (Double vs Single Ctrl+M) |
 
 ### B. Keyboard Mode (Transient)
 *Focus: Rapid text navigation.*
@@ -115,10 +115,10 @@ This layer has two sub-modes, toggled via **Ctrl + Space**.
 | `Space + Capslock` | Left Click (Hold to Drag) |
 | `Shift` | Shift |
 | `Space + Shift` | Right Click |
-| `Middle Click` | Normal Middle Click (Default) / Toggle NVDA (Mode 2) |
-| `Double Mid-Click` | Toggle NVDA Screen Reader (Double-Click Mode Default) |
+| `Middle Click` | Normal Middle Click (Default) / Send `Ctrl + M` (Mode 2) |
+| `Double Mid-Click` | Send `Ctrl + M` (Double-Click Mode Default) |
 | `Space + Mid-Click` | Simple Middle Click (in Single-Click Mode) |
-| `Ctrl + B` | Switch Middle Click Mode (Double vs Single NVDA) |
+| `Ctrl + B` | Switch Middle Click Mode (Double vs Single Ctrl+M) |
 
 **Exiting:** Tap `L-Ctrl` again to return to Halmak layer.
 
@@ -158,6 +158,6 @@ A standard passthrough layer for gaming or when others use the keyboard.
 
 ## 8. NVDA Screen Reader Setup & Connect Assistant
 *   **Automatic Path Resolution:** Scans custom paths in `kanata_settings.ini`, `C:\Program Files\NVDA`, `C:\Program Files (x86)\NVDA`, and `%APPDATA%\NVDA`.
-*   **Setup Assistant GUI:** If NVDA is not found when triggering physical `B` or Middle-Click, an interactive GUI opens offering direct website download, custom/portable directory selection, and instant connection.
+*   **Setup Assistant GUI:** Interactive GUI offering direct website download, custom/portable directory selection, and instant connection.
 *   **Tray Menu:** Direct access via `NVDA Screen Reader` in the AutoHotkey tray icon.
 
