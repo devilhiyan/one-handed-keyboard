@@ -946,10 +946,25 @@ ConnectNVDAAction(pathVal, guiObj) {
     ToggleNVDA(true)
 }
 
+; ------------------------------------------------------------------------------
+; Synthetic Macro Guard (Prevents internal Ctrl+M emissions from triggering sticky latching)
+; ------------------------------------------------------------------------------
+Global InSyntheticMacro := false
+
+SendSyntheticCtrlM() {
+    Global InSyntheticMacro
+    InSyntheticMacro := true
+    try {
+        Send "^m"
+    } finally {
+        InSyntheticMacro := false
+    }
+}
+
 ; F7 is the Kanata bridge hotkey for physical B in Hyn mode
 *F7:: {
     if (Ishyn) {
-        Send "^m"
+        SendSyntheticCtrlM()
     }
 }
 
@@ -989,7 +1004,7 @@ ToggleMiddleButtonMode() {
 ^!F10::ToggleMiddleButtonMode()
 ^F7::ToggleMiddleButtonMode()
 
-#HotIf (Ishyn || NavMode)
+#HotIf NavMode
 ^b::ToggleMiddleButtonMode()
 #HotIf
 
@@ -1037,7 +1052,7 @@ SendPendingMiddleClick() {
             Click "Middle Down"
         } else {
             MiddleClickActive := false
-            Send "^m"
+            SendSyntheticCtrlM()
         }
         return
     }
@@ -1049,7 +1064,7 @@ SendPendingMiddleClick() {
     if (MButtonWaitingForSecond) {
         SetTimer SendPendingMiddleClick, 0
         MButtonWaitingForSecond := false
-        Send "^m"
+        SendSyntheticCtrlM()
         return
     }
 
@@ -1382,7 +1397,8 @@ Global HynSingleKeys := Map(
     "q", "c", "w", "s", "e", "t", "r", "h", "t", "r",
     "a", "a", "s", "e", "d", "i", "f", "o", "g", "u",
     "z", "l", "x", "d", "c", "n", "v", "m",
-    "b", "Ctrl + M"
+    "b", "Ctrl + M",
+    "f7", "Ctrl + M"
 )
 
 Global MirrorSingleKeys := Map(
@@ -1491,6 +1507,10 @@ DisarmStickyModifiers() {
 }
 
 OnOutputKeyDown(ih, vk, sc) {
+    Global InSyntheticMacro
+    if (InSyntheticMacro)
+        return
+
     Global OutputKeyGui, OutputKeyText, OutputKeyTrail, OutputRecentKeys, ShowKeyOverlay
     Global StickyHoldEnabled, ActiveStickyMods, ActiveHeldKeys, ActiveHeldPhysicalKeys, CurrentResolvedDisplay
     Global LastModifierTapped, LastModifierTapTime, ActiveMirroredKey, ActiveMirroredOutputVk, ActiveMirroredOutputName
@@ -1610,6 +1630,10 @@ OnOutputKeyDown(ih, vk, sc) {
 }
 
 OnOutputKeyUp(ih, vk, sc) {
+    Global InSyntheticMacro
+    if (InSyntheticMacro)
+        return
+
     Global OutputKeyGui, OutputKeyText, ShowKeyOverlay
     Global StickyHoldEnabled, ActiveStickyMods, ActiveHeldKeys, ActiveHeldPhysicalKeys, CurrentResolvedDisplay
     Global LastModifierTapped, LastModifierTapTime, ActiveMirroredKey, ActiveMirroredOutputVk, ActiveMirroredOutputName
@@ -1623,22 +1647,24 @@ OnOutputKeyUp(ih, vk, sc) {
         modSend := GetModSendName(vk)
         friendlyName := GetModFriendlyName(vk)
 
-        ; 1. UNIVERSAL OVERLAPPING HAND-OFF:
-        isOtherKeyHeld := (ActiveHeldKeys.Count > 0 || GetKeyState("Space", "P"))
-        if (isOtherKeyHeld && modSend != "") {
-            ActiveStickyMods[modSend] := true
-            try SendInput("{Blind}{" . modSend . " Down}")
-            if (ShowKeyOverlay) {
-                EnsureOutputKeyGui()
-                OutputKeyText.Text := "[" . friendlyName . " Latched]"
-                CurrentResolvedDisplay := OutputKeyText.Text
-                CommitHistoryEntry()
-                try OutputKeyGui.Show("NoActivate")
-                PositionOutputKeyGui()
-                SetTimer HideOutputKeyOverlay, -2500
+        ; 1. UNIVERSAL OVERLAPPING HAND-OFF (Active ONLY when Sticky Modifiers is manually enabled):
+        if (StickyHoldEnabled) {
+            isOtherKeyHeld := (ActiveHeldKeys.Count > 0 || GetKeyState("Space", "P"))
+            if (isOtherKeyHeld && modSend != "") {
+                ActiveStickyMods[modSend] := true
+                try SendInput("{Blind}{" . modSend . " Down}")
+                if (ShowKeyOverlay) {
+                    EnsureOutputKeyGui()
+                    OutputKeyText.Text := "[" . friendlyName . " Latched]"
+                    CurrentResolvedDisplay := OutputKeyText.Text
+                    CommitHistoryEntry()
+                    try OutputKeyGui.Show("NoActivate")
+                    PositionOutputKeyGui()
+                    SetTimer HideOutputKeyOverlay, -2500
+                }
+                LastModifierTapped := 0
+                return
             }
-            LastModifierTapped := 0
-            return
         }
 
         ; 2. Standalone tap of modifier (< 450ms alone with no other keys held)

@@ -256,5 +256,16 @@ The system operates seamlessly across different computers (e.g., Laptops and Win
     3. One-click "Connect & Start NVDA" button.
 *   **Tray Menu Management:** Right-clicking the AutoHotkey tray icon provides an `NVDA Screen Reader` menu with instant toggle and direct access to the Setup & Connect assistant.
 
+---
+
+### 10. Sticky Modifiers & Overlapping Chains
+*   **Manual Activation Requirement:** Sticky Modifiers are completely disabled by default. Modifiers will **never** latch or become sticky during normal typing or combinations until explicitly turned ON by the user.
+*   **Trigger:** Press physical `Ctrl + Space + X` (Kanata `ctrl-spc-layer` -> bridge key `^!f7`) or toggle via the system tray menu (`Sticky Modifiers (Ctrl + Space + X)`).
+*   **Combination Key Latching (When Enabled):** Once manually activated, pressing combination keys (such as `Ctrl + C` or `Alt + Tab`) latches the modifier upon overlapping release, keeping the hand-off active without needing to hold the modifier down.
+*   **Single Tap Latching (When Enabled):** Quickly tapping a standalone modifier (< 450ms) latches it. Tapping it again or pressing `Escape` cancels/disarms it.
+*   **Covered Modifiers:** `Ctrl`, `Alt`, `Shift`, `Win`, and `Insert` (`Tab + \``).
+*   **Space Attachment Rule:** `Space` is excluded from sticky behavior because it controls the mirror layer. `Space` attaches directly to the letter key to produce the mirrored character, not to the modifier.
+*   **Escape / Toggle Cancellation:** Pressing `Escape` or toggling Sticky Modifiers OFF immediately disarms all active sticky modifiers and releases any held keys.
+
 
 

@@ -142,7 +142,10 @@ A standard passthrough layer for gaming or when others use the keyboard.
 
 ## 6. Sticky Modifiers & Overlapping Chains
 
+*   **Manual Activation Requirement:** Sticky Modifiers are completely disabled by default. Modifiers will **never** latch or become sticky during normal typing or combinations until explicitly turned ON by the user.
 *   **Trigger:** Press `Ctrl + Space + X` (physical X) or toggle via the system tray menu (`Sticky Modifiers (Ctrl + Space + X)`).
+*   **Combination Key Latching (When Enabled):** Once manually activated, pressing combination keys (such as `Ctrl + C` or `Alt + Tab`) latches the modifier upon overlapping release, keeping the hand-off active without needing to hold the modifier down.
+*   **Single Tap Latching (When Enabled):** Quickly tapping a standalone modifier (< 450ms) latches it. Tapping it again or pressing `Escape` cancels/disarms it.
 *   **Covered Modifiers:** `Ctrl`, `Alt`, `Shift`, `Win`, and `Insert` (`Tab + \``).
 *   **Space Attachment Rule:** `Space` is excluded from sticky behavior because it controls the mirror layer. `Space` attaches directly to the letter key to produce the mirrored character, not to the modifier.
 *   **Overlapping Chain Rule (Hand-Off):** Multi-key combinations remain active as long as at least ONE key is held down at all times. Switching keys during the sequence keeps the chain alive. Releasing all keys breaks the chain and sends the final command.

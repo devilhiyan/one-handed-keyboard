@@ -225,7 +225,7 @@ def main():
         ("SPACEBAR (Dual-Role)", "• Alone: Literal Space (Held/Tap)\n• + Key: Mirror Group (E->p, G->v)\n• Latched: Releasing Space keeps char\n• Esc+Space+G: Win+V Clipboard"),
         ("FUNCTION KEYS (F1–F12)", "• F1..F5 Alone: Normal F1..F5\n• Space + F5..F1: F6..F10 (Rev Mirror)\n• Space + Esc + F1: F11 (Fullscreen)\n• Space + F1 + F2: F12 (DevTools)"),
         ("PHYSICAL 'B' & MID-CLICK", "• In Hyn: Send [ Ctrl + M ]\n• Ctrl + B: Switch Double vs Single Mode\n• Mode 1: Normal Click / Double=Ctrl+M\n• Mode 2: Single=Ctrl+M / Space=Normal"),
-        ("LEFT CONTROL & STICKY", "• Tap: 3-Way Cycle (Hyn/Nav/Qwer)\n• Hold: Control Layer (QWERTY keys)\n• Ctrl+Space+X: Sticky Modifiers\n• Hand-off combos with key latching"),
+        ("LEFT CONTROL & STICKY", "• Tap: 3-Way Cycle (Hyn/Nav/Qwer)\n• Hold: Control Layer (QWERTY keys)\n• Ctrl+Space+X: Toggle Sticky Keys\n• Manual toggle required for latching"),
         ("PHYSICAL ESC (Win)", "• Hold: Left Win + fn-layer (QWERTY)\n• Esc+Space+G: Win+V / Shift:PT Paste\n• Alt+Space: PowerToys Run instant\n• Z+X+C+V: Pure Escape (Esc)")
     ]
     box_w = S(286)
